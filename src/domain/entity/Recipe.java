@@ -1,3 +1,5 @@
+package domain.entity;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -82,7 +84,7 @@ public class Recipe {
 
     @Override
     public String toString() {
-        return "Recipe{" +
+        return "domain.entity.Recipe{" +
                 "id=" + id +
                 ", title='" + title + '\'' +
                 ", sourceName='" + sourceName + '\'' +

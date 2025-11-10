@@ -1,3 +1,5 @@
+package domain.entity;
+
 public class Ingredient {
     
     private Long id;
