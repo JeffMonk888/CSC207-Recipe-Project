@@ -1,26 +1,14 @@
 import java.util.ArrayList;
 import java.util.List;
 
-public class Ingredient {
-    // TODO finish ingredient.
-}
-
-public class InstructionStep {
-    // TODO finish InstructionStep.
-}
-
-public class NutritionInfo {
-    // TODO finish NutritionInfo.
-}
-
 public class Recipe {
     // Attributes
     private Long id;
     private String title;
     private String description;
     private Integer servings;
-    private Integer prepTimeInMinutes; // UML图中为 "prepTimeMinutes"
-    private String sourceName; // e.g., "User Created", "Spoonacular"
+    private Integer prepTimeInMinutes; //
+    private String sourceName; //
     private String sourceUrl; // URL
     private String image; // URL to the image
     private String apiId; // external API recipe id (nullable if local）
@@ -44,9 +32,8 @@ public class Recipe {
         this.sourceUrl = sourceUrl;
         this.image = image;
         this.apiId = apiId;
-        this.nutritionInfo = nutritionInfo;
 
-        // 总是初始化集合
+        this.nutritionInfo = nutritionInfo;
         this.ingredients = new ArrayList<>();
         this.instructionSteps = new ArrayList<>();
     }
