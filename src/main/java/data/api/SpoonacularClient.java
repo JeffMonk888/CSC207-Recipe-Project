@@ -30,7 +30,7 @@ public class SpoonacularClient {
         this.apiKey = Objects.requireNonNull(apiKey, "apiKey required");
     }
 
-    // Create URL: GET /recipes/{id}/information?includeNutrition=...
+    // Create the DTO
     public RecipeInformationDTO getRecipeInformation(long id, boolean includeNutrition) throws ApiException {
 
         RecipeInformationDTO dto = new RecipeInformationDTO();
