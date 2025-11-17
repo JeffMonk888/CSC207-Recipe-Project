@@ -1,7 +1,10 @@
 // Main.java  (no package, or put it in `dev` if you want)
 import data.api.SpoonacularClient;
+import data.rating.InMemoryUserRatingGateway;
 import domain.entity.Recipe;
+import domain.entity.UserRating;
 import usecase.view_recipe.*;
+import usecase.rate_recipe.*;
 
 public class Main {
     public static void main(String[] args) {
@@ -43,5 +46,30 @@ public class Main {
         // 4. Pick a Spoonacular recipe id to test
         long testId = 716429L;
         interactor.execute(new ViewRecipeInputData(testId));
+
+        // UC9: Rate / Favourite Recipe (int stars 1–5)
+        InMemoryUserRatingGateway ratingGateway = new InMemoryUserRatingGateway();
+
+        RateRecipeOutputBoundary ratingPresenter = new RateRecipeOutputBoundary() {
+            @Override
+            public void presentSuccess(RateRecipeOutputData outputData) {
+                UserRating rating = outputData.getRating();
+                System.out.println("\n=== RATING SAVED ===");
+                System.out.println("User " + rating.getUserId()
+                        + " rated recipe " + rating.getRecipeId()
+                        + " as " + rating.getStars() + " stars.");
+            }
+
+            @Override
+            public void presentFailure(String errorMessage) {
+                System.out.println("RATING FAILED: " + errorMessage);
+            }
+        };
+
+        RateRecipeInputBoundary rateInteractor =
+                new RateRecipeInteractor(ratingGateway, ratingPresenter);
+
+        long userId = 1L;
+        rateInteractor.execute(new RateRecipeInputData(userId, testId, 4));
     }
 }
