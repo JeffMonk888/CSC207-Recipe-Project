@@ -25,80 +25,102 @@ public final class RecipeMapper {
         // Build basic recipe (use your 10-arg constructor)
         Recipe recipe = new Recipe(
                 dto.id,                              // id (Spoonacular id)
-                nn(dto.title),                       // title
+                nullToEmpty(dto.title),                       // title
                 "",                                   // description (API rarely provides; keep empty)
                 dto.servings,                        // servings
                 dto.readyInMinutes,                  // prepTimeInMinutes <- readyInMinutes
-                nn(dto.sourceName),                  // sourceName
-                nn(dto.sourceUrl),                   // sourceUrl
-                nn(dto.image),                       // image (omitted for now)
+                nullToEmpty(dto.sourceName),                  // sourceName
+                nullToEmpty(dto.sourceUrl),                   // sourceUrl
+                nullToEmpty(dto.image),                       // image (omitted for now)
                 String.valueOf(dto.id),              // apiId (string form of API id)
                 null                                 // nutritionInfo set below
 
         );
 
         // Ingredients
-        if (dto.extendedIngredients != null) {
-            for (var ei : dto.extendedIngredients) {
+        if (dto.ingredients != null) {
+            for (RecipeInformationDTO.ExtendedIngredient ingredientDTO : dto.ingredients) {
+                String originalString = buildOriginalString(
+                        ingredientDTO.amount,
+                        ingredientDTO.unit,
+                        ingredientDTO.name
+                );
+
                 recipe.addIngredient(new Ingredient(
-                        null,                     // id (null for now)
-                        nn(ei.name),
-                        ei.amount,                    // may be null -> allowed by your domain
-                        nn(ei.unit),
-                        nn(ei.original)
+                        null,                        // id (don't need it for now)
+                        nullToEmpty(ingredientDTO.name),
+                        ingredientDTO.amount,           // may be null
+                        nullToEmpty(ingredientDTO.unit),
+                        originalString
                 ));
             }
+
         }
 
-        // Instruction steps (DTO already flattened to steps list)
+        // Instruction steps
         if (dto.steps != null) {
-            for (var s : dto.steps) {
+            for (RecipeInformationDTO.Step stepDTO : dto.steps) {
                 recipe.addInstructionStep(new InstructionStep(
                         null,                         // id (null for now)
-                        s.number,                     // stepNumber
-                        nn(s.step)                    // description
+                        stepDTO.number,                   // stepNumber
+                        nullToEmpty(stepDTO.step)         // description
                 ));
             }
         }
 
-        // Nutrition: pick common nutrients; format macros as "amount + unit"
-        Double calories = null;
-        String protein = null, fat = null, carbohydrates = null;
+        // Nutrition
+        Double calories = dto.calories;
 
-        if (dto.nutrients != null) {
-            for (var n : dto.nutrients) {
-                String key = nn(n.name).toLowerCase();
-                if ("calories".equals(key)) {
-                    calories = n.amount; // kcal (Double)
-                } else if ("protein".equals(key)) {
-                    protein = formatAmount(n.amount, n.unit); // "20g"
-                } else if ("fat".equals(key)) {
-                    fat = formatAmount(n.amount, n.unit);
-                } else if ("carbohydrates".equals(key)) {
-                    carbohydrates = formatAmount(n.amount, n.unit);
-                }
-            }
-        }
+        String protein = dto.proteinAmount == null
+                ? null
+                : formatAmount(dto.proteinAmount, dto.proteinUnit);
+
+        String fat = dto.fatAmount == null
+                ? null
+                : formatAmount(dto.fatAmount, dto.fatUnit);
+
+        String carbohydrates = dto.carbsAmount == null
+                ? null
+                : formatAmount(dto.carbsAmount, dto.carbsUnit);
 
         recipe.setNutritionInfo(new NutritionInfo(
                 null,            // id (null for now)
-                calories,        // Double
-                protein,         // "20g"
-                fat,             // "15g"
-                carbohydrates    // "30g"
+                calories,        // Double kcal
+                protein,         // e.g. "20g"
+                fat,             // e.g. "15g"
+                carbohydrates    // e.g. "30g"
         ));
 
         return recipe;
     }
 
-    // --- helpers ---
-    private static String nn(String s) {
+    // helper functions below
+
+    private static String nullToEmpty(String s) {
         return (s == null) ? "" : s;
+    }
+
+    private static String buildOriginalString(Double amount, String unit, String name) {
+        String amountPart = (amount == null) ? "" : stripTrailingZeros(amount);
+        String unitPart = (unit == null) ? "" : unit.trim();
+        String namePart = (name == null) ? "" : name.trim();
+
+        StringBuilder sb = new StringBuilder();
+        if (!amountPart.isEmpty()) sb.append(amountPart);
+        if (!unitPart.isEmpty()) {
+            if (!sb.isEmpty()) sb.append(" ");
+            sb.append(unitPart);
+        }
+        if (!namePart.isEmpty()) {
+            if (!sb.isEmpty()) sb.append(" ");
+            sb.append(namePart);
+        }
+        return sb.toString();
     }
 
     private static String formatAmount(Double amount, String unit) {
         if (amount == null && (unit == null || unit.isBlank())) return null;
-        if (amount == null) return unit == null ? null : unit.trim();
+        if (amount == null) return unit.trim();
         String u = (unit == null) ? "" : unit.trim();
         // compact formatting: "20 g" -> "20g" if unit is a simple token
         if (!u.isEmpty() && !u.startsWith(" ") && !Character.isWhitespace(u.charAt(0))) {

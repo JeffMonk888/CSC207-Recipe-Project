@@ -12,9 +12,20 @@ public class RecipeInformationDTO {
     public String sourceName;
     public String sourceUrl;
 
-    public List<ExtendedIngredient> extendedIngredients = new ArrayList<>();
+    // Ingradients
+    public List<ExtendedIngredient> ingredients = new ArrayList<>();
+
+    // Instructions
     public List<Step> steps = new ArrayList<>();
-    public List<Nutrient> nutrients = new ArrayList<>();
+
+    // Nutrition
+    public Double calories;
+    public Double proteinAmount;
+    public String proteinUnit;
+    public Double fatAmount;
+    public String fatUnit;
+    public Double carbsAmount;
+    public String carbsUnit;
 
     public static class ExtendedIngredient {
         public String name;
@@ -28,9 +39,5 @@ public class RecipeInformationDTO {
         public String step;
     }
 
-    public static class Nutrient {
-        public String name;
-        public Double amount;
-        public String unit;
-    }
+
 }
