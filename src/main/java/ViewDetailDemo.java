@@ -2,6 +2,8 @@
 import data.api.SpoonacularClient;
 import domain.entity.Recipe;
 import usecase.view_recipe.*;
+import domain.entity.NutritionInfo;
+import domain.entity.InstructionStep;
 
 public class ViewDetailDemo {
     public static void main(String[] args) {
@@ -9,15 +11,16 @@ public class ViewDetailDemo {
         String apiKey = System.getenv("SPOONACULAR_API_KEY");
         if (apiKey == null || apiKey.isBlank()) {
             // TEMP ONLY for local testing; don't commit the key
-            apiKey = "ef09f685ac104edbbac1ce1bc9ff8028";
+            apiKey = "7379cb18b81945e4994504e9414ff7f1";
         }
 
         SpoonacularClient client = new SpoonacularClient(apiKey);
 
-        // 2. Simple console presenter
+        // presenter
         ViewRecipeOutputBoundary presenter = new ViewRecipeOutputBoundary() {
             @Override
             public void presentSuccess(ViewRecipeOutputData outputData) {
+
                 Recipe r = outputData.getRecipe();
                 System.out.println("=== RECIPE DETAILS ===");
                 System.out.println("ID: " + r.getId());
@@ -29,6 +32,26 @@ public class ViewDetailDemo {
                 r.getIngredients().forEach(ing ->
                         System.out.println(" - " + ing.getOriginalString())
                 );
+
+                System.out.println("=== Steps ===");
+                if (r.getInstructionSteps().isEmpty()) {
+                    System.out.println("  (no steps provided)");
+                } else {
+                    for (InstructionStep step : r.getInstructionSteps()) {
+                        System.out.println(" " + step.getStepNumber() + ". " + step.getDescription());
+                    }
+                }
+
+                System.out.println("=== Nutrition Info ===");
+                NutritionInfo n = r.getNutritionInfo();
+                if (n == null) {
+                    System.out.println("  (no nutrition data available)");
+                } else {
+                    System.out.println("Calories:       " + n.getCalories());
+                    System.out.println("Protein:        " + n.getProtein());
+                    System.out.println("Fat:            " + n.getFat());
+                    System.out.println("Carbohydrates:  " + n.getCarbohydrates());
+                }
             }
 
             @Override
@@ -41,7 +64,7 @@ public class ViewDetailDemo {
         ViewRecipeInputBoundary interactor = new ViewRecipeInteractor(client, presenter);
 
         // 4. Pick a Spoonacular recipe id to test
-        long testId = 716429L;
+        long testId = 1003464;
         interactor.execute(new ViewRecipeInputData(testId));
     }
 }
