@@ -18,12 +18,8 @@ public class RetrieveSavedInteractor implements RetrieveSavedInputBoundary {
 
     @Override
     public void execute(RetrieveSavedInputData inputData) {
-        // 1. Fetch data from the gateway
         ArrayList<SavedRecipe> recipes = motionForRecipeGateway.findByUserId(inputData.getUserId());
 
-        // 2. Pass the list (even if empty) to the presenter
-        // The "No recipes found" case is handled by the UI
-        // by checking if the list is empty.
         RetrieveSavedOutputData outputData = new RetrieveSavedOutputData(recipes);
         presenter.presentSuccess(outputData);
     }

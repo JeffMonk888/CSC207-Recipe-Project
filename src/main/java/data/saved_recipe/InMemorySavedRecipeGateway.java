@@ -17,15 +17,11 @@ import java.util.stream.Collectors;
  */
 public class InMemorySavedRecipeGateway implements MotionForRecipe {
 
-    // Simulates a database table using a HashMap
     private final Map<String, SavedRecipe> store = new HashMap<>();
 
-    // Simulates auto-incrementing primary keys for the 'id' field
     private final AtomicLong idCounter = new AtomicLong(1L);
 
-    /**
-     * Helper method to create a unique composite key for the map.
-     */
+    // Helper method to create a unique composite key for the map
     private String key(Long userId, Long recipeId) {
         return userId + ":" + recipeId;
     }
@@ -35,10 +31,6 @@ public class InMemorySavedRecipeGateway implements MotionForRecipe {
         return store.containsKey(key(userId, recipeId));
     }
 
-    /**
-     * [MODIFIED] Saves the entity.
-     * Because this is an in-memory store, we also assign a unique ID.
-     */
     @Override
     public void save(SavedRecipe newSave) {
         String k = key(newSave.getUserId(), newSave.getRecipeId());
@@ -62,7 +54,6 @@ public class InMemorySavedRecipeGateway implements MotionForRecipe {
 
     @Override
     public boolean delete(Long userId, Long recipeId) {
-        // remove() returns the value that was removed, or null if key didn't exist
         SavedRecipe removed = store.remove(key(userId, recipeId));
         return removed != null; // Return true if an item was successfully removed
     }

@@ -4,7 +4,7 @@ import domain.entity.SavedRecipe;
 import usecase.common.MotionForRecipe;
 import java.util.ArrayList;
 
-// --- Input Data ---
+
 public class RetrieveSavedInputData {
     private final Long userId;
 
@@ -14,4 +14,4 @@ public class RetrieveSavedInputData {
     public Long getUserId() { return userId; }
 }
 
-// --- Interactor ---
+

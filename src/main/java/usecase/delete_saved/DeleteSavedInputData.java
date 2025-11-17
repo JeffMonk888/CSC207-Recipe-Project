@@ -2,7 +2,6 @@ package usecase.delete_saved;
 
 import usecase.common.MotionForRecipe;
 
-// --- Input Data ---
 public class DeleteSavedInputData {
     private final Long userId;
     private final Long recipeId;
@@ -15,5 +14,4 @@ public class DeleteSavedInputData {
     public Long getRecipeId() { return recipeId; }
 }
 
-// --- Interactor ---
 

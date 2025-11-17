@@ -4,7 +4,6 @@ import domain.entity.SavedRecipe;
 
 import java.util.ArrayList;
 
-// --- Output Data ---
 public class RetrieveSavedOutputData {
     private final ArrayList<SavedRecipe> savedRecipes;
 
