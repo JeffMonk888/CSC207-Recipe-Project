@@ -9,7 +9,7 @@ import domain.entity.Recipe;
 /**
  * Maps Spoonacular RecipeInformationDTO -> domain.entity.Recipe
  * Aligns with the 10-arg Recipe(...) constructor in your domain.
- * - image omitted (null)
+ * - image omitted
  * - description not provided by API (empty string)
  * - prepTimeInMinutes <- readyInMinutes
  * - apiId = String.valueOf(dto.id)
@@ -31,16 +31,17 @@ public final class RecipeMapper {
                 dto.readyInMinutes,                  // prepTimeInMinutes <- readyInMinutes
                 nn(dto.sourceName),                  // sourceName
                 nn(dto.sourceUrl),                   // sourceUrl
-                null,                                 // image (omitted for now)
+                nn(dto.image),                       // image (omitted for now)
                 String.valueOf(dto.id),              // apiId (string form of API id)
-                null                                  // nutritionInfo set below
+                null                                 // nutritionInfo set below
+
         );
 
         // Ingredients
         if (dto.extendedIngredients != null) {
             for (var ei : dto.extendedIngredients) {
                 recipe.addIngredient(new Ingredient(
-                        null,                         // id (null for now)
+                        null,                     // id (null for now)
                         nn(ei.name),
                         ei.amount,                    // may be null -> allowed by your domain
                         nn(ei.unit),

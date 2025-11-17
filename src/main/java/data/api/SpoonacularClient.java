@@ -65,12 +65,12 @@ public class SpoonacularClient {
         if (ing != null) {
             for (int i = 0; i < ing.length(); i++) {
                 JSONObject ei = ing.getJSONObject(i);
-                var xx = new RecipeInformationDTO.ExtendedIngredient();
-                xx.name = ei.optString("name", "");
-                xx.amount = ei.has("amount") ? ei.optDouble("amount") : null;
-                xx.unit = ei.optString("unit", "");
-                xx.original = ei.optString("original", "");
-                dto.extendedIngredients.add(xx);
+                var extendedIngredient = new RecipeInformationDTO.ExtendedIngredient();
+                extendedIngredient.name = ei.optString("name", "");
+                extendedIngredient.amount = ei.has("amount") ? ei.optDouble("amount") : null;
+                extendedIngredient.unit = ei.optString("unit", "");
+                extendedIngredient.original = ei.optString("original", "");
+                dto.extendedIngredients.add(extendedIngredient);
             }
         }
 
