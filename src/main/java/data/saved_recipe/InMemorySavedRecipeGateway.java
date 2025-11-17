@@ -10,11 +10,6 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
-/**
- * In-memory implementation of the MotionforRecipe gateway.
- * Useful for development, testing, and running the app without a database.
- * Matches the style of InMemoryUserRatingGateway.
- */
 public class InMemorySavedRecipeGateway implements MotionForRecipe {
 
     private final Map<String, SavedRecipe> store = new HashMap<>();
@@ -23,7 +18,7 @@ public class InMemorySavedRecipeGateway implements MotionForRecipe {
 
     // Helper method to create a unique composite key for the map
     private String key(Long userId, Long recipeId) {
-        return userId + ":" + recipeId;
+        return userId + "+" + recipeId;
     }
 
     @Override
@@ -46,15 +41,14 @@ public class InMemorySavedRecipeGateway implements MotionForRecipe {
 
     @Override
     public ArrayList<SavedRecipe> findByUserId(Long userId) {
-        // Filter the map's values to find all records for the given user
         return store.values().stream()
                 .filter(savedRecipe -> Objects.equals(savedRecipe.getUserId(), userId))
-                .collect(Collectors.toCollection(ArrayList::new)); // Collect as ArrayList
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     @Override
     public boolean delete(Long userId, Long recipeId) {
         SavedRecipe removed = store.remove(key(userId, recipeId));
-        return removed != null; // Return true if an item was successfully removed
+        return removed != null;
     }
 }
