@@ -2,12 +2,16 @@ package domain.entity;
 
 import java.time.Instant;
 
+/**
+ * Domain entity: rating that a user gives to a recipe.
+ * UC9 Favourite / Rate Recipe.
+ */
 public class UserRating {
 
     private Long id;
     private Long userId;
     private Long recipeId;
-    private int stars;          // <== int, 1..5
+    private int stars;          // integer 1..5
     private Instant updatedAt;
 
     public UserRating(Long id, Long userId, Long recipeId,

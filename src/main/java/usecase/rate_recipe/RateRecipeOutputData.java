@@ -3,7 +3,7 @@ package usecase.rate_recipe;
 import domain.entity.UserRating;
 
 /**
- * Output data for UC9, passed to the presenter.
+ * Output data for UC9, passed from interactor to presenter.
  */
 public class RateRecipeOutputData {
 
