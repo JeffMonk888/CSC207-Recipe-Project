@@ -2,6 +2,7 @@ package data.api;
 
 import data.dto.RecipeInformationDTO;
 import domain.entity.Ingredient;
+import domain.entity.RecipePreview;
 import jdk.jshell.spi.SPIResolutionException;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -43,8 +44,7 @@ public class SpoonacularClient {
         return dto;
     }
 
-    public List<RecipeInformationDTO> getRecipesForIngredients(List<Ingredient> ingredientList, int number,
-                                                               boolean includeNutrition) throws ApiException {
+    public List<RecipePreview> getRecipesForIngredients(List<Ingredient> ingredientList, int number) throws ApiException {
         String ingredients = "";
         for (Ingredient ingredient : ingredientList) {
             ingredients.concat("," + ingredient.getName());
@@ -53,11 +53,17 @@ public class SpoonacularClient {
                 BASE, ingredients, number, apiKey);
         JSONArray jsonArray = getJsonArray(url);
         //JSONArray jsonArray = new JSONArray(body);
-        ArrayList<RecipeInformationDTO> recipes = new ArrayList<>();
+        ArrayList<RecipePreview> recipes = new ArrayList<>();
         for (int i = 0; i < jsonArray.length(); i++) {
             JSONObject jsonObject = jsonArray.getJSONObject(i);
             if (jsonObject.getInt("missedIngredientCount") == 0) {
-                recipes.add(getRecipeInformation(jsonObject.getLong("id"), includeNutrition));
+                RecipePreview recipePreview = new RecipePreview();
+                recipePreview.id = jsonObject.getLong("id");
+                recipePreview.image = jsonObject.optString("image");
+                recipePreview.imageType = jsonObject.optString("imageType");
+                recipePreview.likes = jsonObject.optInt("likes");
+                recipePreview.title = jsonObject.optString("title");
+                recipes.add(recipePreview);
             }
         }
         return recipes;
