@@ -1,7 +1,6 @@
 package domain.entity;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class Recipe {
     // Attributes
@@ -15,9 +14,9 @@ public class Recipe {
     private String image; // URL to the image
     private String recipeid; // external API recipe id (nullable if local）
 
-    private List<Ingredient> ingredients;
+    private ArrayList<Ingredient> ingredients;
 
-    private List<InstructionStep> instructionSteps;
+    private ArrayList<InstructionStep> instructionSteps;
 
     private NutritionInfo nutritionInfo;
 
@@ -51,8 +50,8 @@ public class Recipe {
     public String getImage() { return image; }
     public String getRecipeid() { return recipeid; }
     public NutritionInfo getNutritionInfo() { return nutritionInfo; }
-    public List<Ingredient> getIngredients() { return ingredients; }
-    public List<InstructionStep> getInstructionSteps() { return instructionSteps; }
+    public ArrayList<Ingredient> getIngredients() { return ingredients; }
+    public ArrayList<InstructionStep> getInstructionSteps() { return instructionSteps; }
 
     // Setters
     public void setId(Long id) { this.id = id; }
