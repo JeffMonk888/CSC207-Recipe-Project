@@ -5,9 +5,9 @@ import domain.entity.InstructionStep;
 import domain.entity.NutritionInfo;
 import usecase.view_recipe.*;
 
-public class Main {
+public class ViewDetailDemo {
     public static void main(String[] args) {
-        // 1. API key
+        // API key
         String apiKey = System.getenv("SPOONACULAR_API_KEY");
         if (apiKey == null || apiKey.isBlank()) {
             // TEMP ONLY for local testing; don't commit the key
@@ -16,7 +16,7 @@ public class Main {
 
         SpoonacularClient client = new SpoonacularClient(apiKey);
 
-        // 2. Simple console presenter
+        // presenter
         ViewRecipeOutputBoundary presenter = new ViewRecipeOutputBoundary() {
             @Override
             public void presentSuccess(ViewRecipeOutputData outputData) {
