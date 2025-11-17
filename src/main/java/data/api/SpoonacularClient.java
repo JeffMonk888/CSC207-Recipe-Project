@@ -1,6 +1,7 @@
 package data.api;
 
 import data.dto.RecipeInformationDTO;
+import domain.entity.Ingredient;
 import jdk.jshell.spi.SPIResolutionException;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -10,6 +11,8 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 
@@ -38,6 +41,26 @@ public class SpoonacularClient {
             fillNutrition(id, dto);
         }
         return dto;
+    }
+
+    public List<RecipeInformationDTO> getRecipesForIngredients(List<Ingredient> ingredientList, int number,
+                                                               boolean includeNutrition) throws ApiException {
+        String ingredients = "";
+        for (Ingredient ingredient : ingredientList) {
+            ingredients.concat("," + ingredient.getName());
+        }
+        String url = String.format("%s/recipes/findByIngredients?ingredients=%s&number=%d&ranking=2&apiKey=%s",
+                BASE, ingredients, number, apiKey);
+        JSONArray jsonArray = getJsonArray(url);
+        //JSONArray jsonArray = new JSONArray(body);
+        ArrayList<RecipeInformationDTO> recipes = new ArrayList<>();
+        for (int i = 0; i < jsonArray.length(); i++) {
+            JSONObject jsonObject = jsonArray.getJSONObject(i);
+            if (jsonObject.getInt("missedIngredientCount") == 0) {
+                recipes.add(getRecipeInformation(jsonObject.getLong("id"), includeNutrition));
+            }
+        }
+        return recipes;
     }
 
 
