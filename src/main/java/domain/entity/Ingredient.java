@@ -1,3 +1,5 @@
+package domain.entity;
+
 public class Ingredient {
     
     private Long id;
@@ -14,7 +16,7 @@ public class Ingredient {
             this.originalString = originalString;
         }
 
-    // Getters 和 Setters
+    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getName() { return name; }

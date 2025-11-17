@@ -1,3 +1,5 @@
+package domain.entity;
+
 public class NutritionInfo {
     private Long id;
     private Double calories; // per serving 
@@ -33,4 +35,5 @@ public class NutritionInfo {
                 ", Fat='" + fat + '\'' +
                 ", Carbs='" + carbohydrates + '\'';
     }
+
 }
