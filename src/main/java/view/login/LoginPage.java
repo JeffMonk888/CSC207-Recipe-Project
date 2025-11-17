@@ -64,6 +64,39 @@ public class LoginPage extends JPanel {
         gbc.gridy = 4;
         add(errorLabel, gbc);
 
+        loginButton.addActionListener(e -> handleLoginClick());
+    }
+    private void handleLoginClick() {
+        String username = usernameField.getText().trim();
+        String password = new String(passwordField.getPassword());
 
+        if (username.isEmpty() || password.isEmpty()) {
+            setError("Please enter both username and password");
+            return;
+        }
+
+        if (username.equals("test") && password.equals("1234")) {
+            setError(" ");
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Login successful (temporary check)",
+                    "Success",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+        } else {
+            setError("Invalid username or password");
+        }
+    }
+
+    public void setError(String message) {
+        errorLabel.setText(message);
+    }
+
+    public String getUsername() {
+        return usernameField.getText().trim();
+    }
+
+    public String getPassword() {
+        return new String(passwordField.getPassword());
     }
 }
