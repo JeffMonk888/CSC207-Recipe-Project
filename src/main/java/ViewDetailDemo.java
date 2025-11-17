@@ -1,14 +1,9 @@
 // Main.java  (no package, or put it in `dev` if you want)
 import data.api.SpoonacularClient;
-import data.rating.InMemoryUserRatingGateway;
 import domain.entity.Recipe;
-import domain.entity.InstructionStep;
-import domain.entity.NutritionInfo;
-import domain.entity.UserRating;
 import usecase.view_recipe.*;
-import usecase.rate_recipe.*;
 
-public class Main {
+public class ViewDetailDemo {
     public static void main(String[] args) {
         // 1. API key
         String apiKey = System.getenv("SPOONACULAR_API_KEY");
