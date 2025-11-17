@@ -9,8 +9,6 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 
@@ -27,7 +25,7 @@ public class SpoonacularClient {
         this.apiKey = Objects.requireNonNull(apiKey, "apiKey required");
     }
 
-    /** GET /recipes/{id}/information?includeNutrition=... */
+    // Create URL: GET /recipes/{id}/information?includeNutrition=...
     public RecipeInformationDTO getRecipeInformation(long id, boolean includeNutrition) throws ApiException {
         String url = String.format("%s/recipes/%d/information?includeNutrition=%s&apiKey=%s",
                 BASE, id, includeNutrition, apiKey);
