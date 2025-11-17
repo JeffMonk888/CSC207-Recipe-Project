@@ -8,23 +8,26 @@ public class LoginPage extends JPanel {
     private final JTextField usernameField;
     private final JPasswordField passwordField;
     private final JButton loginButton;
+    private final JButton signupButton;
     private final JLabel errorLabel;
 
     public LoginPage() {
+        setPreferredSize(new Dimension(450, 280));
         setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(8, 8, 8, 8);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        JLabel title = new JLabel("Recipe App - Login");
-        title.setFont(title.getFont().deriveFont(Font.BOLD, 20f));
+        JLabel title = new JLabel("Recipe Manager");
+        title.setFont(title.getFont().deriveFont(Font.BOLD, 22f));
         title.setHorizontalAlignment(SwingConstants.CENTER);
 
         JLabel usernameLabel = new JLabel("Username:");
         JLabel passwordLabel = new JLabel("Password:");
 
-        usernameField = new JTextField(15);
-        passwordField = new JPasswordField(15);
+        usernameField = new JTextField(18);
+        passwordField = new JPasswordField(18);
+        signupButton = new JButton("Sign up");
         loginButton = new JButton("Log in");
         errorLabel = new JLabel(" ");      // blank for now
         errorLabel.setForeground(Color.RED);
@@ -56,15 +59,19 @@ public class LoginPage extends JPanel {
 
         // Row 3 – login button
         gbc.gridy = 3;
+        gbc.gridwidth = 1;
         gbc.gridx = 0;
-        gbc.gridwidth = 2;
+        add(signupButton, gbc);
+        gbc.gridx = 1;
         add(loginButton, gbc);
-
         // Row 4 – error label
         gbc.gridy = 4;
+        gbc.gridx = 0;
+        gbc.gridwidth = 2;
         add(errorLabel, gbc);
 
         loginButton.addActionListener(e -> handleLoginClick());
+        signupButton.addActionListener(e -> openSignupWindow());
     }
     private void handleLoginClick() {
         String username = usernameField.getText().trim();
@@ -87,6 +94,14 @@ public class LoginPage extends JPanel {
             setError("Invalid username or password");
         }
     }
+    private void openSignupWindow() {
+        JFrame signupFrame = new JFrame("Sign up - Recipe Manager");
+        signupFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        signupFrame.setContentPane(new SignUpPage());
+        signupFrame.pack();
+        signupFrame.setLocationRelativeTo(this); // center near login
+        signupFrame.setVisible(true);
+    }
 
     public void setError(String message) {
         errorLabel.setText(message);
@@ -98,5 +113,11 @@ public class LoginPage extends JPanel {
 
     public String getPassword() {
         return new String(passwordField.getPassword());
+    }
+    public JButton getLoginButton() {
+        return loginButton;
+    }
+    public JButton getSignupButton() {
+        return signupButton;
     }
 }
