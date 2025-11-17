@@ -6,7 +6,7 @@ import java.util.List;
 public class RecipeInformationDTO {
     public long id;
     public String title;
-    public String image;
+//    public String image;
     public Integer servings;
     public Integer readyInMinutes;
     public String sourceName;

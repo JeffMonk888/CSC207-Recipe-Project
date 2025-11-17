@@ -13,7 +13,7 @@ public class Recipe {
     private String sourceName; //
     private String sourceUrl; // URL
     private String image; // URL to the image
-    private String apiId; // external API recipe id (nullable if local）
+    private String recipeid; // external API recipe id (nullable if local）
 
     private List<Ingredient> ingredients;
 
@@ -33,7 +33,7 @@ public class Recipe {
         this.sourceName = sourceName;
         this.sourceUrl = sourceUrl;
         this.image = image;
-        this.apiId = apiId;
+        this.recipeid = apiId;
 
         this.nutritionInfo = nutritionInfo;
         this.ingredients = new ArrayList<>();
@@ -49,7 +49,7 @@ public class Recipe {
     public String getSourceName() { return sourceName; }
     public String getSourceUrl() { return sourceUrl; }
     public String getImage() { return image; }
-    public String getApiId() { return apiId; }
+    public String getRecipeid() { return recipeid; }
     public NutritionInfo getNutritionInfo() { return nutritionInfo; }
     public List<Ingredient> getIngredients() { return ingredients; }
     public List<InstructionStep> getInstructionSteps() { return instructionSteps; }
@@ -63,7 +63,7 @@ public class Recipe {
     public void setSourceName(String sourceName) { this.sourceName = sourceName; }
     public void setSourceUrl(String sourceUrl) { this.sourceUrl = sourceUrl; }
     public void setImage(String image) { this.image = image; }
-    public void setApiId(String apiId) { this.apiId = apiId; }
+    public void setRecipeid(String recipeid) { this.recipeid = recipeid; }
     public void setNutritionInfo(NutritionInfo nutritionInfo) { this.nutritionInfo = nutritionInfo; }
 
     public void addIngredient(Ingredient ingredient) {

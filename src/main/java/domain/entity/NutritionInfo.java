@@ -35,4 +35,5 @@ public class NutritionInfo {
                 ", Fat='" + fat + '\'' +
                 ", Carbs='" + carbohydrates + '\'';
     }
+
 }
