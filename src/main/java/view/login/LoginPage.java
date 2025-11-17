@@ -5,13 +5,17 @@ import java.awt.*;
 
 public class LoginPage extends JPanel {
 
+    private final JFrame parentFrame;
+
     private final JTextField usernameField;
     private final JPasswordField passwordField;
     private final JButton loginButton;
     private final JButton signupButton;
     private final JLabel errorLabel;
 
-    public LoginPage() {
+
+    public LoginPage(JFrame parentFrame) {
+        this.parentFrame = parentFrame;
         setPreferredSize(new Dimension(450, 280));
         setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
@@ -73,6 +77,7 @@ public class LoginPage extends JPanel {
         loginButton.addActionListener(e -> handleLoginClick());
         signupButton.addActionListener(e -> openSignupWindow());
     }
+
     private void handleLoginClick() {
         String username = usernameField.getText().trim();
         String password = new String(passwordField.getPassword());
@@ -81,15 +86,12 @@ public class LoginPage extends JPanel {
             setError("Please enter both username and password");
             return;
         }
-
-        if (username.equals("test") && password.equals("1234")) {
+        if (SignUpAuth.authenticate(username, password)) {
             setError(" ");
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Login successful (temporary check)",
-                    "Success",
-                    JOptionPane.INFORMATION_MESSAGE
-            );
+            // open HomePage instead of just a popup
+            parentFrame.setContentPane(new HomePage(username, parentFrame));
+            parentFrame.pack();
+            parentFrame.setLocationRelativeTo(null);
         } else {
             setError("Invalid username or password");
         }

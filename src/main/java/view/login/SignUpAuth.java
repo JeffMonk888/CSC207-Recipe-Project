@@ -7,15 +7,20 @@ public class SignUpAuth {
         USERS.put("admin", "admin");
         USERS.put("user", "user");
     }
-    public static boolean register(String username, String password) {
+    public static synchronized boolean register(String username, String password) {
+        username = username.trim();
+        if (username.isEmpty()) {
+            return false;
+        }
         if (USERS.containsKey(username)) {
-            return false; // username taken
+            return false;          // username already exists
         }
         USERS.put(username, password);
         return true;
     }
 
-    public static boolean authenticate(String username, String password) {
+    public static synchronized boolean authenticate(String username, String password) {
+        username = username.trim();
         String stored = USERS.get(username);
         return stored != null && stored.equals(password);
     }
