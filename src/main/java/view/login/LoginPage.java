@@ -1,4 +1,12 @@
 package view.login;
 
-public class LoginPage {
+import javax.swing.*;
+import java.awt.*;
+
+public class LoginPage extends JPanel {
+    public LoginPage() {
+
+
+
+    }
 }
