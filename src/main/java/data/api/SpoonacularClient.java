@@ -1,6 +1,7 @@
 package data.api;
 
 import data.dto.RecipeInformationDTO;
+import jdk.jshell.spi.SPIResolutionException;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -27,86 +28,151 @@ public class SpoonacularClient {
 
     // Create URL: GET /recipes/{id}/information?includeNutrition=...
     public RecipeInformationDTO getRecipeInformation(long id, boolean includeNutrition) throws ApiException {
-        String url = String.format("%s/recipes/%d/information?includeNutrition=%s&apiKey=%s",
-                BASE, id, includeNutrition, apiKey);
 
-        Request req = new Request.Builder().url(url).get().build();
-        try (Response resp = http.newCall(req).execute()) {
-            int code = resp.code();
-            String body = resp.body() != null ? resp.body().string() : "";
-            if (code < 200 || code >= 300) {
-                String msg = switch (code) {
-                    case 401 -> "Unauthorized (check API key).";
-                    case 402, 429 -> "Quota / rate limit exceeded.";
-                    case 404 -> "domain.entity.Recipe not found.";
-                    default -> "HTTP error " + code;
-                };
-                throw new ApiException(msg, code, body);
-            }
-            return parseRecipeInformation(new JSONObject(body));
-        } catch (IOException e) {
-            throw new ApiException("Network/IO error: " + e.getMessage(), e);
-        }
-    }
-
-    // -------- parsing (kept local to the data layer) --------
-    private static RecipeInformationDTO parseRecipeInformation(JSONObject o) {
         RecipeInformationDTO dto = new RecipeInformationDTO();
-        dto.id = o.optLong("id");
-        dto.title = o.optString("title", "");
-        dto.image = o.optString("image", "");
-        dto.servings = o.optInt("servings", 0);
-        dto.readyInMinutes = o.optInt("readyInMinutes", 0);
-        dto.sourceName = o.optString("sourceName", "");
-        dto.sourceUrl = o.optString("sourceUrl", "");
 
-        // ingredients
-        JSONArray ing = o.optJSONArray("extendedIngredients");
-        if (ing != null) {
-            for (int i = 0; i < ing.length(); i++) {
-                JSONObject ei = ing.getJSONObject(i);
-                var extendedIngredient = new RecipeInformationDTO.ExtendedIngredient();
-                extendedIngredient.name = ei.optString("name", "");
-                extendedIngredient.amount = ei.has("amount") ? ei.optDouble("amount") : null;
-                extendedIngredient.unit = ei.optString("unit", "");
-                extendedIngredient.original = ei.optString("original", "");
-                dto.extendedIngredients.add(extendedIngredient);
-            }
-        }
+        fillBasicAndIngredients(id, dto);
+        fillInstruction(id, dto);
 
-        // steps (take first instruction set if present)
-        JSONArray instr = o.optJSONArray("analyzedInstructions");
-        if (instr != null && !instr.isEmpty()) {
-            JSONArray steps = instr.getJSONObject(0).optJSONArray("steps");
-            if (steps != null) {
-                for (int i = 0; i < steps.length(); i++) {
-                    JSONObject s = steps.getJSONObject(i);
-                    var st = new RecipeInformationDTO.Step();
-                    st.number = s.optInt("number", i + 1);
-                    st.step = s.optString("step", "");
-                    dto.steps.add(st);
-                }
-            }
-        }
-
-        // nutrition
-        JSONObject nutrition = o.optJSONObject("nutrition");
-        if (nutrition != null) {
-            JSONArray nutrients = nutrition.optJSONArray("nutrients");
-            if (nutrients != null) {
-                for (int i = 0; i < nutrients.length(); i++) {
-                    JSONObject n = nutrients.getJSONObject(i);
-                    var nu = new RecipeInformationDTO.Nutrient();
-                    nu.name = n.optString("name", "");
-                    nu.amount = n.has("amount") ? n.optDouble("amount") : null;
-                    nu.unit = n.optString("unit", "");
-                    dto.nutrients.add(nu);
-                }
-            }
+        if (includeNutrition) {
+            fillNutrition(id, dto);
         }
         return dto;
     }
 
+
+    private void fillBasicAndIngredients(long id, RecipeInformationDTO dto) throws ApiException {
+        String url = BASE + "/recipes/" + id + "/information?apiKey=" + apiKey;
+
+        JSONObject root = getJson(url);
+
+        dto.id = root.optLong("id");
+        dto.title = root.optString("title", "");
+        dto.image = root.optString("image", "");
+        dto.servings = root.has("servings") ? root.optInt("servings") : null;
+        dto.readyInMinutes = root.has("readyInMinutes") ? root.optInt("readyInMinutes") : null;
+        dto.sourceName = root.optString("sourceName", "");
+        dto.sourceUrl = root.optString("sourceUrl", "");
+
+        // ingredients required
+        JSONArray ings = root.optJSONArray("extendedIngredients");
+        if (ings != null) {
+            for (int i = 0; i < ings.length(); i++) {
+                JSONObject ingredientJson = ings.getJSONObject(i);
+
+                RecipeInformationDTO.ExtendedIngredient ingredientDTO =
+                        new RecipeInformationDTO.ExtendedIngredient();
+                ingredientDTO.name = ingredientJson.optString("name", "");
+                ingredientDTO.amount = ingredientJson.has("amount")
+                        ? ingredientJson.optDouble("amount")
+                        : null;
+                ingredientDTO.unit = ingredientJson.optString("unit", "");
+
+                dto.ingredients.add(ingredientDTO);
+            }
+        }
+
+    }
+
+    private void fillInstruction(long id, RecipeInformationDTO dto) throws ApiException {
+        String url = BASE + "/recipes/" + id + "/analyzedInstructions?apiKey=" + apiKey;
+        JSONArray blocks = getJsonArray(url);
+        if (blocks != null && !blocks.isEmpty()) {
+            JSONObject instructionBlock = blocks.getJSONObject(0);
+            JSONArray stepsArray = instructionBlock.optJSONArray("steps");
+            if (stepsArray == null) return;
+
+            for (int i = 0; i < stepsArray.length(); i++) {
+                JSONObject stepJson = stepsArray.getJSONObject(i);
+
+                RecipeInformationDTO.Step stepDTO = new RecipeInformationDTO.Step();
+                stepDTO.number = stepJson.optInt("number", i + 1);
+                stepDTO.step = stepJson.optString("step", "");
+
+                dto.steps.add(stepDTO);
+            }
+        }
+
+    }
+
+    private void fillNutrition(long id, RecipeInformationDTO dto) throws ApiException {
+        String url = BASE + "/recipes/" + id + "/nutritionWidget.json?apiKey=" + apiKey;
+        JSONObject root = getJson(url);
+
+        JSONArray nutrientsArray = root.optJSONArray("nutrients");
+        if (nutrientsArray == null) return;
+
+        for (int i = 0; i < nutrientsArray.length(); i++) {
+            JSONObject nutrientJson = nutrientsArray.getJSONObject(i);
+
+            String name = nutrientJson.optString("name", "").toLowerCase();
+            Double amount = nutrientJson.has("amount")
+                    ? nutrientJson.optDouble("amount")
+                    : null;
+            String unit = nutrientJson.optString("unit", "");
+
+            switch (name) {
+                case "calories" -> dto.calories = amount;
+                case "protein" -> {
+                    dto.proteinAmount = amount;
+                    dto.proteinUnit = unit;
+                }
+                case "fat" -> {
+                    dto.fatAmount = amount;
+                    dto.fatUnit = unit;
+                }
+                case "carbohydrates" -> {
+                    dto.carbsAmount = amount;
+                    dto.carbsUnit = unit;
+                }
+            }
+        }
+    }
+
+    private JSONObject getJson(String url) throws ApiException {
+        Request request = new Request.Builder().url(url).build();
+
+        try (Response response = http.newCall(request).execute()) {
+            int code =  response.code();
+            String body = response.body() != null ? response.body().string() : "";
+
+            if (code < 200 || code >= 300) {
+                String msg = switch (code) {
+                    case 401 -> "Unauthorized (check API key).";
+                    case 402, 429 -> "Quota / rate limit exceeded.";
+                    case 404 -> "Recipe not found.";
+                    default -> "HTTP error " + code;
+                };
+                throw new ApiException(msg, code, body);
+            }
+            return new JSONObject(body);
+        } catch (IOException e) {
+            throw new ApiException("IO error calling " + url, e);
+        }
+    }
+
+    private JSONArray getJsonArray(String url) throws ApiException {
+        Request req = new Request.Builder().url(url).get().build();
+
+        try (Response resp = http.newCall(req).execute()) {
+            int code = resp.code();
+            String body = resp.body() != null ? resp.body().string() : "";
+
+            if (code < 200 || code >= 300) {
+                String msg = switch (code) {
+                    case 401 -> "Unauthorized (check API key).";
+                    case 402, 429 -> "Quota / rate limit exceeded.";
+                    case 404 -> "Recipe not found.";
+                    default -> "HTTP error " + code;
+                };
+                throw new ApiException(msg, code, body);
+            }
+
+            return new JSONArray(body);
+        } catch (IOException e) {
+            throw new ApiException("Network/IO error: " + e.getMessage(), e);
+        }
+    }
     // error wrapper
     public static class ApiException extends Exception {
         public final int statusCode;
@@ -122,4 +188,6 @@ public class SpoonacularClient {
             this.body = null;
         }
     }
+
+
 }

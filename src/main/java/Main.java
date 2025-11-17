@@ -1,6 +1,8 @@
 // Main.java  (no package, or put it in `dev` if you want)
 import data.api.SpoonacularClient;
 import domain.entity.Recipe;
+import domain.entity.InstructionStep;
+import domain.entity.NutritionInfo;
 import usecase.view_recipe.*;
 
 public class Main {
@@ -25,10 +27,29 @@ public class Main {
                 System.out.println("Servings: " + r.getServings());
                 System.out.println("Ready in: " + r.getPrepTimeInMinutes() + " min");
                 System.out.println("Image: " + r.getImage());
-                System.out.println("\nIngredients:");
+                System.out.println("=== Ingredients === ");
                 r.getIngredients().forEach(ing ->
                         System.out.println(" - " + ing.getOriginalString())
                 );
+                System.out.println("\nSteps:");
+                if (r.getInstructionSteps().isEmpty()) {
+                    System.out.println("  (no steps provided)");
+                } else {
+                    for (InstructionStep step : r.getInstructionSteps()) {
+                        System.out.println(" " + step.getStepNumber() + ". " + step.getDescription());
+                    }
+                }
+                System.out.println("=== Nutrition Info ===");
+                NutritionInfo info = r.getNutritionInfo();
+                if (info == null) {
+                    System.out.println("  (no nutrition data available)");
+                } else {
+                    System.out.println("Calories:       " + info.getCalories());
+                    System.out.println("Protein:        " + info.getProtein());
+                    System.out.println("Fat:            " + info.getFat());
+                    System.out.println("Carbohydrates:  " + info.getCarbohydrates());
+                }
+
             }
 
             @Override
@@ -41,7 +62,7 @@ public class Main {
         ViewRecipeInputBoundary interactor = new ViewRecipeInteractor(client, presenter);
 
         // 4. Pick a Spoonacular recipe id to test
-        long testId = 716429L;
+        long testId = 324694;
         interactor.execute(new ViewRecipeInputData(testId));
     }
 }
