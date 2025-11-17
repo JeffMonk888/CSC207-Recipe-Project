@@ -64,7 +64,7 @@ public class ViewDetailDemo {
         ViewRecipeInputBoundary interactor = new ViewRecipeInteractor(client, presenter);
 
         // 4. Pick a Spoonacular recipe id to test
-        long testId = 716429L;
+        long testId = 1003464;
         interactor.execute(new ViewRecipeInputData(testId));
     }
 }
