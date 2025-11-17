@@ -1,16 +1,16 @@
 package data.rating;
 
 import domain.entity.UserRating;
-import usecase.rate_recipe.UserRatingGateway;
+import usecase.rate_recipe.UserRatingDataAccessInterface;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Simple in-memory implementation of UserRatingGateway.
- * Key: userId + ":" + recipeId
+ * Simple in-memory implementation of UserRatingDataAccessInterface.
+ * Key format: "userId:recipeId".
  */
-public class InMemoryUserRatingGateway implements UserRatingGateway {
+public class InMemoryUserRatingGateway implements UserRatingDataAccessInterface {
 
     private final Map<String, UserRating> store = new HashMap<>();
 

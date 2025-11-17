@@ -4,14 +4,17 @@ import domain.entity.UserRating;
 
 import java.time.Instant;
 
+/**
+ * Interactor for UC9: Favourite / Rate Recipe.
+ */
 public class RateRecipeInteractor implements RateRecipeInputBoundary {
 
-    private final UserRatingGateway ratingGateway;
+    private final UserRatingDataAccessInterface ratingDataAccess;
     private final RateRecipeOutputBoundary presenter;
 
-    public RateRecipeInteractor(UserRatingGateway ratingGateway,
+    public RateRecipeInteractor(UserRatingDataAccessInterface ratingDataAccess,
                                 RateRecipeOutputBoundary presenter) {
-        this.ratingGateway = ratingGateway;
+        this.ratingDataAccess = ratingDataAccess;
         this.presenter = presenter;
     }
 
@@ -19,7 +22,7 @@ public class RateRecipeInteractor implements RateRecipeInputBoundary {
     public void execute(RateRecipeInputData inputData) {
         int stars = inputData.getStars();
 
-        // 1. 验证评分：只能是 1,2,3,4,5
+        // 1. 验证评分：只能是 1..5 的整数
         if (!isValidStars(stars)) {
             presenter.presentFailure("Rating must be an integer between 1 and 5.");
             return;
@@ -28,8 +31,8 @@ public class RateRecipeInteractor implements RateRecipeInputBoundary {
         long userId = inputData.getUserId();
         long recipeId = inputData.getRecipeId();
 
-        // 2. 查找已有评分
-        UserRating rating = ratingGateway.findByUserAndRecipe(userId, recipeId);
+        // 2. 查询是否已有 rating
+        UserRating rating = ratingDataAccess.findByUserAndRecipe(userId, recipeId);
         if (rating == null) {
             rating = new UserRating(
                     null,
@@ -43,10 +46,10 @@ public class RateRecipeInteractor implements RateRecipeInputBoundary {
             rating.setUpdatedAt(Instant.now());
         }
 
-        // 3. 保存
-        ratingGateway.save(rating);
+        // 3. 持久化
+        ratingDataAccess.save(rating);
 
-        // 4. 通知成功
+        // 4. 输出给 presenter
         presenter.presentSuccess(new RateRecipeOutputData(rating));
     }
 

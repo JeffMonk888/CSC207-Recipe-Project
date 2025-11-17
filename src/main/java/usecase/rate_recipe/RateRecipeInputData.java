@@ -1,10 +1,13 @@
 package usecase.rate_recipe;
 
+/**
+ * Input data for UC9.
+ */
 public class RateRecipeInputData {
 
     private final long userId;
     private final long recipeId;
-    private final int stars;   // <== int 1..5
+    private final int stars;   // 1..5
 
     public RateRecipeInputData(long userId, long recipeId, int stars) {
         this.userId = userId;
