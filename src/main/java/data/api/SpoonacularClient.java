@@ -1,6 +1,7 @@
 package data.api;
 
 import data.dto.RecipeInformationDTO;
+import domain.entity.Ingredient;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -9,6 +10,8 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 
@@ -44,6 +47,40 @@ public class SpoonacularClient {
                 throw new ApiException(msg, code, body);
             }
             return parseRecipeInformation(new JSONObject(body));
+        } catch (IOException e) {
+            throw new ApiException("Network/IO error: " + e.getMessage(), e);
+        }
+    }
+
+    public List<RecipeInformationDTO> getRecipesForIngredients(List<Ingredient> ingredientList, int number) throws ApiException {
+        String ingredients = "";
+        for (Ingredient ingredient : ingredientList) {
+            ingredients.concat("," + ingredient.getName());
+        }
+        String url = String.format("%s/recipes/findByIngredients?ingredients=%s&number=%d&ranking=2&apiKey=%s",
+                BASE, ingredients, number, apiKey);
+        Request req = new Request.Builder().url(url).get().build();
+        try (Response resp = http.newCall(req).execute()) {
+            int code = resp.code();
+            String body = resp.body() != null ? resp.body().string() : "";
+            if (code < 200 || code >= 300) {
+                String msg = switch (code) {
+                    case 401 -> "Unauthorized (check API key).";
+                    case 402, 429 -> "Quota / rate limit exceeded.";
+                    case 404 -> "domain.entity.Recipe not found.";
+                    default -> "HTTP error " + code;
+                };
+                throw new ApiException(msg, code, body);
+            }
+            ArrayList<RecipeInformationDTO> recipes = new ArrayList<>();
+            JSONArray jsonArray = new JSONArray(body);
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject jsonObject = jsonArray.getJSONObject(i);
+                if (jsonObject.getInt("missedIngredientCount") == 0) {
+                    recipes.add(parseRecipeInformation(jsonObject));
+                }
+            }
+            return recipes;
         } catch (IOException e) {
             throw new ApiException("Network/IO error: " + e.getMessage(), e);
         }
