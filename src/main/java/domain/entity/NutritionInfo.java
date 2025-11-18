@@ -1,4 +1,5 @@
 package domain.entity;
+import org.json.JSONObject;
 
 public class NutritionInfo {
     private Long id;
@@ -13,6 +14,26 @@ public class NutritionInfo {
         this.protein = protein;
         this.fat = fat;
         this.carbohydrates = carbohydrates;
+    }
+
+    // Situation for getting recipe from JSON
+    public NutritionInfo(JSONObject jsonObject) {
+        this.id = jsonObject.getLong("id");
+        this.calories = jsonObject.getDouble("calories");
+        this.protein = jsonObject.getString("protein");
+        this.fat = jsonObject.getString("fat");
+        this.carbohydrates = jsonObject.getString("carbohydrates");
+    }
+
+    // create a JSON for recipe
+    public JSONObject toJson() {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("id", id);
+        jsonObject.put("calories", calories);
+        jsonObject.put("protein", protein);
+        jsonObject.put("fat", fat);
+        jsonObject.put("carbohydrates", carbohydrates);
+        return jsonObject;
     }
 
     // Getters and Setters
