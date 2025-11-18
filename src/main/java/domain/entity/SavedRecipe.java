@@ -6,7 +6,7 @@ public class SavedRecipe {
     private Long id;
     private final Long userId;
     private final Long recipeId;
-    private final Instant savedAt;
+    private Instant savedAt;
 
     private boolean favourite;
 
@@ -25,7 +25,8 @@ public class SavedRecipe {
     public Instant getSavedAt() { return savedAt; }
     public boolean isFavourite() { return favourite; }
 
-    // Setters:Allows the gateway to set the ID a
+    // Setters
+    public void setSavedAt(Instant savedAt) { this.savedAt = savedAt; }
     public void setId(Long id) { this.id = id; }
     public void setFavourite(boolean favourite) {
         this.favourite = favourite;

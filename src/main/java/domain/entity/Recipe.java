@@ -42,7 +42,7 @@ public class Recipe {
     }
 
     public Recipe(JSONObject obj) {
-        this.id = obj.has("id") ? obj.getLong("id") : null;
+        this.id = obj.has("id") ? obj.getLong("id") : null; // ensure it will not cause some error when read
         this.title = obj.getString("title");
         this.description = obj.getString("description");
         this.servings = obj.has("servings") ? obj.getInt("servings") : null;
