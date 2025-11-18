@@ -1,4 +1,5 @@
 package domain.entity;
+import org.json.JSONObject;
 
 public class InstructionStep {
 
@@ -10,6 +11,22 @@ public class InstructionStep {
         this.id = id;
         this.stepNumber = stepNumber;
         this.description = description;
+    }
+
+    // Situation for getting recipe from JSON
+    public InstructionStep(JSONObject jsonObject) {
+        this.id = jsonObject.has("id") ? jsonObject.getLong("id") : null;
+        this.stepNumber = jsonObject.has("stepNumber") ? jsonObject.getInt("stepNumber") : null;
+        this.description = jsonObject.has("description") ? jsonObject.getString("description") : ""; // 描述不应为 null
+    }
+
+    // create a JSON for recipe
+    public JSONObject toJson() {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("id", id);
+        jsonObject.put("stepNumber", stepNumber);
+        jsonObject.put("description", description);
+        return jsonObject;
     }
 
     // Getters and Setters

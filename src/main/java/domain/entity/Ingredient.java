@@ -1,4 +1,5 @@
 package domain.entity;
+import org.json.JSONObject;
 
 public class Ingredient {
     
@@ -15,6 +16,25 @@ public class Ingredient {
             this.unit = unit;
             this.originalString = originalString;
         }
+
+    public Ingredient(JSONObject jsonObject) {
+     // not cause error when it does not exist
+        this.id = jsonObject.has("id") ? jsonObject.getLong("id") : null;
+        this.name = jsonObject.has("name") ? jsonObject.getString("name") : "";
+        this.amount = jsonObject.has("amount") ? jsonObject.getDouble("amount") : null;
+        this.unit = jsonObject.has("unit") ? jsonObject.getString("unit") : "";
+        this.originalString = jsonObject.has("originalString") ? jsonObject.getString("originalString") : "";
+    }
+
+    public JSONObject toJson() {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("id", this.id);
+        jsonObject.put("name", this.name);
+        jsonObject.put("amount", this.amount);
+        jsonObject.put("unit", this.unit);
+        jsonObject.put("originalString", this.originalString);
+        return jsonObject;
+    }
 
     // Getters and Setters
     public Long getId() { return id; }
