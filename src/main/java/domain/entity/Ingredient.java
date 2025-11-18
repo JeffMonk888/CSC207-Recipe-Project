@@ -18,11 +18,12 @@ public class Ingredient {
         }
 
     public Ingredient(JSONObject jsonObject) {
-        this.id = jsonObject.getLong("id");
-        this.name = jsonObject.getString("name");
-        this.amount = jsonObject.getDouble("amount");
-        this.unit = jsonObject.getString("unit");
-        this.originalString = jsonObject.getString("originalString");
+     // not cause error when it does not exist
+        this.id = jsonObject.has("id") ? jsonObject.getLong("id") : null;
+        this.name = jsonObject.has("name") ? jsonObject.getString("name") : "";
+        this.amount = jsonObject.has("amount") ? jsonObject.getDouble("amount") : null;
+        this.unit = jsonObject.has("unit") ? jsonObject.getString("unit") : "";
+        this.originalString = jsonObject.has("originalString") ? jsonObject.getString("originalString") : "";
     }
 
     public JSONObject toJson() {

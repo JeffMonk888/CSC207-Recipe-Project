@@ -15,9 +15,9 @@ public class InstructionStep {
 
     // Situation for getting recipe from JSON
     public InstructionStep(JSONObject jsonObject) {
-        this.id = jsonObject.getLong("id");
-        this.stepNumber = jsonObject.getInt("stepNumber");
-        this.description = jsonObject.getString("description");
+        this.id = jsonObject.has("id") ? jsonObject.getLong("id") : null;
+        this.stepNumber = jsonObject.has("stepNumber") ? jsonObject.getInt("stepNumber") : null;
+        this.description = jsonObject.has("description") ? jsonObject.getString("description") : ""; // 描述不应为 null
     }
 
     // create a JSON for recipe

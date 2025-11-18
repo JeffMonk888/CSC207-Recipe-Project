@@ -18,11 +18,11 @@ public class NutritionInfo {
 
     // Situation for getting recipe from JSON
     public NutritionInfo(JSONObject jsonObject) {
-        this.id = jsonObject.getLong("id");
-        this.calories = jsonObject.getDouble("calories");
-        this.protein = jsonObject.getString("protein");
-        this.fat = jsonObject.getString("fat");
-        this.carbohydrates = jsonObject.getString("carbohydrates");
+        this.id = jsonObject.has("id") ? jsonObject.getLong("id") : null;
+        this.calories = jsonObject.has("calories") ? jsonObject.getDouble("calories") : null;
+        this.protein = jsonObject.has("protein") ? jsonObject.getString("protein") : null;
+        this.fat = jsonObject.has("fat") ? jsonObject.getString("fat") : null;
+        this.carbohydrates = jsonObject.has("carbohydrates") ? jsonObject.getString("carbohydrates") : null;
     }
 
     // create a JSON for recipe

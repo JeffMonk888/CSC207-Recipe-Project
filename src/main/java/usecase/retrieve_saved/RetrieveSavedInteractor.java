@@ -1,6 +1,6 @@
 package usecase.retrieve_saved;
 
-import data.saved_recipe.RecipeDataAssessObject; // <-- 新增依赖
+import data.saved_recipe.RecipeDataAssessObject;
 import domain.entity.Recipe;
 import domain.entity.SavedRecipe;
 import usecase.common.MotionForRecipe;
@@ -11,16 +11,16 @@ import java.util.Optional;
 
 public class RetrieveSavedInteractor implements RetrieveSavedInputBoundary {
 
-    private final MotionForRecipe savedRecipeGateway; // (CSV 链接)
-    private final RecipeDataAssessObject recipeDataGateway; // (JSON 完整食谱)
+    private final MotionForRecipe savedRecipeGateway;
+    private final RecipeDataAssessObject recipeDataGateway;
     private final RetrieveSavedOutputBoundary presenter;
 
 
     public RetrieveSavedInteractor(MotionForRecipe savedRecipeGateway,
-                                   RecipeDataAssessObject recipeDataGateway, // <-- 新增
+                                   RecipeDataAssessObject recipeDataGateway,
                                    RetrieveSavedOutputBoundary presenter) {
         this.savedRecipeGateway = savedRecipeGateway;
-        this.recipeDataGateway = recipeDataGateway; // <-- 新增
+        this.recipeDataGateway = recipeDataGateway;
         this.presenter = presenter;
     }
 
