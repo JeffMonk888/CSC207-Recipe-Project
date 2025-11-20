@@ -1,27 +1,57 @@
 package usecase.auth;
-    import java.util.HashMap;
-    import java.util.Map;
+import data.user.UserDataAccess;
+import data.user.PasswordHash;
+import domain.entity.User;
+import usecase.auth.UserDataAccessInterface;
+import usecase.auth.PasswordHasher;
+
+import java.time.Instant;
+
 public class SignUpAuth {
-    private static final Map<String, String> USERS = new HashMap<>();
-    static {
-        USERS.put("admin", "admin");
-        USERS.put("user", "user");
-    }
-    public static synchronized boolean register(String username, String password) {
+
+    // Shared backend objects
+    private static final UserDataAccessInterface userDAO =
+            new UserDataAccess("users.csv");      // file will be created if missing
+
+    private static final PasswordHasher hasher = new PasswordHash();
+
+    /** Register a new user. Returns true on success, false if username exists or invalid. */
+    public static boolean register(String username, String password) {
         username = username.trim();
-        if (username.isEmpty()) {
+
+        if (username.isEmpty() || password.isEmpty()) {
             return false;
         }
-        if (USERS.containsKey(username)) {
-            return false;          // username already exists
+
+        // username taken?
+        if (userDAO.existsByUsername(username)) {
+            return false;
         }
-        USERS.put(username, password);
+
+        long id = userDAO.getNextId();
+        String passwordHash = hasher.hash(password);
+        Instant createdAt = Instant.now();
+
+        User user = new User(id, username, passwordHash, createdAt);
+        userDAO.save(user);  // writes into users.csv
+
         return true;
     }
 
-    public static synchronized boolean authenticate(String username, String password) {
+    /** Check login credentials against stored users. */
+    public static boolean authenticate(String username, String password) {
         username = username.trim();
-        String stored = USERS.get(username);
-        return stored != null && stored.equals(password);
+
+        if (username.isEmpty() || password.isEmpty()) {
+            return false;
+        }
+
+        User user = userDAO.getByUsername(username);
+        if (user == null) {
+            return false;
+        }
+
+        String inputHash = hasher.hash(password);
+        return inputHash.equals(user.getPasswordHash());
     }
 }
