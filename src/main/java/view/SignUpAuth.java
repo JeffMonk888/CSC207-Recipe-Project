@@ -1,4 +1,4 @@
-package view.login;
+package view;
     import java.util.HashMap;
     import java.util.Map;
 public class SignUpAuth {
