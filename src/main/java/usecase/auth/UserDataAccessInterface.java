@@ -9,4 +9,6 @@ public interface UserDataAccessInterface {
     User getByUsername(String username);
 
     void save(User user);
+
+    long getNextId();
 }
