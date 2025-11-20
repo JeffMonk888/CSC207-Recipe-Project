@@ -1,4 +1,6 @@
-package view.login;
+package view;
+
+import usecase.auth.SignUpAuth;
 
 import javax.swing.*;
 import java.awt.*;
