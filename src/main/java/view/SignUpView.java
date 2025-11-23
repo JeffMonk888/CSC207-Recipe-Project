@@ -5,7 +5,7 @@ import usecase.auth.SignUpAuth;
 import javax.swing.*;
 import java.awt.*;
 
-public class SignUpPage extends JPanel {
+public class SignUpView extends JPanel {
 
     private final JTextField usernameField;
     private final JPasswordField passwordField;
@@ -13,7 +13,7 @@ public class SignUpPage extends JPanel {
     private final JButton createButton;
     private final JLabel errorLabel;
 
-    public SignUpPage() {
+    public SignUpView() {
         setPreferredSize(new Dimension(450, 260));
 
         setLayout(new GridBagLayout());

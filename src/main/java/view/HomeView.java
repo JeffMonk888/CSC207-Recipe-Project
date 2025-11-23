@@ -3,9 +3,9 @@ package view;
 import javax.swing.*;
 import java.awt.*;
 
-public class HomePage extends JPanel {
+public class HomeView extends JPanel {
 
-    public HomePage(String username, JFrame frame) {
+    public HomeView(String username, JFrame frame) {
         // Overall size
         setPreferredSize(new Dimension(600, 500));
         setLayout(new BorderLayout(10, 10));
@@ -69,7 +69,7 @@ public class HomePage extends JPanel {
         // ----- Button behaviour (temporary) -----
 
         logoutButton.addActionListener(e -> {
-            frame.setContentPane(new LoginPage(frame));
+            frame.setContentPane(new LoginView(frame));
             frame.pack();
             frame.setLocationRelativeTo(null);
         });

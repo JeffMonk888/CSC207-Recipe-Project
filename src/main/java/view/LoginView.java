@@ -5,7 +5,7 @@ import usecase.auth.SignUpAuth;
 import javax.swing.*;
 import java.awt.*;
 
-public class LoginPage extends JPanel {
+public class LoginView extends JPanel {
 
     private final JFrame parentFrame;
 
@@ -16,7 +16,7 @@ public class LoginPage extends JPanel {
     private final JLabel errorLabel;
 
 
-    public LoginPage(JFrame parentFrame) {
+    public LoginView(JFrame parentFrame) {
         this.parentFrame = parentFrame;
         setPreferredSize(new Dimension(450, 280));
         setLayout(new GridBagLayout());
@@ -91,7 +91,7 @@ public class LoginPage extends JPanel {
         if (SignUpAuth.authenticate(username, password)) {
             setError(" ");
             // open HomePage instead of just a popup
-            parentFrame.setContentPane(new HomePage(username, parentFrame));
+            parentFrame.setContentPane(new HomeView(username, parentFrame));
             parentFrame.pack();
             parentFrame.setLocationRelativeTo(null);
         } else {
@@ -101,7 +101,7 @@ public class LoginPage extends JPanel {
     private void openSignupWindow() {
         JFrame signupFrame = new JFrame("Sign up - Recipe Manager");
         signupFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        signupFrame.setContentPane(new SignUpPage());
+        signupFrame.setContentPane(new SignUpView());
         signupFrame.pack();
         signupFrame.setLocationRelativeTo(this); // center near login
         signupFrame.setVisible(true);
