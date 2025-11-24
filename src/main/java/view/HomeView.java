@@ -1,16 +1,20 @@
 package view;
 
+import interface_adapter.ViewManagerModel;
+
 import javax.swing.*;
 import java.awt.*;
 
 public class HomeView extends JPanel {
 
-    public HomeView(String username, JFrame frame) {
-        // Overall size
+    private final ViewManagerModel viewManagerModel;
+
+    public HomeView(ViewManagerModel viewManagerModel) {
+        this.viewManagerModel = viewManagerModel;
+
         setPreferredSize(new Dimension(600, 500));
         setLayout(new BorderLayout(10, 10));
 
-        // ----- Top bar: title + (optional) logout -----
         JPanel topBar = new JPanel(new BorderLayout());
 
         JLabel title = new JLabel("Find My Recipe - Homepage", SwingConstants.CENTER);
@@ -18,14 +22,12 @@ public class HomeView extends JPanel {
 
         JButton logoutButton = new JButton("Log out");
 
-// 🔹 spacer on the left same size as logout button
         Component leftSpacer = Box.createHorizontalStrut(logoutButton.getPreferredSize().width);
 
         topBar.add(leftSpacer, BorderLayout.WEST);
         topBar.add(title, BorderLayout.CENTER);
         topBar.add(logoutButton, BorderLayout.EAST);
 
-        // ----- Center: welcome + buttons -----
         JPanel centerPanel = new JPanel();
         centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
         centerPanel.setBorder(BorderFactory.createEmptyBorder(20, 60, 20, 60));
@@ -33,19 +35,17 @@ public class HomeView extends JPanel {
         JLabel welcomeLabel = new JLabel("Welcome");
         welcomeLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         welcomeLabel.setFont(welcomeLabel.getFont().deriveFont(Font.BOLD, 26f));
-        welcomeLabel.setForeground(new Color(0, 150, 0)); // light green-ish
+        welcomeLabel.setForeground(new Color(0, 150, 0));
 
-        JLabel usernameLabel = new JLabel(username);
-        usernameLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        usernameLabel.setFont(usernameLabel.getFont().deriveFont(Font.PLAIN, 18f));
+        JLabel subtitleLabel = new JLabel("Find or create your next recipe");
+        subtitleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        subtitleLabel.setFont(subtitleLabel.getFont().deriveFont(Font.PLAIN, 16f));
 
-        // Spacing helper
         centerPanel.add(welcomeLabel);
         centerPanel.add(Box.createVerticalStrut(5));
-        centerPanel.add(usernameLabel);
+        centerPanel.add(subtitleLabel);
         centerPanel.add(Box.createVerticalStrut(25));
 
-        // Buttons styled to look like your sketch
         JButton findNewRecipeButton = new JButton("Find new recipe");
         JButton makeNewRecipeButton = new JButton("Make new recipe");
         JButton favouritesButton = new JButton("Favourites ★");
@@ -62,21 +62,16 @@ public class HomeView extends JPanel {
         centerPanel.add(Box.createVerticalStrut(15));
         centerPanel.add(favouritesButton);
 
-        // ----- Add panels to main layout -----
         add(topBar, BorderLayout.NORTH);
         add(centerPanel, BorderLayout.CENTER);
 
-        // ----- Button behaviour (temporary) -----
-
-        logoutButton.addActionListener(e -> {
-            frame.setContentPane(new LoginView(frame));
-            frame.pack();
-            frame.setLocationRelativeTo(null);
-        });
+        logoutButton.addActionListener(e ->
+                viewManagerModel.setActiveViewName("login")
+        );
 
         findNewRecipeButton.addActionListener(e ->
                 JOptionPane.showMessageDialog(
-                        frame,
+                        this,
                         "Find new recipe – to be implemented",
                         "Find new recipe",
                         JOptionPane.INFORMATION_MESSAGE
@@ -85,7 +80,7 @@ public class HomeView extends JPanel {
 
         makeNewRecipeButton.addActionListener(e ->
                 JOptionPane.showMessageDialog(
-                        frame,
+                        this,
                         "Make new recipe – to be implemented",
                         "Make new recipe",
                         JOptionPane.INFORMATION_MESSAGE
@@ -94,11 +89,15 @@ public class HomeView extends JPanel {
 
         favouritesButton.addActionListener(e ->
                 JOptionPane.showMessageDialog(
-                        frame,
+                        this,
                         "Favourites – to be implemented",
                         "Favourites",
                         JOptionPane.INFORMATION_MESSAGE
                 )
         );
+    }
+
+    public String getViewName() {
+        return "home";
     }
 }
