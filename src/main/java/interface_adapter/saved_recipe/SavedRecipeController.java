@@ -23,8 +23,8 @@ public class SavedRecipeController {
         retrieveUseCase.execute(data);
     }
 
-    public void executeDelete(Long userId, Long recipeId) {
-        DeleteSavedInputData data = new DeleteSavedInputData(userId, recipeId);
+    public void executeDelete(Long userId, String recipeKey) {
+        DeleteSavedInputData data = new DeleteSavedInputData(userId, recipeKey);
         deleteUseCase.execute(data);
     }
 }

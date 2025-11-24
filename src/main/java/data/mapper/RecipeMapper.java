@@ -17,7 +17,6 @@ import domain.entity.Recipe;
  */
 public final class RecipeMapper {
 
-    private RecipeMapper() {}
 
     public static Recipe toDomain(RecipeInformationDTO dto) {
         if (dto == null) throw new IllegalArgumentException("dto is null");

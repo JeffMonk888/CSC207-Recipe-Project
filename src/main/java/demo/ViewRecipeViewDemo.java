@@ -25,7 +25,7 @@ public class ViewRecipeViewDemo {
         String apiKey = System.getenv("SPOONACULAR_API_KEY");
         if (apiKey == null || apiKey.isBlank()) {
             // TEMP for local testing ONLY – do NOT commit a real key
-            apiKey = "7379cb18b81945e4994504e9414ff7f1";
+            apiKey = "6586492a77f54829ba878d12fb62832d";
         }
 
         SpoonacularClient client = new SpoonacularClient(apiKey);

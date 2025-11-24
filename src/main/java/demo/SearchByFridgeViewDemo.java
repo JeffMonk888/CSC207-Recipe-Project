@@ -24,7 +24,7 @@ public class SearchByFridgeViewDemo {
         SwingUtilities.invokeLater(() -> {
             FridgeAccess fridgeAccess = new FileFridgeAccessObject("fridge_items.csv");
 
-            RecipeByIngredientsAccess recipeAccess = new SpoonacularClient("7379cb18b81945e4994504e9414ff7f1");
+            RecipeByIngredientsAccess recipeAccess = new SpoonacularClient("6586492a77f54829ba878d12fb62832d");
 
             SearchByFridgeViewModel viewModel = new SearchByFridgeViewModel();
             SearchByFridgeOutputBoundary presenter = new SearchByFridgePresenter(viewModel);
