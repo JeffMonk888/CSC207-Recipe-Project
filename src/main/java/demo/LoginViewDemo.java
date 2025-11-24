@@ -1,4 +1,4 @@
-package Demo;
+package demo;
 
 import view.LoginView;
 

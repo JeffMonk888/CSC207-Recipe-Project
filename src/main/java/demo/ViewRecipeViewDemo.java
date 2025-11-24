@@ -1,4 +1,4 @@
-package Demo;  // <-- change or remove this to match your project structure
+package demo;  // <-- change or remove this to match your project structure
 
 import data.api.SpoonacularClient;
 import interface_adapter.ViewManagerModel;
