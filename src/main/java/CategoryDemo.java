@@ -1,5 +1,5 @@
 import data.category.InMemoryCategoryGateway;
-import data.saved_recipe.InMemorySavedRecipeGateway;
+import data.saved_recipe.UserSavedRecipeAccessObject;
 import domain.entity.SavedRecipe;
 import usecase.category.assign_category.*;
 import usecase.category.create_category.*;
@@ -15,7 +15,11 @@ public class CategoryDemo {
 
         // --- Gateways ---
         InMemoryCategoryGateway categoryGateway = new InMemoryCategoryGateway();
-        MotionForRecipe savedGateway = new InMemorySavedRecipeGateway();
+
+        // 用你新的持久化实现，而不是 InMemorySavedRecipeGateway
+        // 路径可以随便选一个 demo 用的 csv 文件名
+        MotionForRecipe savedGateway =
+                new UserSavedRecipeAccessObject("saved_recipes_demo.csv");
 
         // 先假装用户已经保存了三道菜
         savedGateway.save(new SavedRecipe(userId, 101L));
@@ -41,7 +45,10 @@ public class CategoryDemo {
         createInteractor.execute(new CreateCategoryInputData(userId, "Quick Meals"));
 
         // 拿到刚刚创建的分类 id
-        Long categoryId = categoryGateway.findCategoriesForUser(userId).get(0).getId();
+        Long categoryId = categoryGateway
+                .findCategoriesForUser(userId)
+                .get(0)
+                .getId();
 
         // --- 2. 给分类分配菜谱 ---
         AssignCategoryOutputBoundary assignPresenter = new AssignCategoryOutputBoundary() {
