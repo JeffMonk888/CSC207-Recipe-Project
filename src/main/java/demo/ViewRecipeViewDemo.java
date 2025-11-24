@@ -45,8 +45,7 @@ public class ViewRecipeViewDemo {
                 new ViewRecipeController(interactor);
 
         ViewRecipeView viewRecipeView =
-                new ViewRecipeView(viewRecipeViewModel /* controller not needed here,
-                                                         because this screen just displays */);
+                new ViewRecipeView(viewRecipeViewModel);
 
         viewManager.addView(viewRecipeView, viewRecipeViewModel.getViewName());
 

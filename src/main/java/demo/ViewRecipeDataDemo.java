@@ -5,12 +5,10 @@ import usecase.view_recipe.*;
 import domain.entity.NutritionInfo;
 import domain.entity.InstructionStep;
 
-public class ViewDetailDemo {
+public class ViewRecipeDataDemo {
     public static void main(String[] args) {
-        // 1. API key
         String apiKey = System.getenv("SPOONACULAR_API_KEY");
         if (apiKey == null || apiKey.isBlank()) {
-            // TEMP ONLY for local testing; don't commit the key
             apiKey = "7379cb18b81945e4994504e9414ff7f1";
         }
 
@@ -60,10 +58,8 @@ public class ViewDetailDemo {
             }
         };
 
-        // 3. Interactor
         ViewRecipeInputBoundary interactor = new ViewRecipeInteractor(client, presenter);
 
-        // 4. Pick a Spoonacular recipe id to test
         long testId = 1003464;
         interactor.execute(new ViewRecipeInputData(testId));
     }
