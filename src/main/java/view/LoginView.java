@@ -1,5 +1,6 @@
 package view;
 
+import interface_adapter.ViewManagerModel;
 import usecase.auth.SignUpAuth;
 
 import javax.swing.*;
@@ -7,7 +8,7 @@ import java.awt.*;
 
 public class LoginView extends JPanel {
 
-    private final JFrame parentFrame;
+    private final ViewManagerModel viewManagerModel;
 
     private final JTextField usernameField;
     private final JPasswordField passwordField;
@@ -15,9 +16,9 @@ public class LoginView extends JPanel {
     private final JButton signupButton;
     private final JLabel errorLabel;
 
+    public LoginView(ViewManagerModel viewManagerModel) {
+        this.viewManagerModel = viewManagerModel;
 
-    public LoginView(JFrame parentFrame) {
-        this.parentFrame = parentFrame;
         setPreferredSize(new Dimension(450, 280));
         setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
@@ -35,49 +36,46 @@ public class LoginView extends JPanel {
         passwordField = new JPasswordField(18);
         signupButton = new JButton("Sign up");
         loginButton = new JButton("Log in");
-        errorLabel = new JLabel(" ");      // blank for now
+        errorLabel = new JLabel(" ");
         errorLabel.setForeground(Color.RED);
 
-        // Row 0 – title
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.gridwidth = 2;
         add(title, gbc);
 
-        // Row 1 – username label
         gbc.gridy = 1;
         gbc.gridwidth = 1;
         gbc.gridx = 0;
         add(usernameLabel, gbc);
 
-        // Row 1 – username field
         gbc.gridx = 1;
         add(usernameField, gbc);
 
-        // Row 2 – password label
         gbc.gridy = 2;
         gbc.gridx = 0;
         add(passwordLabel, gbc);
 
-        // Row 2 – password field
         gbc.gridx = 1;
         add(passwordField, gbc);
 
-        // Row 3 – login button
         gbc.gridy = 3;
-        gbc.gridwidth = 1;
         gbc.gridx = 0;
         add(signupButton, gbc);
         gbc.gridx = 1;
         add(loginButton, gbc);
-        // Row 4 – error label
+
         gbc.gridy = 4;
         gbc.gridx = 0;
         gbc.gridwidth = 2;
         add(errorLabel, gbc);
 
         loginButton.addActionListener(e -> handleLoginClick());
-        signupButton.addActionListener(e -> openSignupWindow());
+        signupButton.addActionListener(e -> openSignupView());
+    }
+
+    public String getViewName() {
+        return "login";
     }
 
     private void handleLoginClick() {
@@ -88,23 +86,17 @@ public class LoginView extends JPanel {
             setError("Please enter both username and password");
             return;
         }
+
         if (SignUpAuth.authenticate(username, password)) {
             setError(" ");
-            // open HomePage instead of just a popup
-            parentFrame.setContentPane(new HomeView(username, parentFrame));
-            parentFrame.pack();
-            parentFrame.setLocationRelativeTo(null);
+            viewManagerModel.setActiveViewName("home");
         } else {
             setError("Invalid username or password");
         }
     }
-    private void openSignupWindow() {
-        JFrame signupFrame = new JFrame("Sign up - Recipe Manager");
-        signupFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        signupFrame.setContentPane(new SignUpView());
-        signupFrame.pack();
-        signupFrame.setLocationRelativeTo(this); // center near login
-        signupFrame.setVisible(true);
+
+    private void openSignupView() {
+        viewManagerModel.setActiveViewName("signup");
     }
 
     public void setError(String message) {
@@ -118,9 +110,11 @@ public class LoginView extends JPanel {
     public String getPassword() {
         return new String(passwordField.getPassword());
     }
+
     public JButton getLoginButton() {
         return loginButton;
     }
+
     public JButton getSignupButton() {
         return signupButton;
     }
