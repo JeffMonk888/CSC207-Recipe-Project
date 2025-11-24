@@ -1,4 +1,5 @@
 package usecase.category;
 
-public class DeleteCategoryInputBoundary {
+public interface DeleteCategoryInputBoundary {
+    void execute(DeleteCategoryInputData inputData);
 }
