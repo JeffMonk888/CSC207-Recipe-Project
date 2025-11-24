@@ -1,4 +1,4 @@
-package Demo;
+package demo;
 
 import data.api.SpoonacularClient;
 import data.saved_recipe.RecipeDataAssessObject;

@@ -1,4 +1,4 @@
-package Demo;// Main.java  (no package, or put it in `dev` if you want)
+package demo;// Main.java  (no package, or put it in `dev` if you want)
 import data.api.SpoonacularClient;
 import domain.entity.Recipe;
 import usecase.view_recipe.*;
