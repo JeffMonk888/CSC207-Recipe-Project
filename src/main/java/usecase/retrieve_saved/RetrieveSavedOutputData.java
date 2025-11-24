@@ -1,14 +1,16 @@
 package usecase.retrieve_saved;
 
-import domain.entity.SavedRecipe;
-
-import java.util.ArrayList;
+import domain.entity.Recipe; // <-- 更改
+import java.util.List; // <-- 更改
 
 public class RetrieveSavedOutputData {
-    private final ArrayList<SavedRecipe> savedRecipes;
+    private final List<Recipe> savedRecipes;
 
-    public RetrieveSavedOutputData(ArrayList<SavedRecipe> savedRecipes) {
+    public RetrieveSavedOutputData(List<Recipe> savedRecipes) {
         this.savedRecipes = savedRecipes;
     }
-    public ArrayList<SavedRecipe> getSavedRecipes() { return savedRecipes; }
+
+    public List<Recipe> getSavedRecipes() {
+        return savedRecipes;
+    }
 }
