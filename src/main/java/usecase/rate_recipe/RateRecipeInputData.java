@@ -7,9 +7,9 @@ public class RateRecipeInputData {
 
     private final long userId;
     private final long recipeId;
-    private final int stars;   // 1..5
+    private final double stars;   // 0.0 .. 5.0 in 0.5 increments; 0.0 = remove rating
 
-    public RateRecipeInputData(long userId, long recipeId, int stars) {
+    public RateRecipeInputData(long userId, long recipeId, double stars) {
         this.userId = userId;
         this.recipeId = recipeId;
         this.stars = stars;
@@ -17,5 +17,5 @@ public class RateRecipeInputData {
 
     public long getUserId() { return userId; }
     public long getRecipeId() { return recipeId; }
-    public int getStars() { return stars; }
+    public double getStars() { return stars; }
 }

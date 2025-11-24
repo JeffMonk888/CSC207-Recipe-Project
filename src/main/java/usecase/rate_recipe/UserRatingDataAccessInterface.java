@@ -17,4 +17,9 @@ public interface UserRatingDataAccessInterface {
      * Save (insert or update) the rating.
      */
     void save(UserRating rating);
+
+    /**
+     * Remove rating for (userId, recipeId) if it exists.
+     */
+    void deleteRating(long userId, long recipeId);
 }

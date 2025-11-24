@@ -27,4 +27,9 @@ public class InMemoryUserRatingGateway implements UserRatingDataAccessInterface 
     public void save(UserRating rating) {
         store.put(key(rating.getUserId(), rating.getRecipeId()), rating);
     }
+
+    @Override
+    public void deleteRating(long userId, long recipeId) {
+        store.remove(key(userId, recipeId));
+    }
 }

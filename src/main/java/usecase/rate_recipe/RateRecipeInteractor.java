@@ -20,20 +20,34 @@ public class RateRecipeInteractor implements RateRecipeInputBoundary {
 
     @Override
     public void execute(RateRecipeInputData inputData) {
-        int stars = inputData.getStars();
+        double stars = inputData.getStars();
 
-        // 1. 验证评分：只能是 1..5 的整数
+        // 1. make sure that ratings are between 0 and 5 in 0.5 increments
         if (!isValidStars(stars)) {
-            presenter.presentFailure("Rating must be an integer between 1 and 5.");
+            presenter.presentFailure(
+                    "Rating must be between 0 and 5 in 0.5 increments (e.g., 0, 0.5, 1, ..., 5).");
             return;
         }
 
         long userId = inputData.getUserId();
         long recipeId = inputData.getRecipeId();
 
-        // 2. 查询是否已有 rating
-        UserRating rating = ratingDataAccess.findByUserAndRecipe(userId, recipeId);
-        if (rating == null) {
+        UserRating existing = ratingDataAccess.findByUserAndRecipe(userId, recipeId);
+
+        // 2. rating is 0, delete current rating
+        if (stars == 0.0) {
+            if (existing == null) {
+                presenter.presentFailure("No existing rating to remove for this recipe.");
+                return;
+            }
+            ratingDataAccess.deleteRating(userId, recipeId);
+            presenter.presentSuccess(new RateRecipeOutputData(null, true));
+            return;
+        }
+
+        // 3. create or update ratings
+        UserRating rating;
+        if (existing == null) {
             rating = new UserRating(
                     null,
                     userId,
@@ -42,18 +56,24 @@ public class RateRecipeInteractor implements RateRecipeInputBoundary {
                     Instant.now()
             );
         } else {
-            rating.setStars(stars);
-            rating.setUpdatedAt(Instant.now());
+            existing.setStars(stars);
+            existing.setUpdatedAt(Instant.now());
+            rating = existing;
         }
 
-        // 3. 持久化
+        // 4. make it last
         ratingDataAccess.save(rating);
 
-        // 4. 输出给 presenter
-        presenter.presentSuccess(new RateRecipeOutputData(rating));
+        // 5. output to presenter
+        presenter.presentSuccess(new RateRecipeOutputData(rating, false));
     }
 
-    private boolean isValidStars(int stars) {
-        return stars >= 1 && stars <= 5;
+    private boolean isValidStars(double stars) {
+        if (stars < 0.0 || stars > 5.0) {
+            return false;
+        }
+        // 2 * stars should be integer
+        double scaled = stars * 2.0;
+        return Math.abs(scaled - Math.round(scaled)) < 1e-9;
     }
 }
