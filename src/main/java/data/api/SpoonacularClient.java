@@ -9,6 +9,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import usecase.common.RecipeByIngredientsAccess;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -18,7 +19,7 @@ import java.util.Objects;
 
 
 //for UC5: View domain.entity.Recipe Details
-public class SpoonacularClient {
+public class SpoonacularClient implements RecipeByIngredientsAccess {
 
     private static final String BASE = "https://api.spoonacular.com";
     private final OkHttpClient http = new OkHttpClient.Builder()
@@ -44,27 +45,38 @@ public class SpoonacularClient {
         return dto;
     }
 
-    public List<RecipePreview> getRecipesForIngredients(List<Ingredient> ingredientList, int number) throws ApiException {
-        String ingredients = "";
-        for (Ingredient ingredient : ingredientList) {
-            ingredients.concat("," + ingredient.getName());
+    @Override
+    public List<RecipePreview> getRecipesForIngredients(
+            List<String> ingredientList,
+            int number,
+            int offset
+    ) throws ApiException {
+        StringBuilder ingredients = new StringBuilder();
+        for (String ingredient : ingredientList) {
+            if (ingredient.length() > 0) {
+                ingredients.append(",");
+            }
+            ingredients.append(ingredient);
         }
-        String url = String.format("%s/recipes/findByIngredients?ingredients=%s&number=%d&ranking=2&apiKey=%s",
-                BASE, ingredients, number, apiKey);
+        String url = String.format(
+                "%s/recipes/findByIngredients?ingredients=%s&number=%d&offset=%d&ranking=2&apiKey=%s",
+                BASE, ingredients, number, offset, apiKey
+        );
+
         JSONArray jsonArray = getJsonArray(url);
-        //JSONArray jsonArray = new JSONArray(body);
+
         ArrayList<RecipePreview> recipes = new ArrayList<>();
         for (int i = 0; i < jsonArray.length(); i++) {
+
             JSONObject jsonObject = jsonArray.getJSONObject(i);
-            if (jsonObject.getInt("missedIngredientCount") == 0) {
-                RecipePreview recipePreview = new RecipePreview();
-                recipePreview.id = jsonObject.getLong("id");
-                recipePreview.image = jsonObject.optString("image");
-                recipePreview.imageType = jsonObject.optString("imageType");
-                recipePreview.likes = jsonObject.optInt("likes");
-                recipePreview.title = jsonObject.optString("title");
-                recipes.add(recipePreview);
-            }
+            RecipePreview recipePreview = new RecipePreview();
+            recipePreview.id = jsonObject.getLong("id");
+            recipePreview.image = jsonObject.optString("image");
+            recipePreview.imageType = jsonObject.optString("imageType");
+            recipePreview.likes = jsonObject.optInt("likes");
+            recipePreview.title = jsonObject.optString("title");
+            recipePreview.missedIngredientCount = jsonObject.getInt("missedIngredientCount");
+            recipes.add(recipePreview);
         }
         return recipes;
     }

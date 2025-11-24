@@ -1,10 +1,10 @@
-package usecase.search_recipes;
+package usecase.search_by_ingredients;
 
-public class SearchRecipesInputData {
+public class SearchByIngredientInputData {
 
     private final String ingredientsQuery;
 
-    public SearchRecipesInputData(String ingredientsQuery) {
+    public SearchByIngredientInputData(String ingredientsQuery) {
         this.ingredientsQuery = ingredientsQuery;
     }
 
