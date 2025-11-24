@@ -1,4 +1,4 @@
-package usecase.category;
+package usecase.category.filter_by_category;
 
 public interface FilterByCategoryOutputBoundary {
     void presentSuccess(FilterByCategoryOutputData outputData);

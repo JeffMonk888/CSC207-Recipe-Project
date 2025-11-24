@@ -1,4 +1,6 @@
-package usecase.category;
+package usecase.category.delete_category;
+
+import usecase.category.CategoryDataAccessInterface;
 
 public class DeleteCategoryInteractor implements DeleteCategoryInputBoundary {
 

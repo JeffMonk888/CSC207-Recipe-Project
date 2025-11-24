@@ -1,11 +1,12 @@
 import data.category.InMemoryCategoryGateway;
 import data.saved_recipe.InMemorySavedRecipeGateway;
 import domain.entity.SavedRecipe;
-import usecase.category.*;
+import usecase.category.assign_category.*;
+import usecase.category.create_category.*;
+import usecase.category.filter_by_category.*;
 import usecase.common.MotionForRecipe;
 
 import java.util.Arrays;
-import java.util.List;
 
 public class CategoryDemo {
 

@@ -1,4 +1,4 @@
-package usecase.category;
+package usecase.category.delete_category;
 
 public class DeleteCategoryOutputData {
 

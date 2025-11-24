@@ -1,4 +1,4 @@
-package usecase.category;
+package usecase.category.create_category;
 
 public class CreateCategoryInputData {
 

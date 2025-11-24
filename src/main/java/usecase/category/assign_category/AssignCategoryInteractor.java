@@ -1,4 +1,6 @@
-package usecase.category;
+package usecase.category.assign_category;
+
+import usecase.category.CategoryDataAccessInterface;
 
 import java.util.List;
 

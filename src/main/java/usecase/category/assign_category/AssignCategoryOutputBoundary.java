@@ -1,4 +1,4 @@
-package usecase.category;
+package usecase.category.assign_category;
 
 public interface AssignCategoryOutputBoundary {
     void presentSuccess(AssignCategoryOutputData outputData);

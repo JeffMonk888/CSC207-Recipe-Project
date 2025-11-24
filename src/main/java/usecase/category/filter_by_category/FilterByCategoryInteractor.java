@@ -1,6 +1,7 @@
-package usecase.category;
+package usecase.category.filter_by_category;
 
 import domain.entity.SavedRecipe;
+import usecase.category.CategoryDataAccessInterface;
 import usecase.common.MotionForRecipe;
 
 import java.util.ArrayList;

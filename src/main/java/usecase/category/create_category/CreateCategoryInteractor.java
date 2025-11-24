@@ -1,4 +1,6 @@
-package usecase.category;
+package usecase.category.create_category;
+
+import usecase.category.CategoryDataAccessInterface;
 
 public class CreateCategoryInteractor implements CreateCategoryInputBoundary {
 
