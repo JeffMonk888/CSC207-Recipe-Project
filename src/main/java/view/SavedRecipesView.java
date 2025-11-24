@@ -83,7 +83,8 @@ public class SavedRecipesView extends JPanel implements PropertyChangeListener {
                         String recipeKey = extractRecipeKey(selected);
 
                         if (recipeKey != null) {
-                            viewRecipeController.execute(recipeKey);
+                                // TODO: solve the viewRecipeController
+//                            viewRecipeController.execute(recipeKey);
                         } else {
                             JOptionPane.showMessageDialog(SavedRecipesView.this,
                                     "Could not find recipe key in selected item.",

@@ -8,7 +8,7 @@ public class SaveRecipePresenter implements SaveRecipeOutputBoundary {
 
     @Override
     public void presentSuccess(SaveRecipeOutputData outputData) {
-        System.out.println("Recipe saved successfully: " + outputData.getSavedRecipe().getRecipeId());
+        System.out.println("Recipe saved successfully: " + outputData.getSavedRecipe().getRecipeKey());
     }
 
     @Override
