@@ -1,7 +1,6 @@
 package usecase.category;
 
 import domain.entity.Category;
-
 import java.util.List;
 
 /**

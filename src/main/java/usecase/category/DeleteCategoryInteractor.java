@@ -25,3 +25,4 @@ public class DeleteCategoryInteractor implements DeleteCategoryInputBoundary {
         presenter.presentSuccess(new DeleteCategoryOutputData(categoryId));
     }
 }
+
