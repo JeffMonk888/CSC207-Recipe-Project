@@ -21,7 +21,6 @@ public class HomeView extends JPanel {
         title.setFont(title.getFont().deriveFont(Font.BOLD, 22f));
 
         JButton logoutButton = new JButton("Log out");
-
         Component leftSpacer = Box.createHorizontalStrut(logoutButton.getPreferredSize().width);
 
         topBar.add(leftSpacer, BorderLayout.WEST);
@@ -49,9 +48,10 @@ public class HomeView extends JPanel {
         JButton findNewRecipeButton = new JButton("Find new recipe");
         JButton makeNewRecipeButton = new JButton("Make new recipe");
         JButton favouritesButton = new JButton("Favourites ★");
+        JButton fridgeButton = new JButton("My Fridge");
 
         Dimension buttonSize = new Dimension(260, 40);
-        for (JButton button : new JButton[]{findNewRecipeButton, makeNewRecipeButton, favouritesButton}) {
+        for (JButton button : new JButton[]{findNewRecipeButton, makeNewRecipeButton, favouritesButton, fridgeButton}) {
             button.setMaximumSize(buttonSize);
             button.setAlignmentX(Component.CENTER_ALIGNMENT);
         }
@@ -61,6 +61,8 @@ public class HomeView extends JPanel {
         centerPanel.add(makeNewRecipeButton);
         centerPanel.add(Box.createVerticalStrut(15));
         centerPanel.add(favouritesButton);
+        centerPanel.add(Box.createVerticalStrut(15));
+        centerPanel.add(fridgeButton);
 
         add(topBar, BorderLayout.NORTH);
         add(centerPanel, BorderLayout.CENTER);
@@ -94,6 +96,10 @@ public class HomeView extends JPanel {
                         "Favourites",
                         JOptionPane.INFORMATION_MESSAGE
                 )
+        );
+
+        fridgeButton.addActionListener(e ->
+                viewManagerModel.setActiveViewName("fridge")
         );
     }
 
