@@ -14,7 +14,7 @@ public class FileFridgeAccessObject implements FridgeAccess {
     private final List<FridgeRow> rows = new ArrayList<>();
     private long idCounter = 0;
 
-    // -------------------- Constructor --------------------
+    // Constructor
     public FileFridgeAccessObject(String csvPath) {
         this.csvFile = new File(csvPath);
         if (!csvFile.exists() || csvFile.length() == 0) {
@@ -24,7 +24,7 @@ public class FileFridgeAccessObject implements FridgeAccess {
         }
     }
 
-    // -------------------- FridgeAccess Methods --------------------
+    // FridgeAccess Methods
 
     @Override
     public boolean hasItem(Long userId, String item) {
@@ -74,7 +74,7 @@ public class FileFridgeAccessObject implements FridgeAccess {
         return result;
     }
 
-    // -------------------- File I/O --------------------
+    // File I/O
 
     private void loadFromFile() {
         try (BufferedReader br = new BufferedReader(new FileReader(csvFile))) {
@@ -118,7 +118,7 @@ public class FileFridgeAccessObject implements FridgeAccess {
         }
     }
 
-    // -------------------- Inner Data Class --------------------
+    // Inner Data Class
     private static class FridgeRow {
         long id;
         long userId;

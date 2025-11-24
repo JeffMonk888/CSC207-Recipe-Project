@@ -10,8 +10,8 @@ public class SaveRecipeController {
         this.saveUseCase = saveUseCase;
     }
 
-    public void execute(Long userId, Long recipeId) {
-        SaveRecipeInputData data = new SaveRecipeInputData(userId, recipeId);
+    public void execute(Long userId, String recipeKey) {
+        SaveRecipeInputData data = new SaveRecipeInputData(userId, recipeKey);
         saveUseCase.execute(data);
     }
 }

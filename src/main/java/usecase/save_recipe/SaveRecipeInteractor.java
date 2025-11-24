@@ -17,15 +17,14 @@ public class SaveRecipeInteractor implements SaveRecipeInputBoundary {
     @Override
     public void execute(SaveRecipeInputData inputData) {
         Long userId = inputData.getUserId();
-        Long recipeId = inputData.getRecipeId();
+        String recipeKey = inputData.getRecipeKey();
 
-        if (motionForRecipeGateway.exists(userId, recipeId)) {
+        if (motionForRecipeGateway.exists(userId, recipeKey)) {
             presenter.presentFailure("Recipe is already in your collection.");
             return;
         }
 
-        SavedRecipe newSave = new SavedRecipe(userId, recipeId);
-
+        SavedRecipe newSave = new SavedRecipe(userId, recipeKey);
         motionForRecipeGateway.save(newSave);
 
         SaveRecipeOutputData outputData = new SaveRecipeOutputData(newSave);

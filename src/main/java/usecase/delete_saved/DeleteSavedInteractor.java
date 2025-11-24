@@ -16,17 +16,17 @@ public class DeleteSavedInteractor implements DeleteSavedInputBoundary {
     @Override
     public void execute(DeleteSavedInputData inputData) {
         Long userId = inputData.getUserId();
-        Long recipeId = inputData.getRecipeId();
+        String recipeKey = inputData.getRecipeKey();
 
-        if (!motionForRecipe.exists(userId, recipeId)) {
+        if (!motionForRecipe.exists(userId, recipeKey)) {
             presenter.presentFailure("Recipe not found in collection.");
             return;
         }
 
-        boolean success = motionForRecipe.delete(userId, recipeId);
+        boolean success = motionForRecipe.delete(userId, recipeKey);
 
         if (success) {
-            DeleteSavedOutputData outputData = new DeleteSavedOutputData(recipeId);
+            DeleteSavedOutputData outputData = new DeleteSavedOutputData(recipeKey);
             presenter.presentSuccess(outputData);
         } else {
             presenter.presentFailure("Failed to delete recipe.");
