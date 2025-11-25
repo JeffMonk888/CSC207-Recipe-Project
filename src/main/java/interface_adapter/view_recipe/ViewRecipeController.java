@@ -9,8 +9,8 @@ public class ViewRecipeController {
         this.interactor = interactor;
     }
 
-    public void execute(long recipeId) {
-        ViewRecipeInputData inputData = new ViewRecipeInputData(recipeId);
+    public void execute(String recipeKey) {
+        ViewRecipeInputData inputData = new ViewRecipeInputData(recipeKey);
         interactor.execute(inputData);
     }
 }

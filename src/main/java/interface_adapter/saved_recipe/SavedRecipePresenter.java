@@ -35,7 +35,7 @@ public class SavedRecipePresenter implements RetrieveSavedOutputBoundary, Delete
 
     @Override
     public void presentSuccess(DeleteSavedOutputData outputData) {
-//        System.out.println("Recipe saved successfully: " + outputData.getDeletedRecipeKey());
+        System.out.println("Recipe saved successfully: " + outputData.getDeletedRecipeKey());
     }
 
     @Override

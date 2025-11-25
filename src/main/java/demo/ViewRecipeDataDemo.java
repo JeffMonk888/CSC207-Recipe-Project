@@ -1,5 +1,6 @@
 package demo;// Main.java  (no package, or put it in `dev` if you want)
 import data.api.SpoonacularClient;
+import data.saved_recipe.RecipeDataAssessObject;
 import domain.entity.Recipe;
 import usecase.view_recipe.*;
 import domain.entity.NutritionInfo;
@@ -13,6 +14,9 @@ public class ViewRecipeDataDemo {
         }
 
         SpoonacularClient client = new SpoonacularClient(apiKey);
+
+        RecipeDataAssessObject recipeCache =
+                new RecipeDataAssessObject("recipe_cache.json");
 
         // presenter
         ViewRecipeOutputBoundary presenter = new ViewRecipeOutputBoundary() {
@@ -58,9 +62,9 @@ public class ViewRecipeDataDemo {
             }
         };
 
-        ViewRecipeInputBoundary interactor = new ViewRecipeInteractor(client, presenter);
+        ViewRecipeInputBoundary interactor = new ViewRecipeInteractor(client, recipeCache, presenter);
 
-        long testId = 1003464;
+        String testId = "a1003464";
         interactor.execute(new ViewRecipeInputData(testId));
     }
 }

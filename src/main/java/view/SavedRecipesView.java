@@ -81,10 +81,8 @@ public class SavedRecipesView extends JPanel implements PropertyChangeListener {
                     String selected = recipesList.getSelectedValue();
                     if (selected != null) {
                         String recipeKey = extractRecipeKey(selected);
-
                         if (recipeKey != null) {
-                                // TODO: solve the viewRecipeController
-//                            viewRecipeController.execute(recipeKey);
+                            viewRecipeController.execute(recipeKey);
                         } else {
                             JOptionPane.showMessageDialog(SavedRecipesView.this,
                                     "Could not find recipe key in selected item.",
@@ -97,14 +95,14 @@ public class SavedRecipesView extends JPanel implements PropertyChangeListener {
         });
     }
 
-    // Extract String recipeKey from display text, e.g. "Pasta [KEY:a716429]"
+    // Extract String recipeKey from display text, i.e. "Pasta [KEY:a716429]"
     private String extractRecipeKey(String text) {
         int start = text.lastIndexOf("[KEY:");
         int end = text.lastIndexOf("]");
         if (start != -1 && end != -1 && end > start + 5) {
             // "[KEY:" is 5 characters
             String key = text.substring(start + 5, end);
-            return key.trim();  // e.g. "a716429" or "c3"
+            return key.trim();  //i.e. "a716429" or "c3"
         }
         return null;
     }

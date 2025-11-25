@@ -1,6 +1,7 @@
 package demo;  // <-- change or remove this to match your project structure
 
 import data.api.SpoonacularClient;
+import data.saved_recipe.RecipeDataAssessObject;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.view_recipe.ViewRecipeController;
 import interface_adapter.view_recipe.ViewRecipePresenter;
@@ -21,12 +22,14 @@ import view.ViewRecipeView;
 public class ViewRecipeViewDemo {
 
     public static void main(String[] args) {
-        // 1. Get API key (env var preferred)
+        // Get API key (env var preferred)
         String apiKey = System.getenv("SPOONACULAR_API_KEY");
         if (apiKey == null || apiKey.isBlank()) {
-            // TEMP for local testing ONLY – do NOT commit a real key
             apiKey = "6586492a77f54829ba878d12fb62832d";
         }
+
+        RecipeDataAssessObject recipeCache =
+                new RecipeDataAssessObject("recipe_cache.json");
 
         SpoonacularClient client = new SpoonacularClient(apiKey);
 
@@ -39,7 +42,7 @@ public class ViewRecipeViewDemo {
                 new ViewRecipePresenter(viewRecipeViewModel, viewManagerModel);
 
         ViewRecipeInputBoundary interactor =
-                new ViewRecipeInteractor(client, presenter);
+                new ViewRecipeInteractor(client, recipeCache, presenter);
 
         ViewRecipeController controller =
                 new ViewRecipeController(interactor);
@@ -53,7 +56,7 @@ public class ViewRecipeViewDemo {
 
         viewManager.show();
 
-        long testId = 1003464L;  // recipe ID
+        String testId = "a1003464L";  // recipe ID
         controller.execute(testId);
     }
 }

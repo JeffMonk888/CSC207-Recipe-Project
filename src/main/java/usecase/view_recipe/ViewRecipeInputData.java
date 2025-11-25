@@ -1,13 +1,13 @@
 package usecase.view_recipe;
 
 public class ViewRecipeInputData {
-    private final long recipeId;
+    private final String recipeKey;
 
-    public ViewRecipeInputData(long recipeId) {
-        this.recipeId = recipeId;
+    public ViewRecipeInputData(String recipeId) {
+        this.recipeKey = recipeId;
     }
 
-    public long getRecipeId() {
-        return recipeId;
+    public String getRecipeKey() {
+        return recipeKey;
     }
 }

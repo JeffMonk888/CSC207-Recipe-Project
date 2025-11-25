@@ -14,7 +14,7 @@ public class Recipe {
     private String sourceName; //
     private String sourceUrl; // URL
     private String image; // URL to the image
-    private String recipeid; // external API recipe id (nullable if local）
+    private String recipeKey; // external API recipe id (nullable if local）
 
     private ArrayList<Ingredient> ingredients;
 
@@ -34,7 +34,6 @@ public class Recipe {
         this.sourceName = sourceName;
         this.sourceUrl = sourceUrl;
         this.image = image;
-        this.recipeid = apiId;
 
         this.nutritionInfo = nutritionInfo;
         this.ingredients = new ArrayList<>();
@@ -50,7 +49,7 @@ public class Recipe {
         this.sourceName = obj.getString("sourceName");
         this.sourceUrl = obj.getString("sourceUrl");
         this.image = obj.getString("image");
-        this.recipeid = obj.getString("recipeid");
+        this.recipeKey = obj.getString("recipeid");
 
         if (obj.has("nutritionInfo")) {
             this.nutritionInfo = new NutritionInfo(obj.getJSONObject("nutritionInfo"));
@@ -84,7 +83,7 @@ public class Recipe {
         obj.put("sourceName", sourceName);
         obj.put("sourceUrl", sourceUrl);
         obj.put("image", image);
-        obj.put("recipeid", recipeid);
+        obj.put("recipeid", recipeKey);
 
         if (nutritionInfo != null) {
             obj.put("nutritionInfo", nutritionInfo.toJson());
@@ -114,7 +113,6 @@ public class Recipe {
     public String getSourceName() { return sourceName; }
     public String getSourceUrl() { return sourceUrl; }
     public String getImage() { return image; }
-    public String getRecipeid() { return recipeid; }
     public NutritionInfo getNutritionInfo() { return nutritionInfo; }
     public ArrayList<Ingredient> getIngredients() { return ingredients; }
     public ArrayList<InstructionStep> getInstructionSteps() { return instructionSteps; }
@@ -128,7 +126,6 @@ public class Recipe {
     public void setSourceName(String sourceName) { this.sourceName = sourceName; }
     public void setSourceUrl(String sourceUrl) { this.sourceUrl = sourceUrl; }
     public void setImage(String image) { this.image = image; }
-    public void setRecipeid(String recipeid) { this.recipeid = recipeid; }
     public void setNutritionInfo(NutritionInfo nutritionInfo) { this.nutritionInfo = nutritionInfo; }
 
     public void addIngredient(Ingredient ingredient) {
