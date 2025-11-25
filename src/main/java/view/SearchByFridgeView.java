@@ -7,8 +7,7 @@ import interface_adapter.search_by_fridge.SearchByFridgeViewModel;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.List;
@@ -20,11 +19,17 @@ import java.util.List;
 public class SearchByFridgeView extends JPanel
         implements ActionListener, PropertyChangeListener {
 
+    // === New: callback interface for recipe selection ===
+    public interface RecipeSelectionListener {
+        void onRecipeSelected(long recipeId);
+    }
+
     private static final int PAGE_SIZE = 10;
 
     private final SearchByFridgeController controller;
     private final SearchByFridgeViewModel viewModel;
     private final Long userId;
+    private final RecipeSelectionListener recipeSelectionListener; // NEW
 
     // UI components
     private final JButton searchButton = new JButton("Search with my fridge");
@@ -36,10 +41,12 @@ public class SearchByFridgeView extends JPanel
 
     public SearchByFridgeView(SearchByFridgeController controller,
                               SearchByFridgeViewModel viewModel,
-                              Long userId) {
+                              Long userId,
+                              RecipeSelectionListener recipeSelectionListener) { // NEW param
         this.controller = controller;
         this.viewModel = viewModel;
         this.userId = userId;
+        this.recipeSelectionListener = recipeSelectionListener;
 
         this.viewModel.addPropertyChangeListener(this);
 
@@ -50,7 +57,7 @@ public class SearchByFridgeView extends JPanel
         propertyChange(null);
     }
 
-    // UI layout
+    // ------------------------ UI layout ------------------------
 
     private void setupUI() {
         setLayout(new BorderLayout());
@@ -93,9 +100,26 @@ public class SearchByFridgeView extends JPanel
 
         searchButton.addActionListener(this);
         loadMoreButton.addActionListener(this);
+
+        // === NEW: double-click on a recipe opens detail ===
+        recipesList.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2 && recipeSelectionListener != null) {
+                    int index = recipesList.locationToIndex(e.getPoint());
+                    if (index >= 0) {
+                        List<RecipePreview> recipes = viewModel.getState().getRecipes();
+                        if (index < recipes.size()) {
+                            RecipePreview selected = recipes.get(index);
+                            recipeSelectionListener.onRecipeSelected(selected.id);
+                        }
+                    }
+                }
+            }
+        });
     }
 
-    // Actions
+    // ------------------------ Actions ------------------------
 
     @Override
     public void actionPerformed(ActionEvent e) {
@@ -115,7 +139,7 @@ public class SearchByFridgeView extends JPanel
         }
     }
 
-    // ViewModel updates
+    //  ViewModel updates
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
@@ -125,7 +149,6 @@ public class SearchByFridgeView extends JPanel
         listModel.clear();
         List<RecipePreview> recipes = state.getRecipes();
         for (RecipePreview r : recipes) {
-            // Display title + likes; adapt if your RecipePreview has different fields
             String display = r.title;
             if (r.likes != 0) {
                 display += "  (" + r.likes + " likes)";
