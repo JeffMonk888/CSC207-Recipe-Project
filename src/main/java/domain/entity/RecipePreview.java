@@ -5,7 +5,7 @@ public class RecipePreview {
     public String title;
     public String image;
     public String imageType;
+    public String recipeKey;
     public int likes;
     public int missedIngredientCount;
-
 }

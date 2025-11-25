@@ -2,6 +2,7 @@ package demo;
 
 import data.api.SpoonacularClient;
 import data.saved_ingredient.FileFridgeAccessObject;
+import data.saved_recipe.RecipeDataAssessObject;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.search_by_fridge.SearchByFridgeController;
 import interface_adapter.search_by_fridge.SearchByFridgePresenter;
@@ -30,12 +31,13 @@ public class SearchByFridgeWithDetailDemo {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            // 1. Data access
             FridgeAccess fridgeAccess = new FileFridgeAccessObject("fridge_items.csv");
 
-            // Spoonacular client used for BOTH search and view-detail
             SpoonacularClient spoonacularClient = new SpoonacularClient("6586492a77f54829ba878d12fb62832d");
             RecipeByIngredientsAccess recipeAccess = spoonacularClient;
+
+            RecipeDataAssessObject recipeCache =
+                    new RecipeDataAssessObject("recipe_cache.json");
 
             ViewManagerModel  viewManagerModel = new ViewManagerModel();
 
@@ -48,18 +50,18 @@ public class SearchByFridgeWithDetailDemo {
             SearchByFridgeController searchController =
                     new SearchByFridgeController(searchInteractor);
 
-            // 3. ViewRecipe stack
+            // ViewRecipe stack
             ViewRecipeViewModel viewRecipeVM = new ViewRecipeViewModel();
             ViewRecipeOutputBoundary viewRecipePresenter =
                     new ViewRecipePresenter(viewRecipeVM, viewManagerModel);
             ViewRecipeInputBoundary viewRecipeInteractor =
-                    new ViewRecipeInteractor(spoonacularClient, viewRecipePresenter);
+                    new ViewRecipeInteractor(spoonacularClient, recipeCache, viewRecipePresenter);
             ViewRecipeController viewRecipeController =
                     new ViewRecipeController(viewRecipeInteractor);
 
             ViewRecipeView viewRecipeView = new ViewRecipeView(viewRecipeVM);
 
-            // 4. Recipe selection listener: open detail window and call ViewRecipe use case
+            // Recipe selection listener: open detail window and call ViewRecipe use case
             SearchByFridgeView.RecipeSelectionListener selectionListener = recipeId -> {
                 JFrame detailFrame = new JFrame("Recipe Detail: " + recipeId);
                 detailFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -72,14 +74,14 @@ public class SearchByFridgeWithDetailDemo {
                 viewRecipeController.execute(recipeId);
             };
 
-            // 5. Choose a demo user (must have ingredients in fridge_items.csv)
+            // demo user
             Long demoUserId = 1L;
 
-            // 6. Build the search view
+            // Build the search view
             SearchByFridgeView searchView =
                     new SearchByFridgeView(searchController, searchVM, demoUserId, selectionListener);
 
-            // 7. Show the main search window
+            // Show the main search window
             JFrame frame = new JFrame("Search By Fridge Demo");
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.setContentPane(searchView);

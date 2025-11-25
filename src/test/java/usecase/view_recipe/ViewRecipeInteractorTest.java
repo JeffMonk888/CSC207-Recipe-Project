@@ -1,6 +1,7 @@
 package usecase.view_recipe;
 
 import data.dto.RecipeInformationDTO;
+import data.saved_recipe.RecipeDataAssessObject;
 import domain.entity.Recipe;
 import org.junit.jupiter.api.Test;
 
@@ -15,10 +16,13 @@ class ViewRecipeInteractorTest {
         // capture result
         var capture = new CapturePresenter();
 
-        ViewRecipeInteractor interactor =
-                new ViewRecipeInteractor(fakeClient, capture);
+        RecipeDataAssessObject recipeCache =
+                new RecipeDataAssessObject("recipe_cache.json");
 
-        interactor.execute(new ViewRecipeInputData(123L));
+        ViewRecipeInteractor interactor =
+                new ViewRecipeInteractor(fakeClient, recipeCache, capture);
+
+        interactor.execute(new ViewRecipeInputData("a123L"));
 
         assertNotNull(capture.lastSuccess);
         Recipe r = capture.lastSuccess.getRecipe();

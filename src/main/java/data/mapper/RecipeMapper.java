@@ -31,7 +31,7 @@ public final class RecipeMapper {
                 nullToEmpty(dto.sourceName),                  // sourceName
                 nullToEmpty(dto.sourceUrl),                   // sourceUrl
                 nullToEmpty(dto.image),                       // image (omitted for now)
-                String.valueOf(dto.id),              // apiId (string form of API id)
+                "a" + dto.id,              // apiId (string form of API id)
                 null                                 // nutritionInfo set below
 
         );

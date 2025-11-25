@@ -19,9 +19,8 @@ import java.util.List;
 public class SearchByFridgeView extends JPanel
         implements ActionListener, PropertyChangeListener {
 
-    // === New: callback interface for recipe selection ===
     public interface RecipeSelectionListener {
-        void onRecipeSelected(long recipeId);
+        void onRecipeSelected(String recipeKey);
     }
 
     private static final int PAGE_SIZE = 10;
@@ -42,7 +41,7 @@ public class SearchByFridgeView extends JPanel
     public SearchByFridgeView(SearchByFridgeController controller,
                               SearchByFridgeViewModel viewModel,
                               Long userId,
-                              RecipeSelectionListener recipeSelectionListener) { // NEW param
+                              RecipeSelectionListener recipeSelectionListener) {
         this.controller = controller;
         this.viewModel = viewModel;
         this.userId = userId;
@@ -57,7 +56,7 @@ public class SearchByFridgeView extends JPanel
         propertyChange(null);
     }
 
-    // ------------------------ UI layout ------------------------
+    // UI layout
 
     private void setupUI() {
         setLayout(new BorderLayout());
@@ -101,7 +100,6 @@ public class SearchByFridgeView extends JPanel
         searchButton.addActionListener(this);
         loadMoreButton.addActionListener(this);
 
-        // === NEW: double-click on a recipe opens detail ===
         recipesList.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -111,7 +109,7 @@ public class SearchByFridgeView extends JPanel
                         List<RecipePreview> recipes = viewModel.getState().getRecipes();
                         if (index < recipes.size()) {
                             RecipePreview selected = recipes.get(index);
-                            recipeSelectionListener.onRecipeSelected(selected.id);
+                            recipeSelectionListener.onRecipeSelected(selected.recipeKey);
                         }
                     }
                 }
@@ -119,7 +117,7 @@ public class SearchByFridgeView extends JPanel
         });
     }
 
-    // ------------------------ Actions ------------------------
+    // Actions
 
     @Override
     public void actionPerformed(ActionEvent e) {
@@ -139,7 +137,7 @@ public class SearchByFridgeView extends JPanel
         }
     }
 
-    //  ViewModel updates
+    // ViewModel updates
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
