@@ -24,8 +24,8 @@ public class UserSavedRecipeAccessObject implements MotionForRecipe {
     private final Map<String, SavedRecipe> savedRecipes = new HashMap<>();
     private final AtomicLong idCounter = new AtomicLong(0L);
 
-    private String key(Long userId, Long recipeId) {
-        return userId + ":" + recipeId;
+    private String key(Long userId, String recipeKey) {
+        return userId + ":" + recipeKey;
     }
 
 
@@ -38,9 +38,9 @@ public class UserSavedRecipeAccessObject implements MotionForRecipe {
         headers.put("favourite", 4);
 
         if (csvFile.length() == 0) {
-            saveToFile(); // Write header if file is new
+            saveToFile();
         } else {
-            loadFromFile(); // Load existing data into memory
+            loadFromFile();
         }
     }
 
@@ -58,16 +58,16 @@ public class UserSavedRecipeAccessObject implements MotionForRecipe {
                 String[] col = row.split(",");
                 Long id = Long.parseLong(col[headers.get("id")]);
                 Long userId = Long.parseLong(col[headers.get("userId")]);
-                Long recipeId = Long.parseLong(col[headers.get("recipeId")]);
+                String recipeKey = col[headers.get("recipeId")];
                 Instant savedAt = Instant.parse(col[headers.get("savedAt")]);
                 boolean favourite = Boolean.parseBoolean(col[headers.get("favourite")]);
 
-                SavedRecipe recipe = new SavedRecipe(userId, recipeId);
+                SavedRecipe recipe = new SavedRecipe(userId, recipeKey);
                 recipe.setId(id);
                 recipe.setSavedAt(savedAt);
                 recipe.setFavourite(favourite);
 
-                savedRecipes.put(key(userId, recipeId), recipe);
+                savedRecipes.put(key(userId, recipeKey), recipe);
                 maxId = Math.max(maxId, id);
             }
             idCounter.set(maxId);
@@ -84,7 +84,7 @@ public class UserSavedRecipeAccessObject implements MotionForRecipe {
 
             for (SavedRecipe recipe : savedRecipes.values()) {
                 String line = String.format("%s,%s,%s,%s,%s",
-                        recipe.getId(), recipe.getUserId(), recipe.getRecipeId(),
+                        recipe.getId(), recipe.getUserId(), recipe.getRecipeKey(),
                         recipe.getSavedAt().toString(), recipe.isFavourite()
                 );
                 writer.write(line);
@@ -96,8 +96,8 @@ public class UserSavedRecipeAccessObject implements MotionForRecipe {
     }
 
     @Override
-    public boolean exists(Long userId, Long recipeId) {
-        return savedRecipes.containsKey(key(userId, recipeId));
+    public boolean exists(Long userId, String recipeKey) {
+        return savedRecipes.containsKey(key(userId, recipeKey));
     }
 
     @Override
@@ -105,7 +105,7 @@ public class UserSavedRecipeAccessObject implements MotionForRecipe {
         if (newSave.getId() == null) {
             newSave.setId(idCounter.incrementAndGet());
         }
-        savedRecipes.put(key(newSave.getUserId(), newSave.getRecipeId()), newSave);
+        savedRecipes.put(key(newSave.getUserId(), newSave.getRecipeKey()), newSave);
         this.saveToFile();
     }
 
@@ -117,8 +117,8 @@ public class UserSavedRecipeAccessObject implements MotionForRecipe {
     }
 
     @Override
-    public boolean delete(Long userId, Long recipeId) {
-        SavedRecipe removed = savedRecipes.remove(key(userId, recipeId));
+    public boolean delete(Long userId, String recipeKey) {
+        SavedRecipe removed = savedRecipes.remove(key(userId, recipeKey));
         if (removed != null) {
             this.saveToFile(); // Persist change
             return true;

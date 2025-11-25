@@ -44,45 +44,50 @@ public class SavedRecipesView extends JPanel implements PropertyChangeListener {
         // bottom
         JPanel buttons = new JPanel();
         JButton deleteButton = new JButton("Delete Selected");
-        JButton backButton = new JButton("Refresh / Load");
+        JButton refreshButton = new JButton("Refresh / Load");
 
-        buttons.add(backButton);
+        buttons.add(refreshButton);
         buttons.add(deleteButton);
         add(buttons, BorderLayout.SOUTH);
-
-        // listener
 
         // 1. delete
         deleteButton.addActionListener(e -> {
             String selected = recipesList.getSelectedValue();
             if (selected != null) {
-                // get id
-                Long recipeId = extractId(selected);
-                if (recipeId != null) {
-                    controller.executeDelete(currentUserId, recipeId);
+                String recipeKey = extractRecipeKey(selected);
+                if (recipeKey != null) {
+                    controller.executeDelete(currentUserId, recipeKey);
                     // refresh
                     controller.executeRetrieve(currentUserId);
+                } else {
+                    JOptionPane.showMessageDialog(this,
+                            "Could not find recipe key in selected item.",
+                            "Error",
+                            JOptionPane.ERROR_MESSAGE);
                 }
             } else {
                 JOptionPane.showMessageDialog(this, "Please select a recipe to delete.");
             }
         });
 
-        // 2. retrieve
-        backButton.addActionListener(e -> {
-            controller.executeRetrieve(currentUserId);
-        });
+        // 2. retrieve / refresh
+        refreshButton.addActionListener(e -> controller.executeRetrieve(currentUserId));
 
-        // double click to get detail
+        // 3. double click to view detail
         recipesList.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() == 2) {
                     String selected = recipesList.getSelectedValue();
                     if (selected != null) {
-                        Long recipeId = extractId(selected);
-                        if (recipeId != null) {
-                            viewRecipeController.execute(recipeId);
+                        String recipeKey = extractRecipeKey(selected);
+                        if (recipeKey != null) {
+                            viewRecipeController.execute(recipeKey);
+                        } else {
+                            JOptionPane.showMessageDialog(SavedRecipesView.this,
+                                    "Could not find recipe key in selected item.",
+                                    "Error",
+                                    JOptionPane.ERROR_MESSAGE);
                         }
                     }
                 }
@@ -90,17 +95,14 @@ public class SavedRecipesView extends JPanel implements PropertyChangeListener {
         });
     }
 
-    // get LOng id from str
-    private Long extractId(String text) {
-        try {
-            int start = text.lastIndexOf("[ID:");
-            int end = text.lastIndexOf("]");
-            if (start != -1 && end != -1) {
-                String idStr = text.substring(start + 4, end);
-                return Long.parseLong(idStr);
-            }
-        } catch (NumberFormatException e) {
-            e.printStackTrace();
+    // Extract String recipeKey from display text, i.e. "Pasta [KEY:a716429]"
+    private String extractRecipeKey(String text) {
+        int start = text.lastIndexOf("[KEY:");
+        int end = text.lastIndexOf("]");
+        if (start != -1 && end != -1 && end > start + 5) {
+            // "[KEY:" is 5 characters
+            String key = text.substring(start + 5, end);
+            return key.trim();  //i.e. "a716429" or "c3"
         }
         return null;
     }
