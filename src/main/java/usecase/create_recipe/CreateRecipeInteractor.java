@@ -40,7 +40,7 @@ public class CreateRecipeInteractor implements CreateRecipeInputBoundary {
                 inputData.getTitle(),
                 "User created recipe",
                 1, 0, "User", "", "",
-                recipeKey,           // <--- 存入 "c..." 格式
+                recipeKey,
                 null
         );
 
