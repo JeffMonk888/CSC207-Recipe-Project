@@ -55,6 +55,10 @@ public class UserSavedRecipeAccessObject implements MotionForRecipe {
             long maxId = 0L;
             String row;
             while ((row = reader.readLine()) != null) {
+                if (row.isEmpty()) {
+                    continue;              // in order to fix issue #45, when there are some empty line in csv, ignore
+                                           // it and continue load
+                }
                 String[] col = row.split(",");
                 Long id = Long.parseLong(col[headers.get("id")]);
                 Long userId = Long.parseLong(col[headers.get("userId")]);
