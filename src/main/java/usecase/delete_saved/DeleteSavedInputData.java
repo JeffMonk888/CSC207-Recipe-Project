@@ -4,14 +4,14 @@ import usecase.common.MotionForRecipe;
 
 public class DeleteSavedInputData {
     private final Long userId;
-    private final Long recipeId;
+    private final String recipeKey;
 
-    public DeleteSavedInputData(Long userId, Long recipeId) {
+    public DeleteSavedInputData(Long userId, String recipeKey) {
         this.userId = userId;
-        this.recipeId = recipeId;
+        this.recipeKey = recipeKey;
     }
     public Long getUserId() { return userId; }
-    public Long getRecipeId() { return recipeId; }
+    public String getRecipeKey() { return recipeKey; }
 }
 
 

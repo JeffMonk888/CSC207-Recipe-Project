@@ -53,7 +53,7 @@ public class RecipeDataAssessObject {
         }
 
         try (FileWriter writer = new FileWriter(jsonFile)) {
-            writer.write(fileObject.toString(4)); // toString(4) for pretty printing
+            writer.write(fileObject.toString(4));
         } catch (IOException e) {
             throw new RuntimeException("Error writing to recipe cache file", e);
         }
@@ -71,7 +71,7 @@ public class RecipeDataAssessObject {
     }
 
 
-    public boolean exists(Long recipeId) {
-        return recipeCache.containsKey(recipeId);
+    public boolean exists(String recipeKey) {
+        return recipeCache.containsKey(recipeKey);
     }
 }

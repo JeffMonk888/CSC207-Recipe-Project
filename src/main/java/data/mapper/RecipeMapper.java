@@ -17,7 +17,6 @@ import domain.entity.Recipe;
  */
 public final class RecipeMapper {
 
-    private RecipeMapper() {}
 
     public static Recipe toDomain(RecipeInformationDTO dto) {
         if (dto == null) throw new IllegalArgumentException("dto is null");
@@ -32,7 +31,7 @@ public final class RecipeMapper {
                 nullToEmpty(dto.sourceName),                  // sourceName
                 nullToEmpty(dto.sourceUrl),                   // sourceUrl
                 nullToEmpty(dto.image),                       // image (omitted for now)
-                String.valueOf(dto.id),              // apiId (string form of API id)
+                "a" + dto.id,              // apiId (string form of API id)
                 null                                 // nutritionInfo set below
 
         );
