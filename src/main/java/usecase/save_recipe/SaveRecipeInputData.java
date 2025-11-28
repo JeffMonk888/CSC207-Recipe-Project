@@ -6,14 +6,14 @@ import usecase.common.MotionForRecipe;
 
 public class SaveRecipeInputData {
     private final Long userId;
-    private final Long recipeId;
+    private final String recipeKey;
 
-    public SaveRecipeInputData(Long userId, Long recipeId) {
+    public SaveRecipeInputData(Long userId, String recipeKey) {
         this.userId = userId;
-        this.recipeId = recipeId;
+        this.recipeKey = recipeKey;
     }
     public Long getUserId() { return userId; }
-    public Long getRecipeId() { return recipeId; }
+    public String getRecipeKey() { return recipeKey; }
 }
 
 

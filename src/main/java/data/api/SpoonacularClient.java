@@ -71,11 +71,13 @@ public class SpoonacularClient implements RecipeByIngredientsAccess {
             JSONObject jsonObject = jsonArray.getJSONObject(i);
             RecipePreview recipePreview = new RecipePreview();
             recipePreview.id = jsonObject.getLong("id");
+            recipePreview.recipeKey = "a" + jsonObject.getLong("id");
             recipePreview.image = jsonObject.optString("image");
             recipePreview.imageType = jsonObject.optString("imageType");
             recipePreview.likes = jsonObject.optInt("likes");
             recipePreview.title = jsonObject.optString("title");
             recipePreview.missedIngredientCount = jsonObject.getInt("missedIngredientCount");
+
             recipes.add(recipePreview);
         }
         return recipes;

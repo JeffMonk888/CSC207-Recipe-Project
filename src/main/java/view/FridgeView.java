@@ -135,4 +135,7 @@ public class FridgeView extends JPanel implements ActionListener, PropertyChange
         String error = state.getErrorMessage();
         errorLabel.setText(error == null ? "" : error);
     }
+    public String getViewName() {
+        return FridgeViewModel.VIEW_NAME; // "fridge"
+    }
 }
