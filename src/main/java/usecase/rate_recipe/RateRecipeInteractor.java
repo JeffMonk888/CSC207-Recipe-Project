@@ -6,6 +6,12 @@ import java.time.Instant;
 
 /**
  * Interactor for UC9: Favourite / Rate Recipe.
+ *
+ * Requirements (updated version):
+ *  - Default is "no rating" (null / empty in storage).
+ *  - Rating can be any value in [0.0, 5.0] with step 0.5, including 0.0.
+ *  - Clearing rating is an explicit action (input.clearRating == true),
+ *    not "rating 0.0".
  */
 public class RateRecipeInteractor implements RateRecipeInputBoundary {
 
@@ -20,51 +26,45 @@ public class RateRecipeInteractor implements RateRecipeInputBoundary {
 
     @Override
     public void execute(RateRecipeInputData inputData) {
-        double stars = inputData.getStars();
-
-        // 1. make sure that ratings are between 0 and 5 in 0.5 increments
-        if (!isValidStars(stars)) {
-            presenter.presentFailure(
-                    "Rating must be between 0 and 5 in 0.5 increments (e.g., 0, 0.5, 1, ..., 5).");
-            return;
-        }
-
         long userId = inputData.getUserId();
         long recipeId = inputData.getRecipeId();
 
-        UserRating existing = ratingDataAccess.findByUserAndRecipe(userId, recipeId);
-
-        // 2. rating is 0, delete current rating
-        if (stars == 0.0) {
-            if (existing == null) {
-                presenter.presentFailure("No existing rating to remove for this recipe.");
-                return;
-            }
+        // 1. Clear rating mode
+        if (inputData.isClearRating()) {
             ratingDataAccess.deleteRating(userId, recipeId);
             presenter.presentSuccess(new RateRecipeOutputData(null, true));
             return;
         }
 
-        // 3. create or update ratings
-        UserRating rating;
-        if (existing == null) {
-            rating = new UserRating(
-                    null,
-                    userId,
-                    recipeId,
-                    stars,
-                    Instant.now()
+        // 2. Normal "set/update rating" mode
+        Double starsObj = inputData.getStars();
+        if (starsObj == null) {
+            presenter.presentFailure("Stars cannot be null unless clearRating is true.");
+            return;
+        }
+        double stars = starsObj;
+
+        if (!isValidStars(stars)) {
+            presenter.presentFailure(
+                    "Rating must be between 0.0 and 5.0 in steps of 0.5."
             );
-        } else {
-            existing.setStars(stars);
-            existing.setUpdatedAt(Instant.now());
-            rating = existing;
+            return;
         }
 
-        // 4. make it last
-        ratingDataAccess.save(rating);
+        // 3. Find existing rating (if any)
+        UserRating rating = ratingDataAccess.findByUserAndRecipe(userId, recipeId);
 
-        // 5. output to presenter
+        if (rating == null) {
+            // First time rating
+            rating = new UserRating(userId, recipeId, stars);
+        } else {
+            // Update existing rating
+            rating.setStars(stars);
+            rating.setUpdatedAt(Instant.now());
+        }
+
+        // 4. Persist and notify presenter
+        ratingDataAccess.save(rating);
         presenter.presentSuccess(new RateRecipeOutputData(rating, false));
     }
 
@@ -72,7 +72,7 @@ public class RateRecipeInteractor implements RateRecipeInputBoundary {
         if (stars < 0.0 || stars > 5.0) {
             return false;
         }
-        // 2 * stars should be integer
+        // step 0.5
         double scaled = stars * 2.0;
         return Math.abs(scaled - Math.round(scaled)) < 1e-9;
     }

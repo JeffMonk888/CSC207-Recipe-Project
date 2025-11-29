@@ -17,19 +17,22 @@ public class InMemoryCategoryGateway implements CategoryDataAccessInterface {
 
     private final Map<Long, Category> categories = new HashMap<>();
     private final Map<Long, Set<Long>> categoryToRecipeIds = new HashMap<>();
-    private final AtomicLong idCounter = new AtomicLong(1L);
+    private final AtomicLong idCounter = new AtomicLong(0L);
 
     @Override
     public boolean categoryNameExists(Long userId, String name) {
-        String normalized = name.trim().toLowerCase();
+        String lower = name.toLowerCase(Locale.ROOT);
         return categories.values().stream()
-                .anyMatch(c -> Objects.equals(c.getUserId(), userId) &&
-                        c.getName().trim().toLowerCase().equals(normalized));
+                .anyMatch(c ->
+                        Objects.equals(c.getUserId(), userId)
+                                && c.getName() != null
+                                && c.getName().toLowerCase(Locale.ROOT).equals(lower)
+                );
     }
 
     @Override
     public Category createCategory(Long userId, String name) {
-        Long id = idCounter.getAndIncrement();
+        Long id = idCounter.incrementAndGet();
         Category category = new Category(id, userId, name);
         categories.put(id, category);
         return category;
@@ -45,25 +48,25 @@ public class InMemoryCategoryGateway implements CategoryDataAccessInterface {
     public List<Category> findCategoriesForUser(Long userId) {
         return categories.values().stream()
                 .filter(c -> Objects.equals(c.getUserId(), userId))
+                .sorted(Comparator.comparing(Category::getName))
                 .collect(Collectors.toList());
     }
 
     @Override
     public void assignRecipesToCategory(Long userId, Long categoryId, List<Long> recipeIds) {
         if (!categoryExistsForUser(userId, categoryId)) {
-            return; // silently ignore; interactor负责做验证
+            return;
         }
-        Set<Long> set = categoryToRecipeIds
-                .computeIfAbsent(categoryId, k -> new HashSet<>());
+        Set<Long> set = categoryToRecipeIds.computeIfAbsent(categoryId, k -> new HashSet<>());
         set.addAll(recipeIds);
     }
 
     @Override
     public List<Long> getRecipeIdsForCategory(Long userId, Long categoryId) {
         if (!categoryExistsForUser(userId, categoryId)) {
-            return List.of();
+            return new ArrayList<>();
         }
-        Set<Long> set = categoryToRecipeIds.getOrDefault(categoryId, Set.of());
+        Set<Long> set = categoryToRecipeIds.getOrDefault(categoryId, Collections.emptySet());
         return new ArrayList<>(set);
     }
 

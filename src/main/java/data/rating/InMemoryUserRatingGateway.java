@@ -9,6 +9,7 @@ import java.util.Map;
 /**
  * Simple in-memory implementation of UserRatingDataAccessInterface.
  * Key format: "userId:recipeId".
+ * This implementation does NOT persist ratings to disk.
  */
 public class InMemoryUserRatingGateway implements UserRatingDataAccessInterface {
 

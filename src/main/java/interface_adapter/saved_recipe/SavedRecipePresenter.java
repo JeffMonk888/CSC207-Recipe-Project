@@ -13,36 +13,49 @@ import java.util.List;
 public class SavedRecipePresenter implements RetrieveSavedOutputBoundary, DeleteSavedOutputBoundary {
 
     private final SavedRecipeViewModel viewModel;
+    private final ViewManagerModel viewManagerModel;
 
-    public SavedRecipePresenter(SavedRecipeViewModel viewModel) {
+    public SavedRecipePresenter(SavedRecipeViewModel viewModel,
+                                ViewManagerModel viewManagerModel) {
         this.viewModel = viewModel;
+        this.viewManagerModel = viewManagerModel;
     }
 
     @Override
     public void presentSuccess(RetrieveSavedOutputData outputData) {
-        SavedRecipeState state = viewModel.getState();
-        List<String> formattedList = new ArrayList<>();
+        List<Recipe> recipes = outputData.getSavedRecipes();
+        List<String> rows = new ArrayList<>();
 
-        for (Recipe recipe : outputData.getSavedRecipes()) {
-            formattedList.add(recipe.getTitle() + " [ID:" + recipe.getId() + "]");
+        for (Recipe r : recipes) {
+            Long id = r.getId();
+            String title = r.getTitle();
+            String line = (id == null ? "" : id.toString()) + " - " + (title == null ? "" : title);
+            rows.add(line);
         }
 
-        state.setSavedRecipes(formattedList);
+        SavedRecipeState state = new SavedRecipeState();
+        state.setSavedRecipes(rows);
         state.setErrorMessage(null);
+
+        viewModel.setState(state);
+        viewModel.firePropertyChanged();
+
+        // Switch to saved recipes view
+        viewManagerModel.setActiveViewName(SavedRecipeViewModel.VIEW_NAME);
+    }
+
+    @Override
+    public void presentFailure(String errorMessage) {
+        SavedRecipeState state = new SavedRecipeState(viewModel.getState());
+        state.setErrorMessage(errorMessage);
         viewModel.setState(state);
         viewModel.firePropertyChanged();
     }
 
     @Override
     public void presentSuccess(DeleteSavedOutputData outputData) {
-        System.out.println("Recipe saved successfully: " + outputData.getDeletedRecipeKey());
-    }
-
-    @Override
-    public void presentFailure(String errorMessage) {
-        SavedRecipeState state = viewModel.getState();
-        state.setErrorMessage(errorMessage);
-        viewModel.setState(state);
-        viewModel.firePropertyChanged();
+        // For now, just print to console. The controller can call executeRetrieve(...)
+        // afterwards to refresh the list.
+        System.out.println("Deleted recipe with key: " + outputData.getDeletedRecipeKey());
     }
 }

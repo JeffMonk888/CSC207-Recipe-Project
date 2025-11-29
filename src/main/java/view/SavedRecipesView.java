@@ -7,104 +7,111 @@ import interface_adapter.view_recipe.ViewRecipeController;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 public class SavedRecipesView extends JPanel implements PropertyChangeListener {
 
-    public final String viewName = "saved recipes"; // for CardLayout
+    private final SavedRecipeController savedController;
+    private final SavedRecipeViewModel viewModel;
+    private final ViewRecipeController viewRecipeController;
+    private final Long userId;
 
-    private final Long currentUserId;
+    private final DefaultListModel<String> listModel = new DefaultListModel<>();
+    private final JList<String> recipeList = new JList<>(listModel);
 
-    private final JList<String> recipesList;
-    private final DefaultListModel<String> listModel;
-
-    public SavedRecipesView(SavedRecipeViewModel viewModel,
-                            SavedRecipeController controller,
+    public SavedRecipesView(SavedRecipeController savedController,
+                            SavedRecipeViewModel viewModel,
                             ViewRecipeController viewRecipeController,
                             Long userId) {
-        this.currentUserId = userId;
+        this.savedController = savedController;
+        this.viewModel = viewModel;
+        this.viewRecipeController = viewRecipeController;
+        this.userId = userId;
 
-        viewModel.addPropertyChangeListener(this);
+        this.viewModel.addPropertyChangeListener(this);
 
-        setLayout(new BorderLayout());
-        setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        setPreferredSize(new Dimension(600, 400));
+        setLayout(new BorderLayout(10, 10));
 
-        JLabel title = new JLabel("My Saved");
-        title.setHorizontalAlignment(SwingConstants.CENTER);
-        add(title, BorderLayout.NORTH);
+        recipeList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        JScrollPane scrollPane = new JScrollPane(recipeList);
+        scrollPane.setBorder(BorderFactory.createTitledBorder("My Saved Recipes"));
 
-        // list of recipes
-        listModel = new DefaultListModel<>();
-        recipesList = new JList<>(listModel);
-        add(new JScrollPane(recipesList), BorderLayout.CENTER);
+        add(scrollPane, BorderLayout.CENTER);
 
-        // bottom
-        JPanel buttons = new JPanel();
-        JButton deleteButton = new JButton("Delete Selected");
-        JButton refreshButton = new JButton("Refresh / Load");
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JButton refreshButton = new JButton("Refresh");
+        JButton viewButton = new JButton("View Details");
+        JButton deleteButton = new JButton("Delete");
 
-        buttons.add(refreshButton);
-        buttons.add(deleteButton);
-        add(buttons, BorderLayout.SOUTH);
+        refreshButton.addActionListener(this::onRefresh);
+        viewButton.addActionListener(this::onView);
+        deleteButton.addActionListener(this::onDelete);
 
-        // 1. delete
-        deleteButton.addActionListener(e -> {
-            String selected = recipesList.getSelectedValue();
-            if (selected != null) {
-                String recipeKey = extractRecipeKey(selected);
-                if (recipeKey != null) {
-                    controller.executeDelete(currentUserId, recipeKey);
-                    // refresh
-                    controller.executeRetrieve(currentUserId);
-                } else {
-                    JOptionPane.showMessageDialog(this,
-                            "Could not find recipe key in selected item.",
-                            "Error",
-                            JOptionPane.ERROR_MESSAGE);
-                }
-            } else {
-                JOptionPane.showMessageDialog(this, "Please select a recipe to delete.");
-            }
-        });
+        buttonPanel.add(refreshButton);
+        buttonPanel.add(viewButton);
+        buttonPanel.add(deleteButton);
 
-        // 2. retrieve / refresh
-        refreshButton.addActionListener(e -> controller.executeRetrieve(currentUserId));
-
-        // 3. double click to view detail
-        recipesList.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (e.getClickCount() == 2) {
-                    String selected = recipesList.getSelectedValue();
-                    if (selected != null) {
-                        String recipeKey = extractRecipeKey(selected);
-                        if (recipeKey != null) {
-                            viewRecipeController.execute(recipeKey);
-                        } else {
-                            JOptionPane.showMessageDialog(SavedRecipesView.this,
-                                    "Could not find recipe key in selected item.",
-                                    "Error",
-                                    JOptionPane.ERROR_MESSAGE);
-                        }
-                    }
-                }
-            }
-        });
+        add(buttonPanel, BorderLayout.SOUTH);
     }
 
-    // Extract String recipeKey from display text, i.e. "Pasta [KEY:a716429]"
-    private String extractRecipeKey(String text) {
-        int start = text.lastIndexOf("[KEY:");
-        int end = text.lastIndexOf("]");
-        if (start != -1 && end != -1 && end > start + 5) {
-            // "[KEY:" is 5 characters
-            String key = text.substring(start + 5, end);
-            return key.trim();  //i.e. "a716429" or "c3"
+    private void onRefresh(ActionEvent e) {
+        savedController.executeRetrieve(userId);
+    }
+
+    private void onView(ActionEvent e) {
+        int index = recipeList.getSelectedIndex();
+        if (index < 0) {
+            JOptionPane.showMessageDialog(this, "Please select a recipe first.");
+            return;
         }
-        return null;
+        String item = listModel.get(index);
+        String recipeKey = parseRecipeKey(item);
+        if (recipeKey == null || recipeKey.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Invalid recipe entry.");
+            return;
+        }
+        viewRecipeController.execute(recipeKey);
+    }
+
+    private void onDelete(ActionEvent e) {
+        int index = recipeList.getSelectedIndex();
+        if (index < 0) {
+            JOptionPane.showMessageDialog(this, "Please select a recipe first.");
+            return;
+        }
+        String item = listModel.get(index);
+        String recipeKey = parseRecipeKey(item);
+        if (recipeKey == null || recipeKey.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Invalid recipe entry.");
+            return;
+        }
+
+        int confirm = JOptionPane.showConfirmDialog(this,
+                "Delete recipe " + recipeKey + "?",
+                "Confirm Delete",
+                JOptionPane.OK_CANCEL_OPTION);
+        if (confirm == JOptionPane.OK_OPTION) {
+            savedController.executeDelete(userId, recipeKey);
+            savedController.executeRetrieve(userId); // refresh after delete
+        }
+    }
+
+    /**
+     * Our presenter formats each row as "id - title".
+     * This helper returns the id part (before " - ").
+     */
+    private String parseRecipeKey(String line) {
+        if (line == null) return null;
+        int idx = line.indexOf(" - ");
+        if (idx <= 0) return line.trim();
+        return line.substring(0, idx).trim();
+    }
+
+    public String getViewName() {
+        return SavedRecipeViewModel.VIEW_NAME;
     }
 
     @Override

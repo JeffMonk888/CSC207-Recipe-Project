@@ -25,6 +25,7 @@ public class AssignCategoryInteractor implements AssignCategoryInputBoundary {
             presenter.presentFailure("Category not found for this user.");
             return;
         }
+
         if (recipeIds == null || recipeIds.isEmpty()) {
             presenter.presentFailure("No recipes selected for assignment.");
             return;

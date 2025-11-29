@@ -13,6 +13,7 @@ public class DeleteCategoryInteractor implements DeleteCategoryInputBoundary {
         this.presenter = presenter;
     }
 
+    @Override
     public void execute(DeleteCategoryInputData inputData) {
         Long userId = inputData.getUserId();
         Long categoryId = inputData.getCategoryId();

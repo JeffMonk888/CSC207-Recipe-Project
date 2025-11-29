@@ -16,17 +16,16 @@ public class CategoryDemo {
         // --- Gateways ---
         InMemoryCategoryGateway categoryGateway = new InMemoryCategoryGateway();
 
-        // 用你新的持久化实现，而不是 InMemorySavedRecipeGateway
-        // 路径可以随便选一个 demo 用的 csv 文件名
+        // Use CSV-backed implementation for saved recipes
         MotionForRecipe savedGateway =
                 new UserSavedRecipeAccessObject("saved_recipes_demo.csv");
 
-        // 先假装用户已经保存了三道菜
-        savedGateway.save(new SavedRecipe(userId, 101L));
-        savedGateway.save(new SavedRecipe(userId, 102L));
-        savedGateway.save(new SavedRecipe(userId, 103L));
+        // Pretend the user already saved three recipes
+        savedGateway.save(new SavedRecipe(userId, "101"));
+        savedGateway.save(new SavedRecipe(userId, "102"));
+        savedGateway.save(new SavedRecipe(userId, "103"));
 
-        // --- 1. 创建分类 ---
+        // --- 1. Create category ---
         CreateCategoryOutputBoundary createPresenter = new CreateCategoryOutputBoundary() {
             @Override
             public void presentSuccess(CreateCategoryOutputData outputData) {
@@ -44,13 +43,12 @@ public class CategoryDemo {
 
         createInteractor.execute(new CreateCategoryInputData(userId, "Quick Meals"));
 
-        // 拿到刚刚创建的分类 id
         Long categoryId = categoryGateway
                 .findCategoriesForUser(userId)
                 .get(0)
                 .getId();
 
-        // --- 2. 给分类分配菜谱 ---
+        // --- 2. Assign recipes to category ---
         AssignCategoryOutputBoundary assignPresenter = new AssignCategoryOutputBoundary() {
             @Override
             public void presentSuccess(AssignCategoryOutputData outputData) {
@@ -67,19 +65,17 @@ public class CategoryDemo {
         AssignCategoryInputBoundary assignInteractor =
                 new AssignCategoryInteractor(categoryGateway, assignPresenter);
 
-        assignInteractor.execute(new AssignCategoryInputData(
-                userId,
-                categoryId,
-                Arrays.asList(101L, 103L)
-        ));
+        assignInteractor.execute(
+                new AssignCategoryInputData(userId, categoryId, Arrays.asList(101L, 103L)));
 
-        // --- 3. 按分类过滤我的菜谱 ---
+        // --- 3. Filter by category ---
         FilterByCategoryOutputBoundary filterPresenter = new FilterByCategoryOutputBoundary() {
             @Override
             public void presentSuccess(FilterByCategoryOutputData outputData) {
-                System.out.println("Recipes in category 'Quick Meals':");
+                System.out.println("Recipes in category " + categoryId + ":");
                 for (SavedRecipe sr : outputData.getSavedRecipes()) {
-                    System.out.println("  recipeId = " + sr.getRecipeId());
+                    System.out.println("  userId=" + sr.getUserId()
+                            + ", recipeKey=" + sr.getRecipeKey());
                 }
             }
 
