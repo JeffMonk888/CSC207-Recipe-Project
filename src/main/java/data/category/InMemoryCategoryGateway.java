@@ -11,16 +11,23 @@ import java.util.stream.Collectors;
  * Simple in-memory implementation of CategoryDataAccessInterface.
  *
  * - Categories are per user (userId field).
- * - Recipe assignments are stored as: categoryId -> set of recipeIds.
+ * - Recipe assignments are stored as: categoryId -> set of recipeIds (numeric form of recipeKey).
+ *
+ * This class is only used in demos and tests; the real project could later
+ * replace it with a persistent implementation.
  */
 public class InMemoryCategoryGateway implements CategoryDataAccessInterface {
 
     private final Map<Long, Category> categories = new HashMap<>();
     private final Map<Long, Set<Long>> categoryToRecipeIds = new HashMap<>();
+
     private final AtomicLong idCounter = new AtomicLong(0L);
 
     @Override
     public boolean categoryNameExists(Long userId, String name) {
+        if (name == null) {
+            return false;
+        }
         String lower = name.toLowerCase(Locale.ROOT);
         return categories.values().stream()
                 .anyMatch(c ->
@@ -54,7 +61,7 @@ public class InMemoryCategoryGateway implements CategoryDataAccessInterface {
 
     @Override
     public void assignRecipesToCategory(Long userId, Long categoryId, List<Long> recipeIds) {
-        if (!categoryExistsForUser(userId, categoryId)) {
+        if (!categoryExistsForUser(userId, categoryId) || recipeIds == null || recipeIds.isEmpty()) {
             return;
         }
         Set<Long> set = categoryToRecipeIds.computeIfAbsent(categoryId, k -> new HashSet<>());
@@ -64,10 +71,24 @@ public class InMemoryCategoryGateway implements CategoryDataAccessInterface {
     @Override
     public List<Long> getRecipeIdsForCategory(Long userId, Long categoryId) {
         if (!categoryExistsForUser(userId, categoryId)) {
-            return new ArrayList<>();
+            return Collections.emptyList();
         }
         Set<Long> set = categoryToRecipeIds.getOrDefault(categoryId, Collections.emptySet());
         return new ArrayList<>(set);
+    }
+
+    @Override
+    public void removeRecipeFromCategory(Long userId, Long categoryId, Long recipeId) {
+        if (!categoryExistsForUser(userId, categoryId) || recipeId == null) {
+            return;
+        }
+        Set<Long> set = categoryToRecipeIds.get(categoryId);
+        if (set != null) {
+            set.remove(recipeId);
+            if (set.isEmpty()) {
+                categoryToRecipeIds.remove(categoryId);
+            }
+        }
     }
 
     @Override
