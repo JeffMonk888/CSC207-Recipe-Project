@@ -4,8 +4,6 @@ import usecase.delete_saved.DeleteSavedInputBoundary;
 import usecase.delete_saved.DeleteSavedInputData;
 import usecase.retrieve_saved.RetrieveSavedInputBoundary;
 import usecase.retrieve_saved.RetrieveSavedInputData;
-import usecase.save_recipe.SaveRecipeInputBoundary;
-import usecase.save_recipe.SaveRecipeInputData;
 
 public class SavedRecipeController {
 
@@ -28,5 +26,3 @@ public class SavedRecipeController {
         deleteUseCase.execute(data);
     }
 }
-
-

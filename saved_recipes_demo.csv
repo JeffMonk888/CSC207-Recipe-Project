@@ -1,0 +1,4 @@
+id,userId,recipeId,savedAt,favourite,rating
+7,1,101,2025-11-29T03:28:59.482248800Z,false,
+9,1,103,2025-11-29T03:28:59.485750800Z,false,
+8,1,102,2025-11-29T03:28:59.484752600Z,false,

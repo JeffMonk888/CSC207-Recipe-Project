@@ -49,12 +49,20 @@ public class CombinedDemo {
             }
         };
 
-        RetrieveSavedOutputBoundary retrievePresenter = outputData -> {
-            List<Recipe> recipes = outputData.getSavedRecipes();
-            System.out.println("Retrieve success: " + recipes.size() + " saved recipes:");
-            for (Recipe recipe : recipes) {
-                System.out.println(" - " + recipe.getTitle() +
-                        " (id: " + recipe.getId() + ")");
+        RetrieveSavedOutputBoundary retrievePresenter = new RetrieveSavedOutputBoundary() {
+            @Override
+            public void presentSuccess(RetrieveSavedOutputData outputData) {
+                List<Recipe> recipes = outputData.getSavedRecipes();
+                System.out.println("Retrieve success: " + recipes.size() + " saved recipes:");
+                for (Recipe recipe : recipes) {
+                    System.out.println(" - " + recipe.getTitle() +
+                            " (id: " + recipe.getId() + ")");
+                }
+            }
+
+            @Override
+            public void presentFailure(String errorMessage) {
+                System.out.println("Retrieve failed: " + errorMessage);
             }
         };
 

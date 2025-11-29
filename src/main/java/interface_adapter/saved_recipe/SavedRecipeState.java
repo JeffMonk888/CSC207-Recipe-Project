@@ -8,12 +8,13 @@ public class SavedRecipeState {
     private List<String> savedRecipes = new ArrayList<>();
     private String errorMessage;
 
-    public SavedRecipeState(SavedRecipeState copy) {
-        this.savedRecipes = copy.savedRecipes;
-        this.errorMessage = copy.errorMessage;
+    public SavedRecipeState() {
     }
 
-    public SavedRecipeState() {}
+    public SavedRecipeState(SavedRecipeState copy) {
+        this.savedRecipes = new ArrayList<>(copy.savedRecipes);
+        this.errorMessage = copy.errorMessage;
+    }
 
     public List<String> getSavedRecipes() {
         return savedRecipes;
