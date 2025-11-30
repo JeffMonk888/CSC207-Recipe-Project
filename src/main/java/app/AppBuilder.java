@@ -89,6 +89,7 @@ public class AppBuilder {
     private FindRecipeView findRecipeView;
     private SearchByFridgeView searchByFridgeView;
     private FilterRecipeView filterRecipeView;
+    private ViewRecipeController viewRecipeController;
 
     public AppBuilder addLoginView() {
         loginView = new LoginView(viewManagerModel);
@@ -182,8 +183,7 @@ public class AppBuilder {
                 new ViewRecipePresenter(viewRecipeViewModel, viewManagerModel);
         ViewRecipeInputBoundary viewRecipeInteractor =
                 new ViewRecipeInteractor(apiClient, recipeDAO, viewRecipePresenter);
-        ViewRecipeController viewRecipeController =
-                new ViewRecipeController(viewRecipeInteractor);
+        viewRecipeController = new ViewRecipeController(viewRecipeInteractor);
         ViewRecipeView viewRecipeView =
                 new ViewRecipeView(viewRecipeViewModel);
 
@@ -234,8 +234,16 @@ public class AppBuilder {
                 new SearchByFridgeController(interactor);
 
         // View – for now, pass null as the RecipeSelectionListener (double-click does nothing yet)
+        SearchByFridgeView.RecipeSelectionListener listener = recipeKey -> {
+            if (viewRecipeController != null) {
+                viewRecipeController.execute(recipeKey);
+            } else {
+                // Optional debug help if someone forgets to call addSavedRecipesFeature()
+                System.err.println("ViewRecipeController is null. Did you call addSavedRecipesFeature()?");
+            }
+        };
         searchByFridgeView =
-                new SearchByFridgeView(controller, vm, viewManagerModel, null);
+                new SearchByFridgeView(controller, vm, viewManagerModel, listener);
 
         // Register with ViewManager using the view's name
         viewManager.addView(searchByFridgeView, searchByFridgeView.getViewName());
