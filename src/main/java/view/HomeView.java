@@ -1,7 +1,10 @@
 package view;
 
 import interface_adapter.ViewManagerModel;
-
+import interface_adapter.create_recipe.CreateRecipeViewModel;
+import interface_adapter.ViewManagerModel;
+import interface_adapter.create_recipe.CreateRecipeViewModel;
+import interface_adapter.saved_recipe.SavedRecipeViewModel;
 import javax.swing.*;
 import java.awt.*;
 
@@ -47,11 +50,11 @@ public class HomeView extends JPanel {
 
         JButton findNewRecipeButton = new JButton("Find new recipe");
         JButton makeNewRecipeButton = new JButton("Make new recipe");
-        JButton favouritesButton = new JButton("Favourites ★");
+        JButton savedRecipesButton = new JButton("Saved Recipes");
         JButton fridgeButton = new JButton("My Fridge");
 
         Dimension buttonSize = new Dimension(260, 40);
-        for (JButton button : new JButton[]{findNewRecipeButton, makeNewRecipeButton, favouritesButton, fridgeButton}) {
+        for (JButton button : new JButton[]{findNewRecipeButton, makeNewRecipeButton, savedRecipesButton, fridgeButton}) {
             button.setMaximumSize(buttonSize);
             button.setAlignmentX(Component.CENTER_ALIGNMENT);
         }
@@ -60,42 +63,27 @@ public class HomeView extends JPanel {
         centerPanel.add(Box.createVerticalStrut(15));
         centerPanel.add(makeNewRecipeButton);
         centerPanel.add(Box.createVerticalStrut(15));
-        centerPanel.add(favouritesButton);
+        centerPanel.add(savedRecipesButton);
         centerPanel.add(Box.createVerticalStrut(15));
         centerPanel.add(fridgeButton);
 
         add(topBar, BorderLayout.NORTH);
         add(centerPanel, BorderLayout.CENTER);
 
+        makeNewRecipeButton.addActionListener(e ->
+                viewManagerModel.setActiveViewName(CreateRecipeViewModel.VIEW_NAME)
+        );
+
         logoutButton.addActionListener(e ->
                 viewManagerModel.setActiveViewName("login")
         );
 
         findNewRecipeButton.addActionListener(e ->
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Find new recipe – to be implemented",
-                        "Find new recipe",
-                        JOptionPane.INFORMATION_MESSAGE
-                )
+                viewManagerModel.setActiveViewName("find-recipes")
         );
 
-        makeNewRecipeButton.addActionListener(e ->
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Make new recipe – to be implemented",
-                        "Make new recipe",
-                        JOptionPane.INFORMATION_MESSAGE
-                )
-        );
-
-        favouritesButton.addActionListener(e ->
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Favourites – to be implemented",
-                        "Favourites",
-                        JOptionPane.INFORMATION_MESSAGE
-                )
+        savedRecipesButton.addActionListener(e ->
+                viewManagerModel.setActiveViewName(SavedRecipeViewModel.VIEW_NAME)
         );
 
         fridgeButton.addActionListener(e ->
