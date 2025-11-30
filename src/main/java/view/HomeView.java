@@ -2,7 +2,9 @@ package view;
 
 import interface_adapter.ViewManagerModel;
 import interface_adapter.create_recipe.CreateRecipeViewModel;
-
+import interface_adapter.ViewManagerModel;
+import interface_adapter.create_recipe.CreateRecipeViewModel;
+import interface_adapter.saved_recipe.SavedRecipeViewModel;
 import javax.swing.*;
 import java.awt.*;
 
@@ -86,12 +88,7 @@ public class HomeView extends JPanel {
         );
 
         favouritesButton.addActionListener(e ->
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Favourites – to be implemented",
-                        "Favourites",
-                        JOptionPane.INFORMATION_MESSAGE
-                )
+                viewManagerModel.setActiveViewName(SavedRecipeViewModel.VIEW_NAME)
         );
 
         fridgeButton.addActionListener(e ->

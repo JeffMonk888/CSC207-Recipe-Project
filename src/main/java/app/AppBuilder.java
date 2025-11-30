@@ -1,33 +1,52 @@
 package app;
+// API + saved-recipe data access
+import data.api.SpoonacularClient;
 import data.saved_recipe.RecipeDataAssessObject;
 import data.saved_recipe.UserSavedRecipeAccessObject;
 
+// Create Recipe (already in your project)
 import interface_adapter.ViewManagerModel;
-
-// fridge
-import interface_adapter.fridge.FridgeController;
-import interface_adapter.fridge.FridgePresenter;
-import interface_adapter.fridge.FridgeViewModel;
-
-// create recipe
 import interface_adapter.create_recipe.CreateRecipeController;
 import interface_adapter.create_recipe.CreateRecipePresenter;
 import interface_adapter.create_recipe.CreateRecipeViewModel;
 
+// Fridge (already there)
+import interface_adapter.fridge.FridgeController;
+import interface_adapter.fridge.FridgePresenter;
+import interface_adapter.fridge.FridgeViewModel;
+
+// Saved Recipes + View Recipe adapters
+import interface_adapter.saved_recipe.SavedRecipeController;
+import interface_adapter.saved_recipe.SavedRecipePresenter;
+import interface_adapter.saved_recipe.SavedRecipeViewModel;
+
+import interface_adapter.view_recipe.ViewRecipeController;
+import interface_adapter.view_recipe.ViewRecipePresenter;
+import interface_adapter.view_recipe.ViewRecipeViewModel;
+
+// Use cases
 import usecase.add_ingredient.AddIngredientInputBoundary;
 import usecase.add_ingredient.AddIngredientInteractor;
 import usecase.common.FridgeAccess;
-import usecase.remove_ingredient.RemoveIngredientInputBoundary;
-import usecase.remove_ingredient.RemoveIngredientInteractor;
-
 import usecase.create_recipe.CreateRecipeInputBoundary;
 import usecase.create_recipe.CreateRecipeInteractor;
 import usecase.create_recipe.CreateRecipeOutputBoundary;
+import usecase.delete_saved.DeleteSavedInputBoundary;
+import usecase.delete_saved.DeleteSavedInteractor;
+import usecase.retrieve_saved.RetrieveSavedInputBoundary;
+import usecase.retrieve_saved.RetrieveSavedInteractor;
+import usecase.view_recipe.ViewRecipeInputBoundary;
+import usecase.view_recipe.ViewRecipeInteractor;
+import usecase.view_recipe.ViewRecipeOutputBoundary;
+import usecase.remove_ingredient.RemoveIngredientInputBoundary;
+import usecase.remove_ingredient.RemoveIngredientInteractor;
 
+// Views
 import view.CreateRecipeView;
 import view.FridgeView;
 import view.HomeView;
 import view.LoginView;
+import view.SavedRecipesView;
 import view.SignUpView;
 import view.ViewManager;
 import view.ViewRecipeView;
@@ -42,6 +61,7 @@ public class AppBuilder {
     private HomeView homeView;
     private FridgeView fridgeView;
     private CreateRecipeView createRecipeView;
+    private SavedRecipesView savedRecipesView;
 
     public AppBuilder addLoginView() {
         loginView = new LoginView(viewManagerModel);
@@ -113,6 +133,58 @@ public class AppBuilder {
         );
 
         viewManager.addView(createRecipeView, createRecipeView.getViewName());
+        return this;
+    }
+
+    public AppBuilder addSavedRecipesFeature(Long userId) {
+        // 1) Shared API & DAOs
+        String apiKey = System.getenv("SPOONACULAR_API_KEY");
+        if (apiKey == null || apiKey.isBlank()) {
+            // same fallback key as your demos
+            apiKey = "6586492a77f54829ba878d12fb62832d";
+        }
+
+        SpoonacularClient apiClient = new SpoonacularClient(apiKey);
+        UserSavedRecipeAccessObject userSavedRecipeDAO =
+                new UserSavedRecipeAccessObject("user_recipe_links.csv");
+        RecipeDataAssessObject recipeDAO =
+                new RecipeDataAssessObject("recipe_cache.json");
+
+        // 2) VIEW RECIPE (details) wiring
+        ViewRecipeViewModel viewRecipeViewModel = new ViewRecipeViewModel();
+        ViewRecipeOutputBoundary viewRecipePresenter =
+                new ViewRecipePresenter(viewRecipeViewModel, viewManagerModel);
+        ViewRecipeInputBoundary viewRecipeInteractor =
+                new ViewRecipeInteractor(apiClient, recipeDAO, viewRecipePresenter);
+        ViewRecipeController viewRecipeController =
+                new ViewRecipeController(viewRecipeInteractor);
+        ViewRecipeView viewRecipeView =
+                new ViewRecipeView(viewRecipeViewModel);
+
+        // register view recipe screen with ViewManager
+        viewManager.addView(viewRecipeView, viewRecipeViewModel.getViewName());
+
+        // 3) SAVED RECIPES (list) wiring
+        SavedRecipeViewModel savedRecipeViewModel = new SavedRecipeViewModel();
+        SavedRecipePresenter savedPresenter =
+                new SavedRecipePresenter(savedRecipeViewModel, viewManagerModel);
+
+        RetrieveSavedInputBoundary retrieveInteractor =
+                new RetrieveSavedInteractor(userSavedRecipeDAO, recipeDAO, apiClient, savedPresenter);
+        DeleteSavedInputBoundary deleteInteractor =
+                new DeleteSavedInteractor(userSavedRecipeDAO, savedPresenter);
+
+        SavedRecipeController savedController =
+                new SavedRecipeController(retrieveInteractor, deleteInteractor);
+
+        savedRecipesView = new SavedRecipesView(
+                savedController,
+                savedRecipeViewModel,
+                viewRecipeController,
+                userId
+        );
+
+        viewManager.addView(savedRecipesView, savedRecipesView.getViewName());
         return this;
     }
 

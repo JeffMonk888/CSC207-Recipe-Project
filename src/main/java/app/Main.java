@@ -23,6 +23,7 @@ public class Main {
                     .addHomeView()
                     .addFridgeFeature(dummyUserId)
                     .addCreateRecipeFeature(dummyUserId)
+                    .addSavedRecipesFeature(dummyUserId)
                     .show();
         });
     }
