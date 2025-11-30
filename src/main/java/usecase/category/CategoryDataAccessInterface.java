@@ -39,7 +39,7 @@ public interface CategoryDataAccessInterface {
     /**
      * Returns the list of recipe ids (numeric) assigned to this category for this user.
      */
-    List<Long> getRecipeIdsForCategory(Long userId, Long categoryId);
+    List<String> getRecipeIdsForCategory(Long userId, Long categoryId);
 
     /**
      * Removes a single recipe from the category for this user.
