@@ -79,12 +79,7 @@ public class HomeView extends JPanel {
         );
 
         findNewRecipeButton.addActionListener(e ->
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Find new recipe – to be implemented",
-                        "Find new recipe",
-                        JOptionPane.INFORMATION_MESSAGE
-                )
+                viewManagerModel.setActiveViewName("find-recipes")
         );
 
         favouritesButton.addActionListener(e ->

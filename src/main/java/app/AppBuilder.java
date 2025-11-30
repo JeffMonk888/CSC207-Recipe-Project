@@ -9,6 +9,8 @@ import interface_adapter.ViewManagerModel;
 import interface_adapter.create_recipe.CreateRecipeController;
 import interface_adapter.create_recipe.CreateRecipePresenter;
 import interface_adapter.create_recipe.CreateRecipeViewModel;
+//Find New Recipe
+import view.FindRecipeView;
 
 // Fridge (already there)
 import interface_adapter.fridge.FridgeController;
@@ -62,6 +64,7 @@ public class AppBuilder {
     private FridgeView fridgeView;
     private CreateRecipeView createRecipeView;
     private SavedRecipesView savedRecipesView;
+    private FindRecipeView findRecipeView;
 
     public AppBuilder addLoginView() {
         loginView = new LoginView(viewManagerModel);
@@ -185,6 +188,12 @@ public class AppBuilder {
         );
 
         viewManager.addView(savedRecipesView, savedRecipesView.getViewName());
+        return this;
+    }
+
+    public AppBuilder addFindRecipe() {
+        findRecipeView = new FindRecipeView(viewManagerModel);
+        viewManager.addView(findRecipeView, findRecipeView.getViewName());
         return this;
     }
 

@@ -21,6 +21,7 @@ public class Main {
                     .addLoginView()
                     .addSignUpView()
                     .addHomeView()
+                    .addFindRecipe()
                     .addFridgeFeature(dummyUserId)
                     .addCreateRecipeFeature(dummyUserId)
                     .addSavedRecipesFeature(dummyUserId)
