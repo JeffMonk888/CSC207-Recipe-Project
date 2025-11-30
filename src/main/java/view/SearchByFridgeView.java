@@ -23,6 +23,7 @@ public class SearchByFridgeView extends JPanel
         void onRecipeSelected(String recipeKey);
     }
 
+    public static final String VIEW_NAME = "search-by-fridge";
     private static final int PAGE_SIZE = 10;
 
     private final SearchByFridgeController controller;
@@ -168,5 +169,8 @@ public class SearchByFridgeView extends JPanel
 
         // Enable/disable loadMore button
         loadMoreButton.setEnabled(state.hasMore());
+    }
+    public String getViewName() {
+        return VIEW_NAME;
     }
 }

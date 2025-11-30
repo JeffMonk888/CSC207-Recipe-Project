@@ -4,7 +4,7 @@ import data.api.SpoonacularClient;
 import data.saved_recipe.RecipeDataAssessObject;
 import data.saved_recipe.UserSavedRecipeAccessObject;
 
-// Create Recipe (already in your project)
+// Create Recipe
 import interface_adapter.ViewManagerModel;
 import interface_adapter.create_recipe.CreateRecipeController;
 import interface_adapter.create_recipe.CreateRecipePresenter;
@@ -12,7 +12,7 @@ import interface_adapter.create_recipe.CreateRecipeViewModel;
 //Find New Recipe
 import view.FindRecipeView;
 
-// Fridge (already there)
+// Fridge
 import interface_adapter.fridge.FridgeController;
 import interface_adapter.fridge.FridgePresenter;
 import interface_adapter.fridge.FridgeViewModel;
@@ -25,6 +25,19 @@ import interface_adapter.saved_recipe.SavedRecipeViewModel;
 import interface_adapter.view_recipe.ViewRecipeController;
 import interface_adapter.view_recipe.ViewRecipePresenter;
 import interface_adapter.view_recipe.ViewRecipeViewModel;
+
+// Search-by-fridge feature
+import view.SearchByFridgeView;
+import interface_adapter.search_by_fridge.SearchByFridgeController;
+import interface_adapter.search_by_fridge.SearchByFridgePresenter;
+import interface_adapter.search_by_fridge.SearchByFridgeViewModel;
+
+import usecase.search_by_fridge.SearchByFridgeInputBoundary;
+import usecase.search_by_fridge.SearchByFridgeInteractor;
+import usecase.search_by_fridge.SearchByFridgeOutputBoundary;
+
+import usecase.common.RecipeByIngredientsAccess;
+import data.api.SpoonacularClient;
 
 // Use cases
 import usecase.add_ingredient.AddIngredientInputBoundary;
@@ -65,6 +78,7 @@ public class AppBuilder {
     private CreateRecipeView createRecipeView;
     private SavedRecipesView savedRecipesView;
     private FindRecipeView findRecipeView;
+    private SearchByFridgeView searchByFridgeView;
 
     public AppBuilder addLoginView() {
         loginView = new LoginView(viewManagerModel);
@@ -188,6 +202,34 @@ public class AppBuilder {
         );
 
         viewManager.addView(savedRecipesView, savedRecipesView.getViewName());
+        return this;
+    }
+
+    public AppBuilder addSearchByFridgeFeature(Long userId) {
+        // API client for searching recipes by ingredients
+        String apiKey = System.getenv("SPOONACULAR_API_KEY");
+        if (apiKey == null || apiKey.isBlank()) {
+            apiKey = "6586492a77f54829ba878d12fb62832d"; // same key you use in demos
+        }
+        SpoonacularClient spoonacularClient = new SpoonacularClient(apiKey);
+        RecipeByIngredientsAccess recipeAccess = spoonacularClient;
+
+        // ViewModel + presenter
+        SearchByFridgeViewModel vm = new SearchByFridgeViewModel();
+        SearchByFridgeOutputBoundary presenter = new SearchByFridgePresenter(vm);
+
+        // Interactor + controller
+        SearchByFridgeInputBoundary interactor =
+                new SearchByFridgeInteractor(fridgeAccess, recipeAccess, presenter);
+        SearchByFridgeController controller =
+                new SearchByFridgeController(interactor);
+
+        // View – for now, pass null as the RecipeSelectionListener (double-click does nothing yet)
+        searchByFridgeView =
+                new SearchByFridgeView(controller, vm, userId, null);
+
+        // Register with ViewManager using the view's name
+        viewManager.addView(searchByFridgeView, searchByFridgeView.getViewName());
         return this;
     }
 

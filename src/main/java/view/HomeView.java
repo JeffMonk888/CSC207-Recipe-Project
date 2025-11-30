@@ -50,11 +50,11 @@ public class HomeView extends JPanel {
 
         JButton findNewRecipeButton = new JButton("Find new recipe");
         JButton makeNewRecipeButton = new JButton("Make new recipe");
-        JButton favouritesButton = new JButton("Favourites ★");
+        JButton savedRecipesButton = new JButton("Saved Recipes");
         JButton fridgeButton = new JButton("My Fridge");
 
         Dimension buttonSize = new Dimension(260, 40);
-        for (JButton button : new JButton[]{findNewRecipeButton, makeNewRecipeButton, favouritesButton, fridgeButton}) {
+        for (JButton button : new JButton[]{findNewRecipeButton, makeNewRecipeButton, savedRecipesButton, fridgeButton}) {
             button.setMaximumSize(buttonSize);
             button.setAlignmentX(Component.CENTER_ALIGNMENT);
         }
@@ -63,7 +63,7 @@ public class HomeView extends JPanel {
         centerPanel.add(Box.createVerticalStrut(15));
         centerPanel.add(makeNewRecipeButton);
         centerPanel.add(Box.createVerticalStrut(15));
-        centerPanel.add(favouritesButton);
+        centerPanel.add(savedRecipesButton);
         centerPanel.add(Box.createVerticalStrut(15));
         centerPanel.add(fridgeButton);
 
@@ -82,7 +82,7 @@ public class HomeView extends JPanel {
                 viewManagerModel.setActiveViewName("find-recipes")
         );
 
-        favouritesButton.addActionListener(e ->
+        savedRecipesButton.addActionListener(e ->
                 viewManagerModel.setActiveViewName(SavedRecipeViewModel.VIEW_NAME)
         );
 

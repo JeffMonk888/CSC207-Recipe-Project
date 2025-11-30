@@ -61,12 +61,7 @@ public class FindRecipeView extends JPanel {
         );
 
         whatCanIMakeButton.addActionListener(e ->
-                JOptionPane.showMessageDialog(
-                        this,
-                        "UC3: What can I make? – to be implemented",
-                        "What can I make?",
-                        JOptionPane.INFORMATION_MESSAGE
-                )
+                viewManagerModel.setActiveViewName("search-by-fridge")
         );
 
         filterSortButton.addActionListener(e ->
