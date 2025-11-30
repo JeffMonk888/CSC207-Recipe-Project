@@ -37,21 +37,28 @@ public class SignUpAuth {
 
         return true;
     }
-
-    /** Check login credentials against stored users. */
-    public static boolean authenticate(String username, String password) {
-        username = username.trim();
-
-        if (username.isEmpty() || password.isEmpty()) {
-            return false;
+    public static User authenticateAndGetUser(String username, String password) {
+        if (username == null || password == null ||
+                username.isEmpty() || password.isEmpty()) {
+            return null;
         }
 
         User user = userDAO.getByUsername(username);
         if (user == null) {
-            return false;
+            return null;
         }
 
         String inputHash = hasher.hash(password);
-        return inputHash.equals(user.getPasswordHash());
+        if (!inputHash.equals(user.getPasswordHash())) {
+            return null;
+        }
+
+        return user;
+    }
+
+    /** Check login credentials against stored users. */
+    public static boolean authenticate(String username, String password) {
+        username = username.trim();
+        return authenticateAndGetUser(username, password) != null;
     }
 }

@@ -113,7 +113,7 @@ public class AppBuilder {
         this.fridgeAccess = fridgeAccess;
     }
 
-    public AppBuilder addFridgeFeature(Long userId) {
+    public AppBuilder addFridgeFeature() {
 
         FridgeViewModel fridgeViewModel = new FridgeViewModel();
         FridgePresenter fridgePresenter = new FridgePresenter(fridgeViewModel);
@@ -127,13 +127,13 @@ public class AppBuilder {
         FridgeController fridgeController =
                 new FridgeController(addInteractor, removeInteractor);
 
-        fridgeView = new FridgeView(fridgeController, fridgeViewModel, userId);
+        fridgeView = new FridgeView(fridgeController, fridgeViewModel, viewManagerModel);
         viewManager.addView(fridgeView, fridgeView.getViewName());
 
         return this;
     }
 
-    public AppBuilder addCreateRecipeFeature(Long userId) {
+    public AppBuilder addCreateRecipeFeature() {
         // Data access, same as in CreateRecipeDemo
         UserSavedRecipeAccessObject userSavedRecipeDAO =
                 new UserSavedRecipeAccessObject("user_recipe_links.csv");
@@ -155,15 +155,14 @@ public class AppBuilder {
         createRecipeView = new CreateRecipeView(
                 createRecipeViewModel,
                 controller,
-                viewManagerModel,
-                userId
+                viewManagerModel
         );
 
         viewManager.addView(createRecipeView, createRecipeView.getViewName());
         return this;
     }
 
-    public AppBuilder addSavedRecipesFeature(Long userId) {
+    public AppBuilder addSavedRecipesFeature() {
         // 1) Shared API & DAOs
         String apiKey = System.getenv("SPOONACULAR_API_KEY");
         if (apiKey == null || apiKey.isBlank()) {
@@ -208,14 +207,14 @@ public class AppBuilder {
                 savedController,
                 savedRecipeViewModel,
                 viewRecipeController,
-                userId
+                viewManagerModel
         );
 
         viewManager.addView(savedRecipesView, savedRecipesView.getViewName());
         return this;
     }
 
-    public AppBuilder addSearchByFridgeFeature(Long userId) {
+    public AppBuilder addSearchByFridgeFeature() {
         // API client for searching recipes by ingredients
         String apiKey = System.getenv("SPOONACULAR_API_KEY");
         if (apiKey == null || apiKey.isBlank()) {
@@ -236,7 +235,7 @@ public class AppBuilder {
 
         // View – for now, pass null as the RecipeSelectionListener (double-click does nothing yet)
         searchByFridgeView =
-                new SearchByFridgeView(controller, vm, userId, null);
+                new SearchByFridgeView(controller, vm, viewManagerModel, null);
 
         // Register with ViewManager using the view's name
         viewManager.addView(searchByFridgeView, searchByFridgeView.getViewName());

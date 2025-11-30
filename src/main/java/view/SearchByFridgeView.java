@@ -4,7 +4,7 @@ import domain.entity.RecipePreview;
 import interface_adapter.search_by_fridge.SearchByFridgeController;
 import interface_adapter.search_by_fridge.SearchByFridgeState;
 import interface_adapter.search_by_fridge.SearchByFridgeViewModel;
-
+import interface_adapter.ViewManagerModel;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -28,7 +28,7 @@ public class SearchByFridgeView extends JPanel
 
     private final SearchByFridgeController controller;
     private final SearchByFridgeViewModel viewModel;
-    private final Long userId;
+    private final ViewManagerModel viewManagerModel;
     private final RecipeSelectionListener recipeSelectionListener; // NEW
 
     // UI components
@@ -41,11 +41,11 @@ public class SearchByFridgeView extends JPanel
 
     public SearchByFridgeView(SearchByFridgeController controller,
                               SearchByFridgeViewModel viewModel,
-                              Long userId,
+                              ViewManagerModel viewManagerModel,
                               RecipeSelectionListener recipeSelectionListener) {
         this.controller = controller;
         this.viewModel = viewModel;
-        this.userId = userId;
+        this.viewManagerModel = viewManagerModel;
         this.recipeSelectionListener = recipeSelectionListener;
 
         this.viewModel.addPropertyChangeListener(this);
@@ -126,11 +126,13 @@ public class SearchByFridgeView extends JPanel
 
         if ("search".equals(cmd)) {
             // Start from the beginning: offset = 0
+            Long userId = viewManagerModel.getCurrentUserId();
             controller.search(userId, PAGE_SIZE, 0);
 
         } else if ("loadMore".equals(cmd)) {
             SearchByFridgeState state = viewModel.getState();
             if (state.hasMore()) {
+                Long userId = viewManagerModel.getCurrentUserId();
                 controller.search(userId, PAGE_SIZE, state.getOffset());
             } else {
                 errorLabel.setText("No more recipes to load.");

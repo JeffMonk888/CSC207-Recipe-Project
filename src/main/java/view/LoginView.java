@@ -2,14 +2,13 @@ package view;
 
 import interface_adapter.ViewManagerModel;
 import usecase.auth.SignUpAuth;
-
+import domain.entity.User;
 import javax.swing.*;
 import java.awt.*;
 
 public class LoginView extends JPanel {
 
     private final ViewManagerModel viewManagerModel;
-
     private final JTextField usernameField;
     private final JPasswordField passwordField;
     private final JButton loginButton;
@@ -81,7 +80,7 @@ public class LoginView extends JPanel {
     private void handleLoginClick() {
         String username = usernameField.getText().trim();
         String password = new String(passwordField.getPassword());
-
+        User user = SignUpAuth.authenticateAndGetUser(username, password);
         if (username.isEmpty() || password.isEmpty()) {
             setError("Please enter both username and password");
             return;
@@ -90,6 +89,7 @@ public class LoginView extends JPanel {
         if (SignUpAuth.authenticate(username, password)) {
             setError(" ");
             viewManagerModel.setActiveViewName("home");
+            viewManagerModel.setCurrentUserId(user.getId());
         } else {
             setError("Invalid username or password");
         }

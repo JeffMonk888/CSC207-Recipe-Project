@@ -36,4 +36,13 @@ public class ViewManagerModel {
     public void removePropertyChangeListener(PropertyChangeListener listener) {
         support.removePropertyChangeListener(listener);
     }
+
+    private Long currentUserId;
+
+    public Long getCurrentUserId() { return currentUserId; }
+
+    public void setCurrentUserId(Long currentUserId) {
+        this.currentUserId = currentUserId;
+        // (optional) fire a PropertyChange if you ever want views to react
+    }
 }

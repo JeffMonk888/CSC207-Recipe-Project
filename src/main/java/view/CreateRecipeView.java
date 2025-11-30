@@ -16,7 +16,7 @@ public class CreateRecipeView extends JPanel implements PropertyChangeListener {
     private final CreateRecipeViewModel viewModel;
     private final CreateRecipeController controller;
     private final ViewManagerModel viewManagerModel;
-    private final Long currentUserId;
+
 
     // UI Components
     private final JTextField titleField = new JTextField(20);
@@ -27,12 +27,12 @@ public class CreateRecipeView extends JPanel implements PropertyChangeListener {
 
     public CreateRecipeView(CreateRecipeViewModel viewModel,
                             CreateRecipeController controller,
-                            ViewManagerModel viewManagerModel,
-                            Long userId) {
+                            ViewManagerModel viewManagerModel
+                            ) {
         this.viewModel = viewModel;
         this.controller = controller;
         this.viewManagerModel = viewManagerModel;
-        this.currentUserId = userId;
+
 
         this.viewModel.addPropertyChangeListener(this);
 
@@ -98,7 +98,8 @@ public class CreateRecipeView extends JPanel implements PropertyChangeListener {
             );
 
             if (choice == JOptionPane.YES_OPTION) {
-                controller.execute(currentUserId, title, ingredients, instructions);
+                Long userId = viewManagerModel.getCurrentUserId();
+                controller.execute(userId, title, ingredients, instructions);
             }
         });
 

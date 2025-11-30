@@ -3,7 +3,7 @@ package view;
 import interface_adapter.fridge.FridgeController;
 import interface_adapter.fridge.FridgeViewModel;
 import interface_adapter.fridge.FridgeState;
-
+import interface_adapter.ViewManagerModel;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -20,9 +20,7 @@ public class FridgeView extends JPanel implements ActionListener, PropertyChange
 
     private final FridgeController controller;
     private final FridgeViewModel viewModel;
-
-    // We need the current logged-in user's id for the use cases.
-    private final Long userId;
+    private final ViewManagerModel viewManagerModel;
 
     // UI components
     private final JTextField ingredientField = new JTextField(20);
@@ -36,10 +34,10 @@ public class FridgeView extends JPanel implements ActionListener, PropertyChange
 
     public FridgeView(FridgeController controller,
                       FridgeViewModel viewModel,
-                      Long userId) {
+                      ViewManagerModel viewManagerModel) {
         this.controller = controller;
         this.viewModel = viewModel;
-        this.userId = userId;
+        this.viewManagerModel = viewManagerModel;
 
         // Register as listener to the ViewModel
         this.viewModel.addPropertyChangeListener(this);
@@ -103,6 +101,7 @@ public class FridgeView extends JPanel implements ActionListener, PropertyChange
 
         if ("add".equals(cmd)) {
             String text = ingredientField.getText().toLowerCase();
+            Long userId = viewManagerModel.getCurrentUserId();
             controller.addIngredient(userId, text);
 
         } else if ("remove".equals(cmd)) {
@@ -110,6 +109,7 @@ public class FridgeView extends JPanel implements ActionListener, PropertyChange
             if (selected == null) {
                 errorLabel.setText("Please select an ingredient to remove.");
             } else {
+                Long userId = viewManagerModel.getCurrentUserId();
                 controller.removeIngredient(userId, selected);
             }
         }

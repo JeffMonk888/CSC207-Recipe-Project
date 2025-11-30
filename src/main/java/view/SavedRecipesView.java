@@ -4,7 +4,7 @@ import interface_adapter.saved_recipe.SavedRecipeController;
 import interface_adapter.saved_recipe.SavedRecipeState;
 import interface_adapter.saved_recipe.SavedRecipeViewModel;
 import interface_adapter.view_recipe.ViewRecipeController;
-
+import interface_adapter.ViewManagerModel;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -16,7 +16,7 @@ public class SavedRecipesView extends JPanel implements PropertyChangeListener {
     private final SavedRecipeController savedController;
     private final SavedRecipeViewModel viewModel;
     private final ViewRecipeController viewRecipeController;
-    private final Long userId;
+    private final ViewManagerModel viewManagerModel;
 
     private final DefaultListModel<String> listModel = new DefaultListModel<>();
     private final JList<String> recipeList = new JList<>(listModel);
@@ -24,12 +24,11 @@ public class SavedRecipesView extends JPanel implements PropertyChangeListener {
     public SavedRecipesView(SavedRecipeController savedController,
                             SavedRecipeViewModel viewModel,
                             ViewRecipeController viewRecipeController,
-                            Long userId) {
+                            ViewManagerModel viewManagerModel) {
         this.savedController = savedController;
         this.viewModel = viewModel;
         this.viewRecipeController = viewRecipeController;
-        this.userId = userId;
-
+        this.viewManagerModel = viewManagerModel;
         this.viewModel.addPropertyChangeListener(this);
 
         setPreferredSize(new Dimension(600, 400));
@@ -58,6 +57,7 @@ public class SavedRecipesView extends JPanel implements PropertyChangeListener {
     }
 
     private void onRefresh(ActionEvent e) {
+        Long userId = viewManagerModel.getCurrentUserId();
         savedController.executeRetrieve(userId);
     }
 
@@ -84,6 +84,7 @@ public class SavedRecipesView extends JPanel implements PropertyChangeListener {
         }
         String item = listModel.get(index);
         String recipeKey = parseRecipeKey(item);
+        Long userId = viewManagerModel.getCurrentUserId();
         if (recipeKey == null || recipeKey.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Invalid recipe entry.");
             return;
