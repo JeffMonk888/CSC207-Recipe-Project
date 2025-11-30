@@ -56,6 +56,15 @@ import usecase.view_recipe.ViewRecipeOutputBoundary;
 import usecase.remove_ingredient.RemoveIngredientInputBoundary;
 import usecase.remove_ingredient.RemoveIngredientInteractor;
 
+// Filter recipes (UC4)
+import interface_adapter.filter_recipes.FilterRecipesController;
+import interface_adapter.filter_recipes.FilterRecipesPresenter;
+import interface_adapter.filter_recipes.FilterRecipesViewModel;
+import usecase.filter_recipes.FilterRecipesInputBoundary;
+import usecase.filter_recipes.FilterRecipesInteractor;
+import usecase.filter_recipes.FilterRecipesOutputBoundary;
+import view.FilterRecipeView;
+
 // Views
 import view.CreateRecipeView;
 import view.FridgeView;
@@ -79,6 +88,7 @@ public class AppBuilder {
     private SavedRecipesView savedRecipesView;
     private FindRecipeView findRecipeView;
     private SearchByFridgeView searchByFridgeView;
+    private FilterRecipeView filterRecipeView;
 
     public AppBuilder addLoginView() {
         loginView = new LoginView(viewManagerModel);
@@ -236,6 +246,18 @@ public class AppBuilder {
     public AppBuilder addFindRecipe() {
         findRecipeView = new FindRecipeView(viewManagerModel);
         viewManager.addView(findRecipeView, findRecipeView.getViewName());
+        return this;
+    }
+
+    public AppBuilder addFilterRecipesFeature() {
+        FilterRecipesViewModel vm = new FilterRecipesViewModel();
+        FilterRecipesOutputBoundary presenter = new FilterRecipesPresenter(vm);
+        FilterRecipesInputBoundary interactor = new FilterRecipesInteractor(presenter);
+        FilterRecipesController controller = new FilterRecipesController(interactor);
+
+        filterRecipeView = new FilterRecipeView(vm, controller, viewManagerModel);
+
+        viewManager.addView(filterRecipeView, filterRecipeView.getViewName());
         return this;
     }
 

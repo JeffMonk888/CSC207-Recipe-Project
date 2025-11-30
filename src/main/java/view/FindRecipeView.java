@@ -32,7 +32,7 @@ public class FindRecipeView extends JPanel {
 
         JButton searchByIngredientsButton = new JButton("Search by Ingredients (UC2)");
         JButton whatCanIMakeButton = new JButton("What can I make? (UC3)");
-        JButton filterSortButton = new JButton("Filter & Sort Results (UC4)");
+        JButton filterSortButton = new JButton("Filter & Sort Results");
 
         Dimension buttonSize = new Dimension(280, 40);
         for (JButton b : new JButton[]{searchByIngredientsButton, whatCanIMakeButton, filterSortButton}) {
@@ -65,12 +65,7 @@ public class FindRecipeView extends JPanel {
         );
 
         filterSortButton.addActionListener(e ->
-                JOptionPane.showMessageDialog(
-                        this,
-                        "UC4: Filter & Sort Results – to be implemented",
-                        "Filter & Sort",
-                        JOptionPane.INFORMATION_MESSAGE
-                )
+                viewManagerModel.setActiveViewName("filter-recipes")
         );
 
         backButton.addActionListener(e ->
