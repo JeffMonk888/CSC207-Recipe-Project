@@ -10,11 +10,11 @@ package usecase.rate_recipe;
 public class RateRecipeInputData {
 
     private final long userId;
-    private final long recipeId;
+    private final String recipeId;
     private final Double stars;   // nullable when clearRating == true
     private final boolean clearRating;
 
-    public RateRecipeInputData(long userId, long recipeId, Double stars, boolean clearRating) {
+    public RateRecipeInputData(long userId, String recipeId, Double stars, boolean clearRating) {
         this.userId = userId;
         this.recipeId = recipeId;
         this.stars = stars;
@@ -22,17 +22,17 @@ public class RateRecipeInputData {
     }
 
     /** Convenience factory: set / update rating. */
-    public static RateRecipeInputData forRating(long userId, long recipeId, double stars) {
+    public static RateRecipeInputData forRating(long userId, String recipeId, double stars) {
         return new RateRecipeInputData(userId, recipeId, stars, false);
     }
 
     /** Convenience factory: clear rating (back to default / empty). */
-    public static RateRecipeInputData forClear(long userId, long recipeId) {
+    public static RateRecipeInputData forClear(long userId, String recipeId) {
         return new RateRecipeInputData(userId, recipeId, null, true);
     }
 
     public long getUserId() { return userId; }
-    public long getRecipeId() { return recipeId; }
+    public String getRecipeId() { return recipeId; }
     public Double getStars() { return stars; }
     public boolean isClearRating() { return clearRating; }
 }

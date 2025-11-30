@@ -15,12 +15,12 @@ public class InMemoryUserRatingGateway implements UserRatingDataAccessInterface 
 
     private final Map<String, UserRating> store = new HashMap<>();
 
-    private String key(long userId, long recipeId) {
+    private String key(long userId, String recipeId) {
         return userId + ":" + recipeId;
     }
 
     @Override
-    public UserRating findByUserAndRecipe(long userId, long recipeId) {
+    public UserRating findByUserAndRecipe(long userId, String recipeId) {
         return store.get(key(userId, recipeId));
     }
 
@@ -30,7 +30,7 @@ public class InMemoryUserRatingGateway implements UserRatingDataAccessInterface 
     }
 
     @Override
-    public void deleteRating(long userId, long recipeId) {
+    public void deleteRating(long userId, String recipeId) {
         store.remove(key(userId, recipeId));
     }
 }

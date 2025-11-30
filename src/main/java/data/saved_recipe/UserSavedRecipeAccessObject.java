@@ -243,7 +243,7 @@ public class UserSavedRecipeAccessObject
      * We convert using String.valueOf(recipeId).
      */
     @Override
-    public UserRating findByUserAndRecipe(long userId, long recipeId) {
+    public UserRating findByUserAndRecipe(long userId, String recipeId) {
         String recipeKey = String.valueOf(recipeId);
         String key = compositeKey(userId, recipeKey);
         Double stars = ratings.get(key);
@@ -255,7 +255,7 @@ public class UserSavedRecipeAccessObject
     @Override
     public void save(UserRating rating) {
         long userId = rating.getUserId();
-        long recipeId = rating.getRecipeId();
+        String recipeId = rating.getRecipeId();
         String recipeKey = String.valueOf(recipeId);
 
         String key = compositeKey(userId, recipeKey);
@@ -273,7 +273,7 @@ public class UserSavedRecipeAccessObject
     }
 
     @Override
-    public void deleteRating(long userId, long recipeId) {
+    public void deleteRating(long userId, String recipeId) {
         String recipeKey = String.valueOf(recipeId);
         String key = compositeKey(userId, recipeKey);
         if (ratings.remove(key) != null) {
