@@ -5,13 +5,13 @@ import java.util.List;
 public class AssignCategoryOutputData {
 
     private final Long categoryId;
-    private final List<Long> assignedRecipeIds;
+    private final List<String> assignedRecipeIds;
 
-    public AssignCategoryOutputData(Long categoryId, List<Long> assignedRecipeIds) {
+    public AssignCategoryOutputData(Long categoryId, List<String> assignedRecipeIds) {
         this.categoryId = categoryId;
         this.assignedRecipeIds = assignedRecipeIds;
     }
 
     public Long getCategoryId() { return categoryId; }
-    public List<Long> getAssignedRecipeIds() { return assignedRecipeIds; }
+    public List<String> getAssignedRecipeIds() { return assignedRecipeIds; }
 }
