@@ -20,8 +20,8 @@ public class CreateRecipeView extends JPanel implements PropertyChangeListener {
 
     // UI Components
     private final JTextField titleField = new JTextField(20);
-    private final JTextArea ingredientsArea = new JTextArea(5, 20);
-    private final JTextArea instructionsArea = new JTextArea(8, 20);
+    private final JTextArea ingredientsArea = new JTextArea(3, 25);
+    private final JTextArea instructionsArea = new JTextArea(5, 25);
     private final JButton createButton = new JButton("Create Recipe");
     private final JButton backButton = new JButton("Back to Home");
 
@@ -46,19 +46,30 @@ public class CreateRecipeView extends JPanel implements PropertyChangeListener {
 
         JPanel formPanel = new JPanel();
         formPanel.setLayout(new BoxLayout(formPanel, BoxLayout.Y_AXIS));
-
+        Dimension titlePref = titleField.getPreferredSize();
+        titleField.setMaximumSize(new Dimension(Integer.MAX_VALUE, titlePref.height));
         formPanel.add(new JLabel("Title:"));
         formPanel.add(titleField);
         formPanel.add(Box.createVerticalStrut(10));
 
         formPanel.add(new JLabel("Ingredients (comma separated):"));
         ingredientsArea.setLineWrap(true);
-        formPanel.add(new JScrollPane(ingredientsArea));
+        ingredientsArea.setWrapStyleWord(true);
+        JScrollPane ingredientsScroll = new JScrollPane(ingredientsArea);
+// keep this scroll pane from stretching too tall
+        Dimension ingPref = ingredientsScroll.getPreferredSize();
+        ingredientsScroll.setMaximumSize(new Dimension(Integer.MAX_VALUE, ingPref.height));
+        formPanel.add(ingredientsScroll);
         formPanel.add(Box.createVerticalStrut(10));
 
         formPanel.add(new JLabel("Instructions (one step per line):"));
         instructionsArea.setLineWrap(true);
-        formPanel.add(new JScrollPane(instructionsArea));
+        instructionsArea.setWrapStyleWord(true);
+        JScrollPane instructionsScroll = new JScrollPane(instructionsArea);
+// same idea for instructions
+        Dimension instrPref = instructionsScroll.getPreferredSize();
+        instructionsScroll.setMaximumSize(new Dimension(Integer.MAX_VALUE, instrPref.height));
+        formPanel.add(instructionsScroll);
 
         add(formPanel, BorderLayout.CENTER);
 
@@ -95,6 +106,10 @@ public class CreateRecipeView extends JPanel implements PropertyChangeListener {
             viewManagerModel.setActiveViewName("home");
         });
     }
+    public String getViewName() {
+        return viewModel.getViewName();
+    }
+
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {

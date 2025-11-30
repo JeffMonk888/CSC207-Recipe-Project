@@ -1,6 +1,7 @@
 package view;
 
 import interface_adapter.ViewManagerModel;
+import interface_adapter.create_recipe.CreateRecipeViewModel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -67,6 +68,10 @@ public class HomeView extends JPanel {
         add(topBar, BorderLayout.NORTH);
         add(centerPanel, BorderLayout.CENTER);
 
+        makeNewRecipeButton.addActionListener(e ->
+                viewManagerModel.setActiveViewName(CreateRecipeViewModel.VIEW_NAME)
+        );
+
         logoutButton.addActionListener(e ->
                 viewManagerModel.setActiveViewName("login")
         );
@@ -76,15 +81,6 @@ public class HomeView extends JPanel {
                         this,
                         "Find new recipe – to be implemented",
                         "Find new recipe",
-                        JOptionPane.INFORMATION_MESSAGE
-                )
-        );
-
-        makeNewRecipeButton.addActionListener(e ->
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Make new recipe – to be implemented",
-                        "Make new recipe",
                         JOptionPane.INFORMATION_MESSAGE
                 )
         );

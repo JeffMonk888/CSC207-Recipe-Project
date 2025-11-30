@@ -22,6 +22,7 @@ public class Main {
                     .addSignUpView()
                     .addHomeView()
                     .addFridgeFeature(dummyUserId)
+                    .addCreateRecipeFeature(dummyUserId)
                     .show();
         });
     }
