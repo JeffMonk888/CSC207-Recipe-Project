@@ -6,9 +6,9 @@ package usecase.category.remove_recipe;
 public class RemoveRecipeFromCategoryOutputData {
 
     private final Long categoryId;
-    private final Long recipeId;
+    private final String recipeId;
 
-    public RemoveRecipeFromCategoryOutputData(Long categoryId, Long recipeId) {
+    public RemoveRecipeFromCategoryOutputData(Long categoryId, String recipeId) {
         this.categoryId = categoryId;
         this.recipeId = recipeId;
     }
@@ -17,7 +17,7 @@ public class RemoveRecipeFromCategoryOutputData {
         return categoryId;
     }
 
-    public Long getRecipeId() {
+    public String getRecipeId() {
         return recipeId;
     }
 }
