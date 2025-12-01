@@ -2,7 +2,7 @@ package demo;
 
 import data.api.SpoonacularClient;
 import data.mapper.RecipeMapper;
-import data.dto.RecipeInformationDTO;
+import data.dto.RecipeInformationDto;
 import data.saved_recipe.RecipeDataAssessObject;
 import data.saved_recipe.UserSavedRecipeAccessObject;
 import domain.entity.Recipe;
@@ -92,7 +92,7 @@ public class CombinedDemo {
 
         try {
             // (Optional) sanity check: directly hit API once
-            RecipeInformationDTO fromApi = apiClient.getRecipeInformation(REAL_API_ID_TO_TEST, true);
+            RecipeInformationDto fromApi = apiClient.getRecipeInformation(REAL_API_ID_TO_TEST, true);
             Recipe recipe = RecipeMapper.toDomain(fromApi);
             System.out.println("Fetched from API (sanity check): " + recipe.getTitle());
 

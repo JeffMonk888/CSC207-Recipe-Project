@@ -1,6 +1,6 @@
 package usecase.view_recipe;
 
-import data.dto.RecipeInformationDTO;
+import data.dto.RecipeInformationDto;
 import data.saved_recipe.RecipeDataAssessObject;
 import domain.entity.Recipe;
 import org.junit.jupiter.api.Test;
@@ -34,8 +34,8 @@ class ViewRecipeInteractorTest {
         FakeClient() { super("FAKE"); }
 
         @Override
-        public RecipeInformationDTO getRecipeInformation(long id, boolean includeNutrition) {
-            RecipeInformationDTO dto = new RecipeInformationDTO();
+        public RecipeInformationDto getRecipeInformation(long id, boolean includeNutrition) {
+            RecipeInformationDto dto = new RecipeInformationDto();
             dto.id = id;
             dto.title = "Test Recipe";
             // fill in minimal DTO fields here...

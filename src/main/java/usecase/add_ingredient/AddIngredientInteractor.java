@@ -1,8 +1,8 @@
 package usecase.add_ingredient;
 
-import usecase.common.FridgeAccess;
-
 import java.util.List;
+
+import usecase.common.FridgeAccess;
 
 public class AddIngredientInteractor implements AddIngredientInputBoundary {
 
@@ -17,33 +17,39 @@ public class AddIngredientInteractor implements AddIngredientInputBoundary {
 
     @Override
     public void execute(AddIngredientInputData inputData) {
-        Long userId = inputData.getUserId();
-        String ingredient = inputData.getIngredient();
+        final Long userId = inputData.getUserId();
+        final String ingredient = inputData.getIngredient();
+        String error = null;
+        AddIngredientOutputData outputData = null;
 
         if (userId == null) {
-            presenter.presentFailure("User ID cannot be null.");
-            return;
+            error = "User ID code cannot be null.";
+        }
+        else if (ingredient == null || ingredient.trim().isEmpty()) {
+            error = "Ingredient cannot be empty.";
+        }
+        else {
+            final String trimmed = ingredient.trim();
+
+            // no duplicates for the same user
+            final List<String> existing = fridgeAccess.getItems(userId);
+            if (existing.contains(trimmed)) {
+                error = "Ingredient is already in your fridge.";
+            }
+            else {
+
+                // Business rule satisfied → update storage
+                fridgeAccess.addItem(userId, trimmed);
+                outputData = new AddIngredientOutputData(userId, trimmed);
+
+            }
         }
 
-        if (ingredient == null || ingredient.trim().isEmpty()) {
-            presenter.presentFailure("Ingredient cannot be empty.");
-            return;
+        if (error != null) {
+            presenter.presentFailure(error);
         }
-
-        String trimmed = ingredient.trim();
-
-        // Optional rule: no duplicates for the same user
-        List<String> existing = fridgeAccess.getItems(userId);
-        if (existing.contains(trimmed)) {
-            presenter.presentFailure("Ingredient is already in your fridge.");
-            return;
+        else {
+            presenter.presentSuccess(outputData);
         }
-
-        // Business rule satisfied → update storage
-        fridgeAccess.addItem(userId, trimmed);
-
-        AddIngredientOutputData outputData =
-                new AddIngredientOutputData(userId, trimmed);
-        presenter.presentSuccess(outputData);
     }
 }
