@@ -32,7 +32,7 @@ public class NutritionInfo {
         }
 
         if (jsonObject.has("fat")) {
-            this.calories = jsonObject.getDouble("fat");
+            this.fat = jsonObject.getString("fat");
         }
 
         if (jsonObject.has("carbohydrates")) {

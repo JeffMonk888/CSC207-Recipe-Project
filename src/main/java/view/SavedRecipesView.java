@@ -10,6 +10,8 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import demo.CategoryDemo;
+import demo.RateRecipeDemo;
 
 public class SavedRecipesView extends JPanel implements PropertyChangeListener {
 
@@ -65,6 +67,35 @@ public class SavedRecipesView extends JPanel implements PropertyChangeListener {
         bottomPanel.add(backPanel, BorderLayout.EAST);
 
         add(bottomPanel, BorderLayout.SOUTH);
+        // --- Right-side panel for demo buttons ---
+        JPanel demoPanel = new JPanel();
+        demoPanel.setLayout(new BoxLayout(demoPanel, BoxLayout.Y_AXIS));
+        demoPanel.setBorder(BorderFactory.createTitledBorder("Extra"));
+
+// Buttons
+        JButton rateDemoButton = new JButton("Rate Recipe");
+        JButton categoryDemoButton = new JButton("Category ");
+
+// Add actions to run the demo classes
+        rateDemoButton.addActionListener(e -> {
+            // Run the RateRecipe demo in its own window
+            RateRecipeDemo.main(new String[0]);
+        });
+
+        categoryDemoButton.addActionListener(e -> {
+            // Run the Category demo in its own window
+            CategoryDemo.main(new String[0]);
+        });
+
+// Layout: push them to the top or center as you like
+        demoPanel.add(Box.createVerticalStrut(10));
+        demoPanel.add(rateDemoButton);
+        demoPanel.add(Box.createVerticalStrut(10));
+        demoPanel.add(categoryDemoButton);
+        demoPanel.add(Box.createVerticalGlue());
+
+// Add the panel on the right side of SavedRecipesView
+        this.add(demoPanel, BorderLayout.EAST);
     }
 
     private void onRefresh(ActionEvent e) {

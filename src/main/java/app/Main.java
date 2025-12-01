@@ -24,7 +24,6 @@ public class Main {
                     .addCreateRecipeFeature()
                     .addSavedRecipesFeature()
                     .addSearchByFridgeFeature()
-                    .addFilterRecipesFeature()
                     .show();
         });
     }

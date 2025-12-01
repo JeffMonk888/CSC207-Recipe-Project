@@ -145,8 +145,15 @@ public class RateRecipeView extends JFrame {
         right.add(Box.createVerticalGlue());
         root.add(right, BorderLayout.CENTER);
 
-        // Initial load
         refreshList();
+        JButton backButton = new JButton("Back to Saved Recipes");
+        backButton.addActionListener(e -> {
+            // Close this demo window; SavedRecipesView stays open behind it
+            dispose();
+        });
+        JPanel bottomPanel = new JPanel();
+        bottomPanel.add(backButton);
+        this.getContentPane().add(bottomPanel, BorderLayout.SOUTH);
     }
 
     /**
