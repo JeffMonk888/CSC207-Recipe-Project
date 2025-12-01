@@ -12,6 +12,9 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.List;
 
+// NEW: import the CSV-backed fridge DAO
+import data.saved_ingredient.FileFridgeAccessObject;
+
 /**
  * Swing view for the "What's in my fridge" feature.
  * Talks to FridgeController and observes FridgeViewModel.
@@ -26,7 +29,7 @@ public class FridgeView extends JPanel implements ActionListener, PropertyChange
     private final JTextField ingredientField = new JTextField(20);
     private final JButton addButton = new JButton("Add");
     private final JButton removeButton = new JButton("Remove Selected");
-
+    private final JButton backButton = new JButton("Back to Home");
     private final DefaultListModel<String> listModel = new DefaultListModel<>();
     private final JList<String> ingredientList = new JList<>(listModel);
 
@@ -39,8 +42,18 @@ public class FridgeView extends JPanel implements ActionListener, PropertyChange
         this.viewModel = viewModel;
         this.viewManagerModel = viewManagerModel;
 
-        // Register as listener to the ViewModel
+        // Register as listener to the ViewModel (for add/remove updates)
         this.viewModel.addPropertyChangeListener(this);
+
+        // NEW: when this view becomes the active one, load items from fridge_items.csv
+        this.viewManagerModel.addPropertyChangeListener(evt -> {
+            if ("activeView".equals(evt.getPropertyName())) {
+                String newView = (String) evt.getNewValue();
+                if (FridgeViewModel.VIEW_NAME.equals(newView)) {
+                    loadIngredientsFromStorageForCurrentUser();
+                }
+            }
+        });
 
         setupUI();
         setupListeners();
@@ -56,6 +69,7 @@ public class FridgeView extends JPanel implements ActionListener, PropertyChange
         JLabel title = new JLabel("Ingredient in Fridge");
         title.setFont(title.getFont().deriveFont(Font.BOLD, 18f));
         JPanel titlePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+
         titlePanel.add(title);
 
         // Center: list of ingredients
@@ -76,9 +90,13 @@ public class FridgeView extends JPanel implements ActionListener, PropertyChange
 
         errorLabel.setForeground(Color.RED);
 
+        JPanel backPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        backPanel.add(backButton);
+
         inputPanel.add(addPanel);
         inputPanel.add(removePanel);
         inputPanel.add(errorLabel);
+        inputPanel.add(backPanel);
 
         add(titlePanel, BorderLayout.NORTH);
         add(scrollPane, BorderLayout.CENTER);
@@ -88,7 +106,8 @@ public class FridgeView extends JPanel implements ActionListener, PropertyChange
     private void setupListeners() {
         addButton.setActionCommand("add");
         removeButton.setActionCommand("remove");
-
+        backButton.setActionCommand("back");
+        backButton.addActionListener(this);
         addButton.addActionListener(this);
         removeButton.addActionListener(this);
     }
@@ -113,9 +132,32 @@ public class FridgeView extends JPanel implements ActionListener, PropertyChange
                 controller.removeIngredient(userId, selected);
             }
         }
+        else if ("back".equals(cmd)) {
+            viewManagerModel.setActiveViewName("home");
+        }
     }
 
-    // --------------------- ViewModel updates ---------------------
+    // NEW: load ingredients from fridge_items.csv for the active user,
+    // and push them into the FridgeViewModel state.
+    private void loadIngredientsFromStorageForCurrentUser() {
+        Long userId = viewManagerModel.getCurrentUserId();
+        if (userId == null) {
+            // No logged-in user yet; nothing to load.
+            return;
+        }
+
+        // Fresh DAO each time so we always read the latest contents of the file.
+        FileFridgeAccessObject fridgeAccess = new FileFridgeAccessObject("fridge_items.csv");
+
+        List<String> items = fridgeAccess.getItems(userId);
+
+        FridgeState state = viewModel.getState();
+        state.setIngredients(items);      // overwrite with what’s in the CSV for this user
+        state.setErrorMessage(null);
+        viewModel.fireStateChanged();     // triggers propertyChange(...) below
+    }
+
+    // ------------------ ViewModel updates ---------------------
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
@@ -135,6 +177,7 @@ public class FridgeView extends JPanel implements ActionListener, PropertyChange
         String error = state.getErrorMessage();
         errorLabel.setText(error == null ? "" : error);
     }
+
     public String getViewName() {
         return FridgeViewModel.VIEW_NAME; // "fridge"
     }

@@ -1,4 +1,86 @@
 id,userId,item
+1,1,turkey
+2,1,beef
 3,1,spinach
 4,1,milk
-5,1,apple
+5,1,egg
+6,1,butter
+7,1,cheddar cheese
+8,1,garlic
+9,1,onion
+10,1,olive oil
+11,1,salt
+12,1,black pepper
+13,1,tomato
+14,1,pasta
+15,1,rice
+16,1,chicken breast
+17,1,parmesan
+18,1,bread
+19,1,mozzarella
+20,1,basil
+21,1,bacon
+22,1,sausage
+23,1,ham
+24,1,shrimp
+25,1,fish fillet
+26,1,tofu
+27,1,broccoli
+28,1,carrot
+29,1,mushroom
+30,1,red bell pepper
+31,1,green bell pepper
+32,1,potato
+33,1,sweet potato
+34,1,cabbage
+35,1,lettuce
+36,1,cucumber
+37,1,lemon
+38,1,lime
+39,1,ginger
+40,1,cilantro
+41,1,soy sauce
+42,1,tomato paste
+43,1,ketchup
+44,1,mayonnaise
+45,1,balsamic vinegar
+46,1,white vinegar
+47,1,hot sauce
+48,1,chicken broth
+49,1,beef broth
+50,1,coconut milk
+51,1,flour
+52,1,sugar
+53,1,brown sugar
+54,1,baking powder
+55,1,baking soda
+56,1,honey
+57,1,vanilla extract
+58,1,cinnamon
+59,1,paprika
+60,1,cumin
+61,1,turmeric
+62,1,chili powder
+63,1,oregano
+64,1,thyme
+65,1,rosemary
+66,1,tortilla
+67,1,noodles
+68,1,spaghetti
+69,1,kidney beans
+70,1,black beans
+71,1,chickpeas
+72,1,cream cheese
+73,1,yogurt
+74,1,whipping cream
+75,1,green beans
+76,1,peas
+77,1,corn
+78,1,feta cheese
+79,1,goat cheese
+80,1,apple
+81,1,banana
+82,1,strawberries
+83,1,peanut butter
+84,1,almonds
+85,1,walnuts
