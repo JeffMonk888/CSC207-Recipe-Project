@@ -4,46 +4,30 @@ import data.category.InMemoryCategoryGateway;
 import data.saved_recipe.UserSavedRecipeAccessObject;
 import domain.entity.Category;
 import domain.entity.SavedRecipe;
-import interface_adapter.category.CategoryController;
-import interface_adapter.category.CategoryPresenter;
-import interface_adapter.category.CategoryState;
-import interface_adapter.category.CategoryViewModel;
 import usecase.category.CategoryDataAccessInterface;
-import usecase.category.assign_category.AssignCategoryInputBoundary;
-import usecase.category.assign_category.AssignCategoryInteractor;
-import usecase.category.create_category.CreateCategoryInputBoundary;
-import usecase.category.create_category.CreateCategoryInteractor;
-import usecase.category.delete_category.DeleteCategoryInputBoundary;
-import usecase.category.delete_category.DeleteCategoryInteractor;
-import usecase.category.filter_by_category.FilterByCategoryInputBoundary;
-import usecase.category.filter_by_category.FilterByCategoryInteractor;
-import usecase.category.remove_recipe.RemoveRecipeFromCategoryInputBoundary;
-import usecase.category.remove_recipe.RemoveRecipeFromCategoryInteractor;
+import usecase.category.assign_category.*;
+import usecase.category.create_category.*;
+import usecase.category.delete_category.*;
+import usecase.category.filter_by_category.*;
+import usecase.category.remove_recipe.*;
 import usecase.common.MotionForRecipe;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
- * GUI view for UC10: Category management.
+ * GUI view for UC10 Category.
  *
- * This view uses the category interface adapters:
- *  - CategoryViewModel / CategoryState
- *  - CategoryController
- *  - CategoryPresenter (as the OutputBoundary implementation)
+ * This class is responsible for displaying:
+ *  - all saved recipes of user 1
+ *  - category list
+ *  - recipes in the selected category (filter result)
  *
- * The view directly reads from gateways to populate:
- *  - the list of saved recipes on the left
- *  - the list of categories in the middle
- * but all category-related operations (create, assign, filter, remove, delete)
- * go through the controller and use case interactors.
+ * It wires the UI directly to the use cases and gateways.
  */
-public class CategoryView extends JFrame implements PropertyChangeListener {
+public class CategoryView extends JFrame {
 
     private static final long USER_ID = 1L;
 
@@ -51,11 +35,7 @@ public class CategoryView extends JFrame implements PropertyChangeListener {
     private final CategoryDataAccessInterface categoryGateway;
     private final MotionForRecipe savedGateway;
 
-    // Interface adapters
-    private final CategoryViewModel viewModel;
-    private final CategoryController controller;
-
-    // Swing models and components
+    // Swing models
     private final DefaultListModel<String> savedModel = new DefaultListModel<>();
     private final DefaultListModel<String> categoryModel = new DefaultListModel<>();
     private final DefaultListModel<String> categoryRecipeModel = new DefaultListModel<>();
@@ -66,140 +46,214 @@ public class CategoryView extends JFrame implements PropertyChangeListener {
 
     private final JTextField newCategoryField = new JTextField(12);
 
-    // Whether we are currently showing recipes filtered by a category
+    // Whether the bottom panel is currently filtered by a category
     private boolean isFiltered = false;
 
-    /**
-     * Construct a CategoryView wired with in-memory gateways and
-     * all the necessary interface adapters (for demo use).
-     */
+    // Use case boundaries
+    private final CreateCategoryInputBoundary createInteractor;
+    private final AssignCategoryInputBoundary assignInteractor;
+    private final FilterByCategoryInputBoundary filterInteractor;
+    private final RemoveRecipeFromCategoryInputBoundary removeInteractor;
+    private final DeleteCategoryInputBoundary deleteInteractor;
+
     public CategoryView() {
-        super("Category Management");
+        super("Category Demo");
 
         // ===== Gateways =====
         this.categoryGateway = new InMemoryCategoryGateway();
         this.savedGateway = new UserSavedRecipeAccessObject("user_recipe_links.csv");
 
-        // ===== ViewModel & Presenter =====
-        this.viewModel = new CategoryViewModel();
-        CategoryPresenter presenter = new CategoryPresenter(viewModel);
+        // Seed demo saved recipes if needed
+        seedSavedRecipes(savedGateway);
+
+        // ===== Presenters =====
+        CreateCategoryOutputBoundary createPresenter = new CreateCategoryOutputBoundary() {
+            @Override
+            public void presentSuccess(CreateCategoryOutputData outputData) {
+                JOptionPane.showMessageDialog(CategoryView.this,
+                        "Category created: " + outputData.getCategory().getName(),
+                        "Create Category", JOptionPane.INFORMATION_MESSAGE);
+            }
+
+            @Override
+            public void presentFailure(String errorMessage) {
+                JOptionPane.showMessageDialog(CategoryView.this,
+                        errorMessage,
+                        "Create Category Error", JOptionPane.ERROR_MESSAGE);
+            }
+        };
+
+        AssignCategoryOutputBoundary assignPresenter = new AssignCategoryOutputBoundary() {
+            @Override
+            public void presentSuccess(AssignCategoryOutputData outputData) {
+                JOptionPane.showMessageDialog(CategoryView.this,
+                        "Assigned recipe(s) " + outputData.getAssignedRecipeIds()
+                                + " to category " + outputData.getCategoryId(),
+                        "Assign to Category", JOptionPane.INFORMATION_MESSAGE);
+            }
+
+            @Override
+            public void presentFailure(String errorMessage) {
+                JOptionPane.showMessageDialog(CategoryView.this,
+                        errorMessage,
+                        "Assign Error", JOptionPane.ERROR_MESSAGE);
+            }
+        };
+
+        FilterByCategoryOutputBoundary filterPresenter = new FilterByCategoryOutputBoundary() {
+            @Override
+            public void presentSuccess(FilterByCategoryOutputData outputData) {
+                categoryRecipeModel.clear();
+                for (SavedRecipe sr : outputData.getSavedRecipes()) {
+                    String text = sr.getRecipeKey();
+                    if (sr.isFavourite()) text += " ★";
+                    categoryRecipeModel.addElement(text);
+                }
+            }
+
+            @Override
+            public void presentFailure(String errorMessage) {
+                JOptionPane.showMessageDialog(CategoryView.this, errorMessage,
+                        "Filter Error", JOptionPane.ERROR_MESSAGE);
+                categoryRecipeModel.clear();
+            }
+        };
+
+        RemoveRecipeFromCategoryOutputBoundary removePresenter =
+                new RemoveRecipeFromCategoryOutputBoundary() {
+                    @Override
+                    public void presentSuccess(RemoveRecipeFromCategoryOutputData outputData) {
+                        JOptionPane.showMessageDialog(CategoryView.this,
+                                "Removed recipe " + outputData.getRecipeId() +
+                                        " from category " + outputData.getCategoryId(),
+                                "Remove From Category",
+                                JOptionPane.INFORMATION_MESSAGE);
+                    }
+
+                    @Override
+                    public void presentFailure(String errorMessage) {
+                        JOptionPane.showMessageDialog(CategoryView.this,
+                                errorMessage,
+                                "Remove Error",
+                                JOptionPane.ERROR_MESSAGE);
+                    }
+                };
+
+        DeleteCategoryOutputBoundary deletePresenter =
+                new DeleteCategoryOutputBoundary() {
+                    @Override
+                    public void presentSuccess(DeleteCategoryOutputData outputData) {
+                        JOptionPane.showMessageDialog(CategoryView.this,
+                                "Deleted category " + outputData.getDeletedCategoryId(),
+                                "Delete Category", JOptionPane.INFORMATION_MESSAGE);
+                    }
+
+                    @Override
+                    public void presentFailure(String errorMessage) {
+                        JOptionPane.showMessageDialog(CategoryView.this,
+                                errorMessage,
+                                "Delete Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                };
 
         // ===== Interactors =====
-        CreateCategoryInputBoundary createInteractor =
-                new CreateCategoryInteractor(categoryGateway, presenter);
-        AssignCategoryInputBoundary assignInteractor =
-                new AssignCategoryInteractor(categoryGateway, presenter);
-        FilterByCategoryInputBoundary filterInteractor =
-                new FilterByCategoryInteractor(categoryGateway, savedGateway, presenter);
-        RemoveRecipeFromCategoryInputBoundary removeInteractor =
-                new RemoveRecipeFromCategoryInteractor(categoryGateway, presenter);
-        DeleteCategoryInputBoundary deleteInteractor =
-                new DeleteCategoryInteractor(categoryGateway, presenter);
+        this.createInteractor =
+                new CreateCategoryInteractor(categoryGateway, createPresenter);
+        this.assignInteractor =
+                new AssignCategoryInteractor(categoryGateway, assignPresenter);
+        this.filterInteractor =
+                new FilterByCategoryInteractor(categoryGateway, savedGateway, filterPresenter);
+        this.removeInteractor =
+                new RemoveRecipeFromCategoryInteractor(categoryGateway, removePresenter);
+        this.deleteInteractor =
+                new DeleteCategoryInteractor(categoryGateway, deletePresenter);
 
-        // ===== Controller =====
-        this.controller = new CategoryController(
-                createInteractor,
-                assignInteractor,
-                filterInteractor,
-                removeInteractor,
-                deleteInteractor
-        );
-
-        // Listen to ViewModel changes
-        this.viewModel.addPropertyChangeListener(this);
-
-        // Build UI and load initial data
+        // Build the UI
         buildLayout();
+
+        // Initial data load
         refreshSavedList();
         refreshCategoryList();
-
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setSize(900, 600);
-        setLocationRelativeTo(null);
     }
 
-    /**
-     * Builds the overall layout.
-     *
-     * Top: three columns (Saved, Categories, Recipes in Category).
-     * Bottom: a horizontal row of buttons that is always visible.
-     */
     private void buildLayout() {
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setSize(980, 520);
+        setLocationRelativeTo(null);
+
         JPanel root = new JPanel(new BorderLayout(10, 10));
         root.setBorder(new EmptyBorder(10, 10, 10, 10));
         setContentPane(root);
 
-        // ===== TOP PANEL: three columns with fixed preferred height =====
-        JPanel topPanel = new JPanel(new GridLayout(1, 3, 10, 10));
-        topPanel.setPreferredSize(new Dimension(900, 360));
-        root.add(topPanel, BorderLayout.CENTER);
-
-        // ----- LEFT COLUMN: Saved recipes -----
-        JPanel left = new JPanel(new BorderLayout(5, 5));
-        left.setBorder(BorderFactory.createTitledBorder("Saved Recipes (user " + USER_ID + ")"));
-
-        savedList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+        // ===== Left: saved recipes =====
+        savedList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         JScrollPane savedScroll = new JScrollPane(savedList);
-        // Reduce preferred height so bottom controls have more room
-        savedScroll.setPreferredSize(new Dimension(260, 260));
-        left.add(savedScroll, BorderLayout.CENTER);
+        savedScroll.setBorder(BorderFactory.createTitledBorder("Saved Recipes"));
 
         JButton refreshSavedButton = new JButton("Refresh Saved");
-        JPanel leftBottom = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        leftBottom.add(refreshSavedButton);
-        left.add(leftBottom, BorderLayout.SOUTH);
 
-        topPanel.add(left);
+        JPanel leftPanel = new JPanel(new BorderLayout(5, 5));
+        leftPanel.add(savedScroll, BorderLayout.CENTER);
+        leftPanel.add(refreshSavedButton, BorderLayout.SOUTH);
 
-        // ----- MIDDLE COLUMN: Categories -----
-        JPanel middle = new JPanel(new BorderLayout(5, 5));
-        middle.setBorder(BorderFactory.createTitledBorder("Categories"));
+        root.add(leftPanel, BorderLayout.WEST);
 
+        // ===== Right: categories (top) + recipes in category (bottom) =====
         categoryList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         JScrollPane categoryScroll = new JScrollPane(categoryList);
-        // Also reduce height here so Create/Delete buttons are visible
-        categoryScroll.setPreferredSize(new Dimension(260, 260));
-        middle.add(categoryScroll, BorderLayout.CENTER);
-
-        JPanel createPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        createPanel.add(new JLabel("New Category:"));
-        createPanel.add(newCategoryField);
-        JButton createButton = new JButton("Create");
-        JButton deleteButton = new JButton("Delete Selected");
-        JButton refreshCategoriesButton = new JButton("Refresh Categories");
-        createPanel.add(createButton);
-        createPanel.add(deleteButton);
-        createPanel.add(refreshCategoriesButton);
-        middle.add(createPanel, BorderLayout.SOUTH);
-
-        topPanel.add(middle);
-
-        // ----- RIGHT COLUMN: Recipes in selected category -----
-        JPanel right = new JPanel(new BorderLayout(5, 5));
-        right.setBorder(BorderFactory.createTitledBorder("Recipes in Selected Category"));
+        categoryScroll.setBorder(BorderFactory.createTitledBorder("Categories"));
 
         categoryRecipeList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         JScrollPane categoryRecipeScroll = new JScrollPane(categoryRecipeList);
-        categoryRecipeScroll.setPreferredSize(new Dimension(260, 260));
-        right.add(categoryRecipeScroll, BorderLayout.CENTER);
+        categoryRecipeScroll.setBorder(
+                BorderFactory.createTitledBorder("Recipes (filtered / unfiltered)")
+        );
 
-        topPanel.add(right);
+        JSplitPane rightSplit = new JSplitPane(
+                JSplitPane.VERTICAL_SPLIT, categoryScroll, categoryRecipeScroll
+        );
+        rightSplit.setResizeWeight(0.4);
+        root.add(rightSplit, BorderLayout.CENTER);
 
-        // ===== BOTTOM PANEL: always-visible buttons =====
-        JPanel bottomPanel = new JPanel(new GridLayout(1, 5, 10, 0));
-        root.add(bottomPanel, BorderLayout.SOUTH);
+        // ===== Bottom controls =====
+        JPanel bottom = new JPanel(new GridLayout(4, 1, 5, 5));
 
-        JButton assignButton = new JButton("Assign Selected Saved -> Category");
-        JButton removeButton = new JButton("Remove Selected Recipe from Category");
-        JButton filterButton = new JButton("Filter by Category");
-        JButton clearFilterButton = new JButton("Clear Filter");
-        JButton backButton = new JButton("Back / Close");
+        // Row 1: create / delete category
+        JPanel row1 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        row1.add(new JLabel("New category:"));
+        row1.add(newCategoryField);
+        JButton createButton = new JButton("Create");
+        JButton deleteButton = new JButton("Delete selected category");
+        JButton refreshCategoriesButton = new JButton("Refresh Categories");
+        row1.add(createButton);
+        row1.add(deleteButton);
+        row1.add(refreshCategoriesButton);
 
-        bottomPanel.add(assignButton);
-        bottomPanel.add(removeButton);
-        bottomPanel.add(filterButton);
-        bottomPanel.add(clearFilterButton);
-        bottomPanel.add(backButton);
+        // Row 2: assign / remove
+        JPanel row2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JButton assignButton = new JButton("Assign selected saved recipe to category");
+        JButton removeButton = new JButton("Remove selected recipe from category");
+        row2.add(assignButton);
+        row2.add(removeButton);
+
+        // Row 3: filter / clear filter
+        JPanel row3 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JButton filterButton = new JButton("Filter by selected category");
+        JButton clearFilterButton = new JButton("Clear Board");
+        row3.add(filterButton);
+        row3.add(clearFilterButton);
+
+        bottom.add(row1);
+        bottom.add(row2);
+        bottom.add(row3);
+        root.add(bottom, BorderLayout.SOUTH);
+
+        // Row 4: back button to close this demo and return to Saved Recipes view (ADDED)
+        JPanel row4 = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JButton backButton = new JButton("Back to Saved Recipes");
+        row4.add(backButton);
+
+        bottom.add(row4);
 
         // ===== Button actions =====
 
@@ -207,98 +261,70 @@ public class CategoryView extends JFrame implements PropertyChangeListener {
         refreshCategoriesButton.addActionListener(e -> refreshCategoryList());
 
         createButton.addActionListener(e -> {
-            String name = newCategoryField.getText().trim();
-            if (name.isEmpty()) {
-                JOptionPane.showMessageDialog(
-                        CategoryView.this,
-                        "Category name cannot be empty.",
-                        "Create Category Error",
-                        JOptionPane.ERROR_MESSAGE
-                );
-                return;
-            }
-            controller.createCategory(USER_ID, name);
-            newCategoryField.setText("");
+            createInteractor.execute(
+                    new CreateCategoryInputData(USER_ID, newCategoryField.getText().trim())
+            );
             refreshCategoryList();
         });
+
+        backButton.addActionListener(e -> dispose());
 
         deleteButton.addActionListener(e -> {
             Long cid = getSelectedCategoryId(categoryList);
             if (cid == null) {
-                JOptionPane.showMessageDialog(
-                        CategoryView.this,
-                        "Please select a category to delete.",
-                        "Delete Category",
-                        JOptionPane.WARNING_MESSAGE
-                );
+                JOptionPane.showMessageDialog(this,
+                        "Select a category first.", "Delete Category",
+                        JOptionPane.WARNING_MESSAGE);
                 return;
             }
-            controller.deleteCategory(USER_ID, cid);
-            refreshCategoryList();
+            deleteInteractor.execute(new DeleteCategoryInputData(USER_ID, cid));
             categoryRecipeModel.clear();
+            refreshCategoryList();
         });
 
         assignButton.addActionListener(e -> {
             Long cid = getSelectedCategoryId(categoryList);
-            if (cid == null) {
-                JOptionPane.showMessageDialog(
-                        CategoryView.this,
-                        "Please select a category in the middle list.",
-                        "Assign Recipes",
-                        JOptionPane.WARNING_MESSAGE
-                );
+            int idx = savedList.getSelectedIndex();
+            if (cid == null || idx < 0) {
+                JOptionPane.showMessageDialog(this,
+                        "Select both a category and a saved recipe.",
+                        "Assign Error", JOptionPane.WARNING_MESSAGE);
                 return;
             }
-            List<String> selectedRecipeIds = getSelectedRecipeKeys(savedList);
-            if (selectedRecipeIds.isEmpty()) {
-                JOptionPane.showMessageDialog(
-                        CategoryView.this,
-                        "Please select at least one saved recipe on the left.",
-                        "Assign Recipes",
-                        JOptionPane.WARNING_MESSAGE
-                );
-                return;
-            }
-            controller.assignRecipesToCategory(USER_ID, cid, selectedRecipeIds);
-            if (isFiltered) {
-                refreshFilteredRecipes();
-            }
+            String token = parseLeadingToken(savedModel.get(idx));
+            String recipeId = token;
+
+            assignInteractor.execute(
+                    new AssignCategoryInputData(USER_ID, cid,
+                            Collections.singletonList(recipeId))
+            );
+            refreshFilteredRecipes();
         });
 
         removeButton.addActionListener(e -> {
             Long cid = getSelectedCategoryId(categoryList);
-            if (cid == null) {
-                JOptionPane.showMessageDialog(
-                        CategoryView.this,
-                        "Please select a category.",
-                        "Remove Recipe",
-                        JOptionPane.WARNING_MESSAGE
-                );
+            int idx = categoryRecipeList.getSelectedIndex();
+            if (cid == null || idx < 0) {
+                JOptionPane.showMessageDialog(this,
+                        "Select a category and a recipe in the bottom list.",
+                        "Remove Error", JOptionPane.WARNING_MESSAGE);
                 return;
             }
-            String recipeKey = getSelectedRecipeKey(categoryRecipeList);
-            if (recipeKey == null) {
-                JOptionPane.showMessageDialog(
-                        CategoryView.this,
-                        "Please select a recipe in the right-hand list.",
-                        "Remove Recipe",
-                        JOptionPane.WARNING_MESSAGE
-                );
-                return;
-            }
-            controller.removeRecipeFromCategory(USER_ID, cid, recipeKey);
+            String token = parseLeadingToken(categoryRecipeModel.get(idx));
+            String recipeId = token;
+
+            removeInteractor.execute(
+                    new RemoveRecipeFromCategoryInputData(USER_ID, cid, recipeId)
+            );
             refreshFilteredRecipes();
         });
 
         filterButton.addActionListener(e -> {
             Long cid = getSelectedCategoryId(categoryList);
             if (cid == null) {
-                JOptionPane.showMessageDialog(
-                        CategoryView.this,
-                        "Please select a category to filter by.",
-                        "Filter Recipes",
-                        JOptionPane.WARNING_MESSAGE
-                );
+                JOptionPane.showMessageDialog(this,
+                        "Select a category first.", "Filter",
+                        JOptionPane.WARNING_MESSAGE);
                 return;
             }
             isFiltered = true;
@@ -309,27 +335,19 @@ public class CategoryView extends JFrame implements PropertyChangeListener {
             isFiltered = false;
             categoryRecipeModel.clear();
         });
-
-        backButton.addActionListener(e -> dispose());
     }
 
-    /**
-     * Refreshes the left list of saved recipes from the gateway.
-     */
+    // ===== Helper methods =====
+
     private void refreshSavedList() {
         savedModel.clear();
         for (SavedRecipe sr : savedGateway.findByUserId(USER_ID)) {
             String text = sr.getRecipeKey();
-            if (sr.isFavourite()) {
-                text += " ★";
-            }
+            if (sr.isFavourite()) text += " ★";
             savedModel.addElement(text);
         }
     }
 
-    /**
-     * Refreshes the middle list of categories from the gateway.
-     */
     private void refreshCategoryList() {
         categoryModel.clear();
         for (Category c : categoryGateway.findCategoriesForUser(USER_ID)) {
@@ -337,13 +355,8 @@ public class CategoryView extends JFrame implements PropertyChangeListener {
         }
     }
 
-    /**
-     * Refreshes the right list of recipes in the selected category
-     * by invoking the filter-by-category use case.
-     */
     private void refreshFilteredRecipes() {
         if (!isFiltered) {
-            categoryRecipeModel.clear();
             return;
         }
         Long cid = getSelectedCategoryId(categoryList);
@@ -351,90 +364,48 @@ public class CategoryView extends JFrame implements PropertyChangeListener {
             categoryRecipeModel.clear();
             return;
         }
-        controller.filterRecipesByCategory(USER_ID, cid);
+        filterInteractor.execute(new FilterByCategoryInputData(USER_ID, cid));
     }
 
     /**
-     * Extracts the category id from a line like "3 - Dinner".
+     * Extracts category ID from a line such as "3 - Quick Meals".
      */
     private static Long getSelectedCategoryId(JList<String> list) {
         int idx = list.getSelectedIndex();
-        if (idx < 0) {
-            return null;
-        }
+        if (idx < 0) return null;
         String line = list.getModel().getElementAt(idx);
         int dash = line.indexOf(" - ");
-        if (dash < 0) {
-            return null;
-        }
+        String idStr = (dash >= 0 ? line.substring(0, dash) : line).trim();
         try {
-            return Long.parseLong(line.substring(0, dash));
-        } catch (NumberFormatException e) {
+            return Long.parseLong(idStr);
+        } catch (Exception e) {
             return null;
         }
     }
 
     /**
-     * Returns the recipe keys of all selected entries from a JList that
-     * contains lines like "201" or "201 ★".
+     * Extracts leading token: "201 ★" → "201".
      */
-    private static List<String> getSelectedRecipeKeys(JList<String> list) {
-        List<String> out = new ArrayList<>();
-        int[] indices = list.getSelectedIndices();
-        for (int idx : indices) {
-            String line = list.getModel().getElementAt(idx);
-            String key = line.split("\\s+")[0];
-            out.add(key);
-        }
-        return out;
+    private static String parseLeadingToken(String line) {
+        if (line == null) return "";
+        line = line.trim();
+        int space = line.indexOf(" ");
+        return space < 0 ? line : line.substring(0, space);
     }
 
     /**
-     * Returns the recipe key of the selected item in a JList, or null.
+     * Ensures demo saved recipes (201–205) exist.
      */
-    private static String getSelectedRecipeKey(JList<String> list) {
-        int idx = list.getSelectedIndex();
-        if (idx < 0) {
-            return null;
+    private static void seedSavedRecipes(MotionForRecipe gateway) {
+        Set<String> existing = new HashSet<>();
+        for (SavedRecipe sr : gateway.findByUserId(USER_ID)) {
+            existing.add(sr.getRecipeKey());
         }
-        String line = list.getModel().getElementAt(idx);
-        return line.split("\\s+")[0];
-    }
-
-    /**
-     * React to changes in the CategoryViewModel state:
-     *  - update the right-hand recipe list when filtered recipes change
-     *  - show any info or error messages in dialog boxes
-     */
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-        if (!"state".equals(evt.getPropertyName())) {
-            return;
-        }
-
-        CategoryState state = viewModel.getState();
-
-        // Update right-hand list from state
-        categoryRecipeModel.clear();
-        for (String s : state.getFilteredRecipes()) {
-            categoryRecipeModel.addElement(s);
-        }
-
-        // Show messages (if any)
-        if (state.getErrorMessage() != null) {
-            JOptionPane.showMessageDialog(
-                    this,
-                    state.getErrorMessage(),
-                    "Category Error",
-                    JOptionPane.ERROR_MESSAGE
-            );
-        } else if (state.getInfoMessage() != null) {
-            JOptionPane.showMessageDialog(
-                    this,
-                    state.getInfoMessage(),
-                    "Category Info",
-                    JOptionPane.INFORMATION_MESSAGE
-            );
+        String[] demo = {"201", "202", "203", "204", "205"};
+        for (String k : demo) {
+            if (!existing.contains(k)) {
+                gateway.save(new SavedRecipe(USER_ID, k));
+            }
         }
     }
 }

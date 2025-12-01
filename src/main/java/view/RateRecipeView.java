@@ -1,78 +1,68 @@
 package view;
 
-import data.rating.InMemoryUserRatingGateway;
 import data.saved_recipe.UserSavedRecipeAccessObject;
 import domain.entity.SavedRecipe;
 import domain.entity.UserRating;
-import interface_adapter.rate_recipe.RateRecipeController;
-import interface_adapter.rate_recipe.RateRecipeState;
-import interface_adapter.rate_recipe.RateRecipeViewModel;
-import interface_adapter.rate_recipe.RateRecipePresenter;
-import usecase.rate_recipe.RateRecipeInputBoundary;
-import usecase.rate_recipe.RateRecipeInteractor;
-import usecase.rate_recipe.UserRatingDataAccessInterface;
+import usecase.rate_recipe.*;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 
 /**
  * GUI view for UC9: Rate Recipe.
  *
- * This version uses the Rate Recipe interface adapter:
- *  - RateRecipeViewModel / RateRecipeState
- *  - RateRecipeController
- *  - RateRecipePresenter as the OutputBoundary
+ * Features:
+ *  - Shows saved recipes for USER_ID in a list
+ *  - Allows selecting a recipe and setting a star rating (0.0–5.0 step 0.5)
+ *  - Allows clearing the rating for the selected recipe
  *
- * The view still reads saved recipes from UserSavedRecipeAccessObject
- * to populate the list on the left.
+ * This view talks directly to the rate-recipe use case and its gateway.
  */
-public class RateRecipeView extends JFrame implements PropertyChangeListener {
+public class RateRecipeView extends JFrame {
 
     private static final long USER_ID = 1L;
 
-    // Gateways
-    private final UserSavedRecipeAccessObject savedGateway;
-    private final UserRatingDataAccessInterface ratingGateway;
+    private final UserSavedRecipeAccessObject gateway;
+    private final RateRecipeInputBoundary interactor;
 
-    // Interface adapters
-    private final RateRecipeViewModel viewModel;
-    private final RateRecipeController controller;
-
-    // Swing components
     private final DefaultListModel<String> listModel = new DefaultListModel<>();
     private final JList<String> recipeList = new JList<>(listModel);
     private final JSpinner spinner;
-    private final JLabel messageLabel = new JLabel(" ");
 
-    /**
-     * Construct a RateRecipeView wired with in-memory gateways and the
-     * interface adapter objects (for demo use).
-     */
     public RateRecipeView() {
         super("Rate Recipe");
 
-        // ===== Gateways =====
-        this.savedGateway = new UserSavedRecipeAccessObject("user_recipe_links.csv");
-        this.ratingGateway = new InMemoryUserRatingGateway();
+        // ===== Gateway =====
+        this.gateway = new UserSavedRecipeAccessObject("user_recipe_links.csv");
 
-        seedDemoData(savedGateway);
+        // Seed demo data if this user has no saved recipes yet
+        seedDemoData(gateway);
 
-        // ===== ViewModel & Presenter =====
-        this.viewModel = new RateRecipeViewModel();
-        RateRecipePresenter presenter = new RateRecipePresenter(viewModel);
+        // ===== Presenter =====
+        RateRecipeOutputBoundary presenter = new RateRecipeOutputBoundary() {
+            @Override
+            public void presentSuccess(RateRecipeOutputData outputData) {
+                if (outputData.isRemoved()) {
+                    System.out.println("[UC9] Rating cleared.");
+                } else {
+                    System.out.println("[UC9] Rating saved: " + outputData.getRating());
+                }
+            }
 
-        // ===== Interactor & Controller =====
-        RateRecipeInputBoundary interactor =
-                new RateRecipeInteractor(ratingGateway, presenter);
-        this.controller = new RateRecipeController(interactor);
+            @Override
+            public void presentFailure(String errorMessage) {
+                JOptionPane.showMessageDialog(RateRecipeView.this,
+                        errorMessage,
+                        "Rating Error",
+                        JOptionPane.ERROR_MESSAGE);
+            }
+        };
 
-        // Listen to ViewModel updates
-        this.viewModel.addPropertyChangeListener(this);
+        // ===== Interactor =====
+        this.interactor = new RateRecipeInteractor(gateway, presenter);
 
-        // ===== Build UI =====
+        // ===== UI components =====
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setSize(580, 420);
         setLocationRelativeTo(null);
@@ -99,108 +89,89 @@ public class RateRecipeView extends JFrame implements PropertyChangeListener {
         ratingPanel.setBorder(BorderFactory.createTitledBorder("Rating"));
         ratingPanel.setPreferredSize(new Dimension(260, 200));
 
-        // Spinner for stars: 0.0..5.0 step 0.5
+        // ===== Bigger spinner for stars =====
         SpinnerNumberModel spinnerModel = new SpinnerNumberModel(0.0, 0.0, 5.0, 0.5);
         spinner = new JSpinner(spinnerModel);
         spinner.setPreferredSize(new Dimension(80, 32));
 
-        // Enlarge font inside the spinner editor a bit
+        // Enlarge font inside the spinner editor
         JComponent editor = spinner.getEditor();
         if (editor instanceof JSpinner.DefaultEditor) {
             JFormattedTextField tf = ((JSpinner.DefaultEditor) editor).getTextField();
             tf.setColumns(3);
-            tf.setFont(tf.getFont().deriveFont(Font.BOLD, 18f));
+            tf.setFont(tf.getFont().deriveFont(Font.BOLD, 16f));
+            tf.setHorizontalAlignment(SwingConstants.CENTER);
         }
 
-        JLabel starLabel = new JLabel("★");
-        starLabel.setFont(starLabel.getFont().deriveFont(Font.BOLD, 22f));
+        JButton save = new JButton("Save Rating");
+        JButton clear = new JButton("Clear Rating");
 
-        JButton rateButton = new JButton("Save Rating");
-        JButton clearButton = new JButton("Clear Rating");
+        // Save button
+        save.addActionListener(e -> {
+            int index = recipeList.getSelectedIndex();
+            if (index < 0) {
+                JOptionPane.showMessageDialog(RateRecipeView.this,
+                        "Select a recipe first.");
+                return;
+            }
+
+            String recipeId = listModel.get(index).split("\\s+")[0];
+            double stars = (double) spinner.getValue();
+
+            interactor.execute(RateRecipeInputData.forRating(USER_ID, recipeId, stars));
+            refreshList();
+        });
+
+        // Clear button
+        clear.addActionListener(e -> {
+            int index = recipeList.getSelectedIndex();
+            if (index < 0) {
+                JOptionPane.showMessageDialog(RateRecipeView.this,
+                        "Select a recipe first.");
+                return;
+            }
+
+            String recipeId = listModel.get(index).split("\\s+")[0];
+            interactor.execute(RateRecipeInputData.forClear(USER_ID, recipeId));
+            refreshList();
+        });
 
         ratingPanel.add(new JLabel("Stars:"));
         ratingPanel.add(spinner);
-        ratingPanel.add(starLabel);
-        ratingPanel.add(rateButton);
-        ratingPanel.add(clearButton);
-
-        // Message label
-        messageLabel.setForeground(new Color(0, 80, 0));
-        JPanel messagePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        messagePanel.add(messageLabel);
+        ratingPanel.add(save);
+        ratingPanel.add(clear);
 
         right.add(ratingPanel);
-        right.add(Box.createVerticalStrut(10));
-        right.add(messagePanel);
-
+        right.add(Box.createVerticalGlue());
         root.add(right, BorderLayout.CENTER);
 
-        // ===== Button actions =====
-
-        rateButton.addActionListener(e -> {
-            String recipeId = getSelectedRecipeKey();
-            if (recipeId == null) {
-                JOptionPane.showMessageDialog(
-                        RateRecipeView.this,
-                        "Please select a recipe on the left.",
-                        "Rate Recipe",
-                        JOptionPane.WARNING_MESSAGE
-                );
-                return;
-            }
-            double stars = (Double) spinner.getValue();
-            controller.rate(USER_ID, recipeId, stars);
-            refreshList();
-        });
-
-        clearButton.addActionListener(e -> {
-            String recipeId = getSelectedRecipeKey();
-            if (recipeId == null) {
-                JOptionPane.showMessageDialog(
-                        RateRecipeView.this,
-                        "Please select a recipe on the left.",
-                        "Clear Rating",
-                        JOptionPane.WARNING_MESSAGE
-                );
-                return;
-            }
-            controller.clear(USER_ID, recipeId);
-            refreshList();
-        });
-
-        // Initial list load
         refreshList();
+        JButton backButton = new JButton("Back to Saved Recipes");
+        backButton.addActionListener(e -> {
+            // Close this demo window; SavedRecipesView stays open behind it
+            dispose();
+        });
+        JPanel bottomPanel = new JPanel();
+        bottomPanel.add(backButton);
+        this.getContentPane().add(bottomPanel, BorderLayout.SOUTH);
     }
 
     /**
-     * Reloads the left-hand list with saved recipes and their ratings.
+     * Reloads the list of saved recipes and their ratings into the left JList.
      */
     private void refreshList() {
         listModel.clear();
-
-        for (SavedRecipe sr : savedGateway.findByUserId(USER_ID)) {
+        for (SavedRecipe sr : gateway.findByUserId(USER_ID)) {
             String recipeId = sr.getRecipeKey();
-            UserRating rating = ratingGateway.findByUserAndRecipe(USER_ID, recipeId);
+            UserRating rating = gateway.findByUserAndRecipe(USER_ID, recipeId);
             String ratingStr = (rating == null ? "(no rating)" : rating.getStars() + "★");
             listModel.addElement(recipeId + "  " + ratingStr);
         }
     }
 
     /**
-     * Returns the recipe key of the current selection in the left list,
-     * or {@code null} if none is selected.
-     */
-    private String getSelectedRecipeKey() {
-        int idx = recipeList.getSelectedIndex();
-        if (idx < 0) {
-            return null;
-        }
-        String line = recipeList.getModel().getElementAt(idx);
-        return line.split("\\s+")[0];
-    }
-
-    /**
      * Seed two demo recipes for USER_ID if none exist yet.
+     * We use numeric keys so UC9 (which expects long recipeId) can parse them.
      */
     private static void seedDemoData(UserSavedRecipeAccessObject gateway) {
         if (!gateway.findByUserId(USER_ID).isEmpty()) {
@@ -214,32 +185,7 @@ public class RateRecipeView extends JFrame implements PropertyChangeListener {
         SavedRecipe r2 = new SavedRecipe(USER_ID, "102");
         r2.setFavourite(false);
         gateway.save(r2);
-    }
 
-    /**
-     * Called whenever the RateRecipeViewModel's state changes.
-     * We use it to update the small message label and show any errors.
-     */
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-        if (!"state".equals(evt.getPropertyName())) {
-            return;
-        }
-
-        RateRecipeState state = viewModel.getState();
-        String msg = state.getMessage();
-
-        if (msg != null && !msg.isEmpty()) {
-            messageLabel.setText(msg);
-        }
-
-        if (msg != null && msg.toLowerCase().contains("error")) {
-            JOptionPane.showMessageDialog(
-                    this,
-                    msg,
-                    "Rating Error",
-                    JOptionPane.ERROR_MESSAGE
-            );
-        }
+        System.out.println("[Seed] Added demo recipes 101 and 102 for user " + USER_ID);
     }
 }
