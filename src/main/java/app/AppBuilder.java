@@ -82,8 +82,10 @@ import view.SavedRecipesView;
 import view.SignUpView;
 import view.ViewManager;
 import view.ViewRecipeView;
+import view.ViewRecipeNoSave;
 
 public class AppBuilder {
+    String masterApiKey = "dc0c68e1d23b41fba2813b51dfbc5125";
     private final ViewManagerModel viewManagerModel;
     private final ViewManager viewManager;
     private final FridgeAccess fridgeAccess;
@@ -176,7 +178,7 @@ public class AppBuilder {
         String apiKey = System.getenv("SPOONACULAR_API_KEY");
         if (apiKey == null || apiKey.isBlank()) {
             // same fallback key as your demos
-            apiKey = "6586492a77f54829ba878d12fb62832d";
+            apiKey = masterApiKey;
         }
 
         SpoonacularClient apiClient = new SpoonacularClient(apiKey);
@@ -203,7 +205,9 @@ public class AppBuilder {
 
         // register view recipe screen with ViewManager
         viewManager.addView(viewRecipeView, viewRecipeViewModel.getViewName());
-
+        ViewRecipeNoSave viewRecipeNoSave =
+                new ViewRecipeNoSave(viewRecipeViewModel, null, viewManagerModel);
+        viewManager.addView(viewRecipeNoSave, ViewRecipeNoSave.VIEW_NAME);
         // 3) SAVED RECIPES (list) wiring
         SavedRecipeViewModel savedRecipeViewModel = new SavedRecipeViewModel();
         SavedRecipePresenter savedPresenter =
@@ -232,7 +236,7 @@ public class AppBuilder {
         // API client for searching recipes by ingredients
         String apiKey = System.getenv("SPOONACULAR_API_KEY");
         if (apiKey == null || apiKey.isBlank()) {
-            apiKey = "6586492a77f54829ba878d12fb62832d"; // same key you use in demos
+            apiKey = masterApiKey; // same key you use in demos
         }
         SpoonacularClient spoonacularClient = new SpoonacularClient(apiKey);
         RecipeByIngredientsAccess recipeAccess = spoonacularClient;

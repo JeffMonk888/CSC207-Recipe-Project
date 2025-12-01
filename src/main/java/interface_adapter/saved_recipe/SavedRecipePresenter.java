@@ -27,9 +27,14 @@ public class SavedRecipePresenter implements RetrieveSavedOutputBoundary, Delete
         List<String> rows = new ArrayList<>();
 
         for (Recipe r : recipes) {
-            Long id = r.getId();
+            String key = r.getRecipeKey();          // full key: "a632137", "c1764558054954"
             String title = r.getTitle();
-            String line = (id == null ? "" : id.toString()) + " - " + (title == null ? "" : title);
+
+            // What will appear in the list:
+            // e.g. "c1764558054954 - Banana"  or  "a632137 - Almond Green Bean Salad"
+            String line = (key == null ? "" : key) + " - "
+                    + (title == null ? "" : title);
+
             rows.add(line);
         }
 

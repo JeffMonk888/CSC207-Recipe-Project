@@ -34,7 +34,7 @@ public class Recipe {
         this.sourceName = sourceName;
         this.sourceUrl = sourceUrl;
         this.image = image;
-
+        this.recipeKey = apiId;
         this.nutritionInfo = nutritionInfo;
         this.ingredients = new ArrayList<>();
         this.instructionSteps = new ArrayList<>();
@@ -49,7 +49,7 @@ public class Recipe {
         this.sourceName = obj.getString("sourceName");
         this.sourceUrl = obj.getString("sourceUrl");
         this.image = obj.getString("image");
-        this.recipeKey = obj.optString("recipeid", null);
+        this.recipeKey = obj.has("recipeid") ? obj.optString("recipeid", null) : null;
 
         if (obj.has("nutritionInfo")) {
             this.nutritionInfo = new NutritionInfo(obj.getJSONObject("nutritionInfo"));
@@ -116,6 +116,7 @@ public class Recipe {
     public NutritionInfo getNutritionInfo() { return nutritionInfo; }
     public ArrayList<Ingredient> getIngredients() { return ingredients; }
     public ArrayList<InstructionStep> getInstructionSteps() { return instructionSteps; }
+    public String getRecipeKey() { return recipeKey; }
 
     // Setters
     public void setId(Long id) { this.id = id; }
