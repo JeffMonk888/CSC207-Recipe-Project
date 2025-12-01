@@ -30,18 +30,16 @@ public class FindRecipeView extends JPanel {
         centerPanel.add(subtitle);
         centerPanel.add(Box.createVerticalStrut(20));
 
-        JButton searchByIngredientsButton = new JButton("Search by Ingredients (UC2)");
-        JButton whatCanIMakeButton = new JButton("What can I make? (UC3)");
-        JButton filterSortButton = new JButton("Filter & Sort Results");
+        JButton searchByIngredientsButton = new JButton("Search by Ingredients");
+        JButton whatCanIMakeButton = new JButton("Makeable Recipes");
 
         Dimension buttonSize = new Dimension(280, 40);
-        for (JButton b : new JButton[]{searchByIngredientsButton, whatCanIMakeButton, filterSortButton}) {
+        for (JButton b : new JButton[]{searchByIngredientsButton, whatCanIMakeButton}) {
             b.setMaximumSize(buttonSize);
             b.setAlignmentX(Component.CENTER_ALIGNMENT);
             centerPanel.add(b);
             centerPanel.add(Box.createVerticalStrut(10));
         }
-
         add(centerPanel, BorderLayout.CENTER);
 
         // Bottom: Back to Home
@@ -64,9 +62,6 @@ public class FindRecipeView extends JPanel {
                 viewManagerModel.setActiveViewName("search-by-fridge")
         );
 
-        filterSortButton.addActionListener(e ->
-                viewManagerModel.setActiveViewName("filter-recipes")
-        );
 
         backButton.addActionListener(e ->
                 viewManagerModel.setActiveViewName("home")

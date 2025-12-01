@@ -216,7 +216,7 @@ public class CategoryView extends JFrame {
         root.add(rightSplit, BorderLayout.CENTER);
 
         // ===== Bottom controls =====
-        JPanel bottom = new JPanel(new GridLayout(3, 1, 5, 5));
+        JPanel bottom = new JPanel(new GridLayout(4, 1, 5, 5));
 
         // Row 1: create / delete category
         JPanel row1 = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -248,6 +248,13 @@ public class CategoryView extends JFrame {
         bottom.add(row3);
         root.add(bottom, BorderLayout.SOUTH);
 
+        // Row 4: back button to close this demo and return to Saved Recipes view (ADDED)
+        JPanel row4 = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JButton backButton = new JButton("Back to Saved Recipes");
+        row4.add(backButton);
+
+        bottom.add(row4);
+
         // ===== Button actions =====
 
         refreshSavedButton.addActionListener(e -> refreshSavedList());
@@ -259,6 +266,8 @@ public class CategoryView extends JFrame {
             );
             refreshCategoryList();
         });
+
+        backButton.addActionListener(e -> dispose());
 
         deleteButton.addActionListener(e -> {
             Long cid = getSelectedCategoryId(categoryList);
