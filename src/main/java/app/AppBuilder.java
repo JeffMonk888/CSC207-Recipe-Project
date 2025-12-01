@@ -232,7 +232,7 @@ public class AppBuilder {
         // API client for searching recipes by ingredients
         String apiKey = System.getenv("SPOONACULAR_API_KEY");
         if (apiKey == null || apiKey.isBlank()) {
-            apiKey = "6586492a77f54829ba878d12fb62832d"; // same key you use in demos
+            apiKey = "ef09f685ac104edbbac1ce1bc9ff8028"; // same key you use in demos
         }
         SpoonacularClient spoonacularClient = new SpoonacularClient(apiKey);
         RecipeByIngredientsAccess recipeAccess = spoonacularClient;

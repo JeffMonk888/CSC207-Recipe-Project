@@ -13,6 +13,8 @@ import usecase.common.FridgeAccess;
 
 public class FileFridgeAccessObject implements FridgeAccess {
 
+    public static final String REGEX = ",";
+
     private static final String HEADER = "id,userId,item";
 
     private final File csvFile;
@@ -34,47 +36,51 @@ public class FileFridgeAccessObject implements FridgeAccess {
 
     @Override
     public boolean hasItem(Long userId, String item) {
+        boolean hasItem = false;
         for (FridgeRow row : rows) {
-            if (row.userId == userId && row.item.equals(item)) {
-                return true;
+            if (row.getUserId() == userId && row.getItem().equals(item)) {
+                hasItem = true;
+                break;
             }
         }
-        return false;
+        return hasItem;
     }
 
     @Override
     public void addItem(Long userId, String item) {
-        String trimmed = item.trim();
-        if (hasItem(userId, trimmed)) return;
+        final String trimmed = item.trim();
+        if (!hasItem(userId, trimmed)) {
+            final long newId = ++idCounter;
+            rows.add(new FridgeRow(newId, userId, trimmed));
 
-        long newId = ++idCounter;
-        rows.add(new FridgeRow(newId, userId, trimmed));
-
-        saveToFile();
+            saveToFile();
+        }
     }
 
     @Override
     public boolean removeItem(Long userId, String item) {
-        String trimmed = item.trim();
+        boolean removed = false;
+        final String trimmed = item.trim();
 
         for (int i = 0; i < rows.size(); i++) {
-            FridgeRow row = rows.get(i);
+            final FridgeRow row = rows.get(i);
 
-            if (row.userId == userId && row.item.equals(trimmed)) {
+            if (row.getUserId() == userId && row.getItem().equals(trimmed)) {
                 rows.remove(i);
                 saveToFile();
-                return true;
+                removed = true;
+                break;
             }
         }
-        return false;
+        return removed;
     }
 
     @Override
     public List<String> getItems(Long userId) {
-        List<String> result = new ArrayList<>();
+        final List<String> result = new ArrayList<>();
         for (FridgeRow row : rows) {
-            if (row.userId == userId) {
-                result.add(row.item);
+            if (row.getUserId() == userId) {
+                result.add(row.getItem());
             }
         }
         return result;
@@ -84,18 +90,20 @@ public class FileFridgeAccessObject implements FridgeAccess {
 
     private void loadFromFile() {
         try (BufferedReader br = new BufferedReader(new FileReader(csvFile))) {
-            String header = br.readLine();
+            final String header = br.readLine();
             String line;
 
             long maxId = 0;
 
             while ((line = br.readLine()) != null) {
-                if (line.isEmpty()) continue;
+                if (line.isEmpty()) {
+                    continue;
+                }
                 // id,userId,item
-                String[] parts = line.split(",", 3);
-                long id = Long.parseLong(parts[0]);
-                long userId = Long.parseLong(parts[1]);
-                String item = parts[2];
+                final String[] parts = line.split(REGEX, 3);
+                final long id = Long.parseLong(parts[0]);
+                final long userId = Long.parseLong(parts[1]);
+                final String item = parts[2];
 
                 rows.add(new FridgeRow(id, userId, item));
                 maxId = Math.max(maxId, id);
@@ -104,8 +112,8 @@ public class FileFridgeAccessObject implements FridgeAccess {
             this.idCounter = maxId;
 
         }
-        catch (IOException e) {
-            throw new RuntimeException("Error reading fridge CSV", e);
+        catch (IOException exception) {
+            throw new RuntimeException("Error reading fridge CSV", exception);
         }
     }
 
@@ -116,26 +124,50 @@ public class FileFridgeAccessObject implements FridgeAccess {
             bw.newLine();
 
             for (FridgeRow row : rows) {
-                bw.write(row.id + "," + row.userId + "," + row.item);
+                bw.write(row.getId() + REGEX + row.userId + REGEX + row.getItem());
                 bw.newLine();
             }
 
         }
-        catch (IOException e) {
-            throw new RuntimeException("Error writing fridge CSV", e);
+        catch (IOException exception) {
+            throw new RuntimeException("Error writing fridge CSV", exception);
         }
     }
 
     // Inner Data Class
     private static class FridgeRow {
-        long id;
-        long userId;
-        String item;
+        private long id;
+        private long userId;
+        private String item;
 
         FridgeRow(long id, long userId, String item) {
             this.id = id;
             this.userId = userId;
             this.item = item;
+        }
+
+        public void setId(long id) {
+            this.id = id;
+        }
+
+        public void setUserId(long userId) {
+            this.userId = userId;
+        }
+
+        public void setItem(String item) {
+            this.item = item;
+        }
+
+        public long getId() {
+            return id;
+        }
+
+        public long getUserId() {
+            return userId;
+        }
+
+        public String getItem() {
+            return item;
         }
     }
 }
