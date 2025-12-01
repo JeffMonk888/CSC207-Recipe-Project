@@ -1,10 +1,15 @@
 package data.saved_ingredient;
 
-import usecase.common.FridgeAccess;
-
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import usecase.common.FridgeAccess;
 
 public class FileFridgeAccessObject implements FridgeAccess {
 
@@ -12,14 +17,15 @@ public class FileFridgeAccessObject implements FridgeAccess {
 
     private final File csvFile;
     private final List<FridgeRow> rows = new ArrayList<>();
-    private long idCounter = 0;
+    private long idCounter;
 
     // Constructor
     public FileFridgeAccessObject(String csvPath) {
         this.csvFile = new File(csvPath);
         if (!csvFile.exists() || csvFile.length() == 0) {
-            saveToFile(); // write header only
-        } else {
+            saveToFile();
+        }
+        else {
             loadFromFile();
         }
     }
@@ -78,7 +84,7 @@ public class FileFridgeAccessObject implements FridgeAccess {
 
     private void loadFromFile() {
         try (BufferedReader br = new BufferedReader(new FileReader(csvFile))) {
-            String header = br.readLine(); // skip header
+            String header = br.readLine();
             String line;
 
             long maxId = 0;
@@ -97,7 +103,8 @@ public class FileFridgeAccessObject implements FridgeAccess {
 
             this.idCounter = maxId;
 
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             throw new RuntimeException("Error reading fridge CSV", e);
         }
     }
@@ -113,7 +120,8 @@ public class FileFridgeAccessObject implements FridgeAccess {
                 bw.newLine();
             }
 
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             throw new RuntimeException("Error writing fridge CSV", e);
         }
     }

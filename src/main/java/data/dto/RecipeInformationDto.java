@@ -3,7 +3,7 @@ package data.dto;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RecipeInformationDTO {
+public class RecipeInformationDto {
     public long id;
     public String title;
     public String image;

@@ -1,24 +1,22 @@
 package data.api;
 
-import data.dto.RecipeInformationDTO;
-import domain.entity.Ingredient;
-import domain.entity.RecipePreview;
-import jdk.jshell.spi.SPIResolutionException;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import usecase.common.RecipeByIngredientsAccess;
-
 import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
 
-//for UC5: View domain.entity.Recipe Details
+import data.dto.RecipeInformationDto;
+import domain.entity.RecipePreview;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import usecase.common.RecipeByIngredientsAccess;
+
+// for UC5: View domain.entity.Recipe Details
 public class SpoonacularClient implements RecipeByIngredientsAccess {
 
     private static final String BASE = "https://api.spoonacular.com";
@@ -32,9 +30,9 @@ public class SpoonacularClient implements RecipeByIngredientsAccess {
     }
 
     // Create the DTO
-    public RecipeInformationDTO getRecipeInformation(long id, boolean includeNutrition) throws ApiException {
+    public RecipeInformationDto getRecipeInformation(long id, boolean includeNutrition) throws ApiException {
 
-        RecipeInformationDTO dto = new RecipeInformationDTO();
+        RecipeInformationDto dto = new RecipeInformationDto();
 
         fillBasicAndIngredients(id, dto);
         fillInstruction(id, dto);
@@ -51,9 +49,10 @@ public class SpoonacularClient implements RecipeByIngredientsAccess {
             int number,
             int offset
     ) throws ApiException {
-        StringBuilder ingredients = new StringBuilder();
+
+        final StringBuilder ingredients = new StringBuilder();
         for (String ingredient : ingredientList) {
-            if (ingredient.length() > 0) {
+            if (!ingredient.isEmpty()) {
                 ingredients.append(",");
             }
             ingredients.append(ingredient);
@@ -68,8 +67,8 @@ public class SpoonacularClient implements RecipeByIngredientsAccess {
         ArrayList<RecipePreview> recipes = new ArrayList<>();
         for (int i = 0; i < jsonArray.length(); i++) {
 
-            JSONObject jsonObject = jsonArray.getJSONObject(i);
-            RecipePreview recipePreview = new RecipePreview();
+            final JSONObject jsonObject = jsonArray.getJSONObject(i);
+            final RecipePreview recipePreview = new RecipePreview();
             recipePreview.id = jsonObject.getLong("id");
             recipePreview.recipeKey = "a" + jsonObject.getLong("id");
             recipePreview.image = jsonObject.optString("image");
@@ -84,10 +83,10 @@ public class SpoonacularClient implements RecipeByIngredientsAccess {
     }
 
 
-    private void fillBasicAndIngredients(long id, RecipeInformationDTO dto) throws ApiException {
-        String url = BASE + "/recipes/" + id + "/information?apiKey=" + apiKey;
+    private void fillBasicAndIngredients(long id, RecipeInformationDto dto) throws ApiException {
+        final String url = BASE + "/recipes/" + id + "/information?apiKey=" + apiKey;
 
-        JSONObject root = getJson(url);
+        final JSONObject root = getJson(url);
 
         dto.id = root.optLong("id");
         dto.title = root.optString("title", "");
@@ -101,72 +100,72 @@ public class SpoonacularClient implements RecipeByIngredientsAccess {
         JSONArray ings = root.optJSONArray("extendedIngredients");
         if (ings != null) {
             for (int i = 0; i < ings.length(); i++) {
-                JSONObject ingredientJson = ings.getJSONObject(i);
+                final JSONObject ingredientJson = ings.getJSONObject(i);
 
-                RecipeInformationDTO.ExtendedIngredient ingredientDTO =
-                        new RecipeInformationDTO.ExtendedIngredient();
-                ingredientDTO.name = ingredientJson.optString("name", "");
-                ingredientDTO.amount = ingredientJson.has("amount")
+                final RecipeInformationDto.ExtendedIngredient ingredientdto =
+                        new RecipeInformationDto.ExtendedIngredient();
+                ingredientdto.name = ingredientJson.optString("name", "");
+                ingredientdto.amount = ingredientJson.has("amount")
                         ? ingredientJson.optDouble("amount")
                         : null;
-                ingredientDTO.unit = ingredientJson.optString("unit", "");
+                ingredientdto.unit = ingredientJson.optString("unit", "");
 
-                dto.ingredients.add(ingredientDTO);
+                dto.ingredients.add(ingredientdto);
             }
         }
 
     }
 
-    private void fillInstruction(long id, RecipeInformationDTO dto) throws ApiException {
+    private void fillInstruction(long id, RecipeInformationDto dto) throws ApiException {
         String url = BASE + "/recipes/" + id + "/analyzedInstructions?apiKey=" + apiKey;
         JSONArray blocks = getJsonArray(url);
-        if (blocks != null && !blocks.isEmpty()) {
-            JSONObject instructionBlock = blocks.getJSONObject(0);
-            JSONArray stepsArray = instructionBlock.optJSONArray("steps");
-            if (stepsArray == null) return;
+        if (!blocks.isEmpty()) {
+            final JSONObject instructionBlock = blocks.getJSONObject(0);
+            final JSONArray stepsArray = instructionBlock.optJSONArray("steps");
+            if (stepsArray != null) {
+                for (int i = 0; i < stepsArray.length(); i++) {
+                    final JSONObject stepJson = stepsArray.getJSONObject(i);
 
-            for (int i = 0; i < stepsArray.length(); i++) {
-                JSONObject stepJson = stepsArray.getJSONObject(i);
+                    final RecipeInformationDto.Step stepdto = new RecipeInformationDto.Step();
+                    stepdto.number = stepJson.optInt("number", i + 1);
+                    stepdto.step = stepJson.optString("step", "");
 
-                RecipeInformationDTO.Step stepDTO = new RecipeInformationDTO.Step();
-                stepDTO.number = stepJson.optInt("number", i + 1);
-                stepDTO.step = stepJson.optString("step", "");
-
-                dto.steps.add(stepDTO);
+                    dto.steps.add(stepdto);
+                }
             }
         }
 
     }
 
-    private void fillNutrition(long id, RecipeInformationDTO dto) throws ApiException {
-        String url = BASE + "/recipes/" + id + "/nutritionWidget.json?apiKey=" + apiKey;
-        JSONObject root = getJson(url);
+    private void fillNutrition(long id, RecipeInformationDto dto) throws ApiException {
+        final String url = BASE + "/recipes/" + id + "/nutritionWidget.json?apiKey=" + apiKey;
+        final JSONObject root = getJson(url);
 
-        JSONArray nutrientsArray = root.optJSONArray("nutrients");
-        if (nutrientsArray == null) return;
+        final JSONArray nutrientsArray = root.optJSONArray("nutrients");
+        if (nutrientsArray != null) {
+            for (int i = 0; i < nutrientsArray.length(); i++) {
+                final JSONObject nutrientJson = nutrientsArray.getJSONObject(i);
 
-        for (int i = 0; i < nutrientsArray.length(); i++) {
-            JSONObject nutrientJson = nutrientsArray.getJSONObject(i);
+                final String name = nutrientJson.optString("name", "").toLowerCase();
+                final Double amount = nutrientJson.has("amount")
+                        ? nutrientJson.optDouble("amount")
+                        : null;
+                String unit = nutrientJson.optString("unit", "");
 
-            String name = nutrientJson.optString("name", "").toLowerCase();
-            Double amount = nutrientJson.has("amount")
-                    ? nutrientJson.optDouble("amount")
-                    : null;
-            String unit = nutrientJson.optString("unit", "");
-
-            switch (name) {
-                case "calories" -> dto.calories = amount;
-                case "protein" -> {
-                    dto.proteinAmount = amount;
-                    dto.proteinUnit = unit;
-                }
-                case "fat" -> {
-                    dto.fatAmount = amount;
-                    dto.fatUnit = unit;
-                }
-                case "carbohydrates" -> {
-                    dto.carbsAmount = amount;
-                    dto.carbsUnit = unit;
+                switch (name) {
+                    case "calories" -> dto.calories = amount;
+                    case "protein" -> {
+                        dto.proteinAmount = amount;
+                        dto.proteinUnit = unit;
+                    }
+                    case "fat" -> {
+                        dto.fatAmount = amount;
+                        dto.fatUnit = unit;
+                    }
+                    case "carbohydrates" -> {
+                        dto.carbsAmount = amount;
+                        dto.carbsUnit = unit;
+                    }
                 }
             }
         }
