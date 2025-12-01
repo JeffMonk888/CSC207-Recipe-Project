@@ -19,8 +19,12 @@ import usecase.common.RecipeByIngredientsAccess;
 // for UC5: View domain.entity.Recipe Details
 public class SpoonacularClient implements RecipeByIngredientsAccess {
 
-    private static final String BASE = "https://api.spoonacular.com";
     public static final String AMOUNT = "amount";
+    public static final String ID = "id";
+
+    private static final String BASE = "https://api.spoonacular.com";
+    public static final String RECIPES = "/recipes/";
+
     private final OkHttpClient http = new OkHttpClient.Builder()
             .callTimeout(Duration.ofSeconds(15))
             .build();
@@ -31,9 +35,22 @@ public class SpoonacularClient implements RecipeByIngredientsAccess {
     }
 
     // Create the DTO
+
+    /**
+     * Retrieve full recipe information from the Spoonacular API and populates
+     * a RecipeInformationDto with all available fields.
+     *
+     * @param id the Spoonacular recipe ID to look up
+     * @param includeNutrition to load nutrition data, {@code false} skip it
+     * @return a fully populated RecipeInformationDto containing all
+     *         available information for the recipe
+     * @throws ApiException if the API request fails, the HTTP response indicates
+     *                      and error, or if any I/O or parsing error occurs during
+     *                      the retrieval of recipe data
+     */
     public RecipeInformationDto getRecipeInformation(long id, boolean includeNutrition) throws ApiException {
 
-        RecipeInformationDto dto = new RecipeInformationDto();
+        final RecipeInformationDto dto = new RecipeInformationDto();
 
         fillBasicAndIngredients(id, dto);
         fillInstruction(id, dto);
@@ -58,20 +75,20 @@ public class SpoonacularClient implements RecipeByIngredientsAccess {
             }
             ingredients.append(ingredient);
         }
-        String url = String.format(
+        final String url = String.format(
                 "%s/recipes/findByIngredients?ingredients=%s&number=%d&offset=%d&ranking=2&apiKey=%s",
                 BASE, ingredients, number, offset, apiKey
         );
 
-        JSONArray jsonArray = getJsonArray(url);
+        final JSONArray jsonArray = getJsonArray(url);
 
-        ArrayList<RecipePreview> recipes = new ArrayList<>();
+        final ArrayList<RecipePreview> recipes = new ArrayList<>();
         for (int i = 0; i < jsonArray.length(); i++) {
 
             final JSONObject jsonObject = jsonArray.getJSONObject(i);
             final RecipePreview recipePreview = new RecipePreview();
-            recipePreview.id = jsonObject.getLong("id");
-            recipePreview.recipeKey = "a" + jsonObject.getLong("id");
+            recipePreview.id = jsonObject.getLong(ID);
+            recipePreview.recipeKey = "a" + jsonObject.getLong(ID);
             recipePreview.image = jsonObject.optString("image");
             recipePreview.imageType = jsonObject.optString("imageType");
             recipePreview.likes = jsonObject.optInt("likes");
@@ -83,13 +100,12 @@ public class SpoonacularClient implements RecipeByIngredientsAccess {
         return recipes;
     }
 
-
     private void fillBasicAndIngredients(long id, RecipeInformationDto dto) throws ApiException {
-        final String url = BASE + "/recipes/" + id + "/information?apiKey=" + apiKey;
+        final String url = BASE + RECIPES + id + "/information?apiKey=" + apiKey;
 
         final JSONObject root = getJson(url);
 
-        dto.setId(root.optLong("id"));
+        dto.setId(root.optLong(ID));
         dto.setTitle(root.optString("title", ""));
         dto.setImage(root.optString("image", ""));
 
@@ -115,9 +131,12 @@ public class SpoonacularClient implements RecipeByIngredientsAccess {
                 final JSONObject ingredientJson = ings.getJSONObject(i);
 
                 final String name = ingredientJson.optString("name", "");
-                final Double amount = ingredientJson.has(AMOUNT)
-                        ? ingredientJson.optDouble(AMOUNT)
-                        : null;
+
+                Double amount = null;
+                if (ingredientJson.has(AMOUNT)) {
+                    amount = ingredientJson.optDouble(AMOUNT);
+                }
+
                 final String unit = ingredientJson.optString("unit", "");
                 final String original = ingredientJson.optString("original", "");
 
@@ -125,11 +144,10 @@ public class SpoonacularClient implements RecipeByIngredientsAccess {
                 dto.addIngredient(name, amount, unit, original);
             }
         }
-
     }
 
     private void fillInstruction(long id, RecipeInformationDto dto) throws ApiException {
-        final String url = BASE + "/recipes/" + id + "/analyzedInstructions?apiKey=" + apiKey;
+        final String url = BASE + RECIPES + id + "/analyzedInstructions?apiKey=" + apiKey;
         final JSONArray blocks = getJsonArray(url);
         if (!blocks.isEmpty()) {
             final JSONObject instructionBlock = blocks.getJSONObject(0);
@@ -154,7 +172,7 @@ public class SpoonacularClient implements RecipeByIngredientsAccess {
     }
 
     private void fillNutrition(long id, RecipeInformationDto dto) throws ApiException {
-        final String url = BASE + "/recipes/" + id + "/nutritionWidget.json?apiKey=" + apiKey;
+        final String url = BASE + RECIPES + id + "/nutritionWidget.json?apiKey=" + apiKey;
         final JSONObject root = getJson(url);
 
         final JSONArray nutrientsArray = root.optJSONArray("nutrients");
@@ -163,9 +181,12 @@ public class SpoonacularClient implements RecipeByIngredientsAccess {
                 final JSONObject nutrientJson = nutrientsArray.getJSONObject(i);
 
                 final String name = nutrientJson.optString("name", "").toLowerCase();
-                final Double amount = nutrientJson.has(AMOUNT)
-                        ? nutrientJson.optDouble("amount")
-                        : null;
+
+                Double amount = null;
+                if (nutrientJson.has(AMOUNT)) {
+                    amount = nutrientJson.optDouble(AMOUNT);
+                }
+
                 final String unit = nutrientJson.optString("unit", "");
 
                 switch (name) {
@@ -188,66 +209,73 @@ public class SpoonacularClient implements RecipeByIngredientsAccess {
     }
 
     private JSONObject getJson(String url) throws ApiException {
-        final Request request = new Request.Builder().url(url).build();
-
-        try (Response response = http.newCall(request).execute()) {
-            int code =  response.code();
-            String body = response.body() != null ? response.body().string() : "";
-
-            if (code < 200 || code >= 300) {
-                String msg = switch (code) {
-                    case 401 -> "Unauthorized (check API key).";
-                    case 402, 429 -> "Quota / rate limit exceeded.";
-                    case 404 -> "Recipe not found.";
-                    default -> "HTTP error " + code;
-                };
-                throw new ApiException(msg, code, body);
-            }
-            return new JSONObject(body);
-        } catch (IOException e) {
-            throw new ApiException("IO error calling " + url, e);
-        }
+        final String body = fetchJsonString(url);
+        return new JSONObject(body);
     }
 
     private JSONArray getJsonArray(String url) throws ApiException {
-        Request req = new Request.Builder().url(url).get().build();
+        final String body = fetchJsonString(url);
+        return new JSONArray(body);
+    }
 
-        try (Response resp = http.newCall(req).execute()) {
-            int code = resp.code();
-            String body = resp.body() != null ? resp.body().string() : "";
+    private String fetchJsonString(String url) throws ApiException {
+        final Request request = new Request.Builder().url(url).get().build();
+
+        try (Response response = http.newCall(request).execute()) {
+
+            final int code = response.code();
+            String body = "";
+            if (response.body() != null) {
+                body = response.body().string();
+            }
 
             if (code < 200 || code >= 300) {
-                String msg = switch (code) {
-                    case 401 -> "Unauthorized (check API key).";
-                    case 402, 429 -> "Quota / rate limit exceeded.";
-                    case 404 -> "Recipe not found.";
-                    default -> "HTTP error " + code;
-                };
+                String msg = mapHttpErrorMessage(code);
                 throw new ApiException(msg, code, body);
             }
 
-            return new JSONArray(body);
-        } catch (IOException e) {
-            throw new ApiException("Network/IO error: " + e.getMessage(), e);
+            return body;
+
+        }
+        catch (IOException ex) {
+            throw new ApiException("Network/IO error calling " + url, ex);
         }
     }
 
+    private String mapHttpErrorMessage(int code) {
+
+        return switch (code) {
+            case 401 -> "Unauthorized (check API key).";
+            case 402, 429 -> "Quota / rate limit exceeded.";
+            case 404 -> "Recipe not found.";
+            default -> "HTTP error " + code;
+        };
+    }
 
     // error wrapper
     public static class ApiException extends Exception {
-        public final int statusCode;
-        public final String body;
+        private final int statusCode;
+        private final String body;
+
         public ApiException(String message, int statusCode, String body) {
             super(message);
             this.statusCode = statusCode;
             this.body = body;
         }
+
         public ApiException(String message, Throwable cause) {
             super(message, cause);
             this.statusCode = -1;
             this.body = null;
         }
-    }
 
+        public int getStatusCode() {
+            return statusCode;
+        }
+
+        public String getBody() {
+            return body;
+        }
+    }
 
 }
