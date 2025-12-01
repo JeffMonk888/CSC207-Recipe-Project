@@ -20,6 +20,7 @@ import usecase.common.RecipeByIngredientsAccess;
 public class SpoonacularClient implements RecipeByIngredientsAccess {
 
     private static final String BASE = "https://api.spoonacular.com";
+    public static final String AMOUNT = "amount";
     private final OkHttpClient http = new OkHttpClient.Builder()
             .callTimeout(Duration.ofSeconds(15))
             .build();
@@ -88,37 +89,48 @@ public class SpoonacularClient implements RecipeByIngredientsAccess {
 
         final JSONObject root = getJson(url);
 
-        dto.id = root.optLong("id");
-        dto.title = root.optString("title", "");
-        dto.image = root.optString("image", "");
-        dto.servings = root.has("servings") ? root.optInt("servings") : null;
-        dto.readyInMinutes = root.has("readyInMinutes") ? root.optInt("readyInMinutes") : null;
-        dto.sourceName = root.optString("sourceName", "");
-        dto.sourceUrl = root.optString("sourceUrl", "");
+        dto.setId(root.optLong("id"));
+        dto.setTitle(root.optString("title", ""));
+        dto.setImage(root.optString("image", ""));
+
+        Integer servings = null;
+        if (root.has("servings")) {
+            servings = root.optInt("servings");
+        }
+        dto.setServings(servings);
+
+        Integer readyInMinutes = null;
+        if (root.has("readyInMinutes")) {
+            readyInMinutes = root.optInt("readyInMinutes");
+        }
+        dto.setReadyInMinutes(readyInMinutes);
+
+        dto.setSourceName(root.optString("sourceName", ""));
+        dto.setSourceUrl(root.optString("sourceUrl", ""));
 
         // ingredients required
-        JSONArray ings = root.optJSONArray("extendedIngredients");
+        final JSONArray ings = root.optJSONArray("extendedIngredients");
         if (ings != null) {
             for (int i = 0; i < ings.length(); i++) {
                 final JSONObject ingredientJson = ings.getJSONObject(i);
 
-                final RecipeInformationDto.ExtendedIngredient ingredientdto =
-                        new RecipeInformationDto.ExtendedIngredient();
-                ingredientdto.name = ingredientJson.optString("name", "");
-                ingredientdto.amount = ingredientJson.has("amount")
-                        ? ingredientJson.optDouble("amount")
+                final String name = ingredientJson.optString("name", "");
+                final Double amount = ingredientJson.has(AMOUNT)
+                        ? ingredientJson.optDouble(AMOUNT)
                         : null;
-                ingredientdto.unit = ingredientJson.optString("unit", "");
+                final String unit = ingredientJson.optString("unit", "");
+                final String original = ingredientJson.optString("original", "");
 
-                dto.ingredients.add(ingredientdto);
+                // helper method on DTO, no direct ExtendedIngredient usage
+                dto.addIngredient(name, amount, unit, original);
             }
         }
 
     }
 
     private void fillInstruction(long id, RecipeInformationDto dto) throws ApiException {
-        String url = BASE + "/recipes/" + id + "/analyzedInstructions?apiKey=" + apiKey;
-        JSONArray blocks = getJsonArray(url);
+        final String url = BASE + "/recipes/" + id + "/analyzedInstructions?apiKey=" + apiKey;
+        final JSONArray blocks = getJsonArray(url);
         if (!blocks.isEmpty()) {
             final JSONObject instructionBlock = blocks.getJSONObject(0);
             final JSONArray stepsArray = instructionBlock.optJSONArray("steps");
@@ -126,11 +138,15 @@ public class SpoonacularClient implements RecipeByIngredientsAccess {
                 for (int i = 0; i < stepsArray.length(); i++) {
                     final JSONObject stepJson = stepsArray.getJSONObject(i);
 
-                    final RecipeInformationDto.Step stepdto = new RecipeInformationDto.Step();
-                    stepdto.number = stepJson.optInt("number", i + 1);
-                    stepdto.step = stepJson.optString("step", "");
+                    int number = i + 1;
+                    if (stepJson.has("number")) {
+                        number = stepJson.optInt("number");
+                    }
 
-                    dto.steps.add(stepdto);
+                    final String text = stepJson.optString("step", "");
+
+                    // use helper method (Step class is no longer referenced here)
+                    dto.addStep(number, text);
                 }
             }
         }
@@ -147,24 +163,24 @@ public class SpoonacularClient implements RecipeByIngredientsAccess {
                 final JSONObject nutrientJson = nutrientsArray.getJSONObject(i);
 
                 final String name = nutrientJson.optString("name", "").toLowerCase();
-                final Double amount = nutrientJson.has("amount")
+                final Double amount = nutrientJson.has(AMOUNT)
                         ? nutrientJson.optDouble("amount")
                         : null;
-                String unit = nutrientJson.optString("unit", "");
+                final String unit = nutrientJson.optString("unit", "");
 
                 switch (name) {
-                    case "calories" -> dto.calories = amount;
+                    case "calories" -> dto.setCalories(amount);
                     case "protein" -> {
-                        dto.proteinAmount = amount;
-                        dto.proteinUnit = unit;
+                        dto.setProteinAmount(amount);
+                        dto.setProteinUnit(unit);
                     }
                     case "fat" -> {
-                        dto.fatAmount = amount;
-                        dto.fatUnit = unit;
+                        dto.setFatAmount(amount);
+                        dto.setFatUnit(unit);
                     }
                     case "carbohydrates" -> {
-                        dto.carbsAmount = amount;
-                        dto.carbsUnit = unit;
+                        dto.setCarbsAmount(amount);
+                        dto.setCarbsUnit(unit);
                     }
                 }
             }
@@ -172,7 +188,7 @@ public class SpoonacularClient implements RecipeByIngredientsAccess {
     }
 
     private JSONObject getJson(String url) throws ApiException {
-        Request request = new Request.Builder().url(url).build();
+        final Request request = new Request.Builder().url(url).build();
 
         try (Response response = http.newCall(request).execute()) {
             int code =  response.code();
@@ -215,6 +231,8 @@ public class SpoonacularClient implements RecipeByIngredientsAccess {
             throw new ApiException("Network/IO error: " + e.getMessage(), e);
         }
     }
+
+
     // error wrapper
     public static class ApiException extends Exception {
         public final int statusCode;

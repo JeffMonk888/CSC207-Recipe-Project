@@ -18,40 +18,51 @@ import domain.entity.Recipe;
 
 public final class RecipeMapper {
 
+    public static final String SPACE = " ";
+
+    /**
+     * Convert RecipeInformationDto into a fully constructed Recipe domain entity.
+     *
+     * @param dto the DTO representing Spoonacular recipe information; must not be {@code null}
+     * @return a new Recipe domain object populated with all data extracted from the DTO
+     * @throws IllegalArgumentException if {@code dto} is {@code null}
+     */
+
     public static Recipe toDomain(RecipeInformationDto dto) {
+
         if (dto == null) {
             throw new IllegalArgumentException("dto is null");
         }
 
         // Build basic recipe (use your 10-arg constructor)
-        Recipe recipe = new Recipe(
-                dto.id,
-                nullToEmpty(dto.title),
+        final Recipe recipe = new Recipe(
+                dto.getId(),
+                nullToEmpty(dto.getTitle()),
                 "",
-                dto.servings,
-                dto.readyInMinutes,
-                nullToEmpty(dto.sourceName),
-                nullToEmpty(dto.sourceUrl),
-                nullToEmpty(dto.image),
-                "a" + dto.id,
+                dto.getServings(),
+                dto.getReadyInMinutes(),
+                nullToEmpty(dto.getSourceName()),
+                nullToEmpty(dto.getSourceUrl()),
+                nullToEmpty(dto.getImage()),
+                "a" + dto.getId(),
                 null
 
         );
 
         // Ingredients
-        if (dto.ingredients != null) {
-            for (RecipeInformationDto.ExtendedIngredient ingredientDTO : dto.ingredients) {
-                String originalString = buildOriginalString(
-                        ingredientDTO.amount,
-                        ingredientDTO.unit,
-                        ingredientDTO.name
+        if (dto.getIngredients() != null) {
+            for (RecipeInformationDto.ExtendedIngredient ingredientDto : dto.getIngredients()) {
+                final String originalString = buildOriginalString(
+                        ingredientDto.getAmount(),
+                        ingredientDto.getUnit(),
+                        ingredientDto.getName()
                 );
 
                 recipe.addIngredient(new Ingredient(
                         null,
-                        nullToEmpty(ingredientDTO.name),
-                        ingredientDTO.amount,
-                        nullToEmpty(ingredientDTO.unit),
+                        nullToEmpty(ingredientDto.getName()),
+                        ingredientDto.getAmount(),
+                        nullToEmpty(ingredientDto.getUnit()),
                         originalString
                 ));
             }
@@ -59,30 +70,33 @@ public final class RecipeMapper {
         }
 
         // Instruction steps
-        if (dto.steps != null) {
-            for (RecipeInformationDto.Step stepDto : dto.steps) {
+        if (dto.getSteps() != null) {
+            for (RecipeInformationDto.Step stepDto : dto.getSteps()) {
                 recipe.addInstructionStep(new InstructionStep(
                         null,
-                        stepDto.number,
-                        nullToEmpty(stepDto.step)
+                        stepDto.getNumber(),
+                        nullToEmpty(stepDto.getStep())
                 ));
             }
         }
 
         // Nutrition
-        final Double calories = dto.calories;
+        final Double calories = dto.getCalories();
 
-        String protein = dto.proteinAmount == null
-                ? null
-                : formatAmount(dto.proteinAmount, dto.proteinUnit);
+        String protein = null;
+        if (dto.getProteinAmount() != null) {
+            protein = formatAmount(dto.getProteinAmount(), dto.getProteinUnit());
+        }
 
-        String fat = dto.fatAmount == null
-                ? null
-                : formatAmount(dto.fatAmount, dto.fatUnit);
+        String fat = null;
+        if (dto.getFatAmount() != null) {
+            fat = formatAmount(dto.getFatAmount(), dto.getFatUnit());
+        }
 
-        String carbohydrates = dto.carbsAmount == null
-                ? null
-                : formatAmount(dto.carbsAmount, dto.carbsUnit);
+        String carbohydrates = null;
+        if (dto.getCarbsAmount() != null) {
+            carbohydrates = formatAmount(dto.getCarbsAmount(), dto.getCarbsUnit());
+        }
 
         recipe.setNutritionInfo(new NutritionInfo(
                 null,
@@ -97,29 +111,45 @@ public final class RecipeMapper {
 
     // helper functions below
 
-    private static String nullToEmpty(String s) {
-        return (s == null) ? "" : s;
+    private static String nullToEmpty(String string) {
+        String result = "";
+        if (string != null) {
+            result = string;
+        }
+        return result;
     }
 
     private static String buildOriginalString(Double amount, String unit, String name) {
-        final String amountPart = (amount == null) ? "" : stripTrailingZeros(amount);
-        final String unitPart = (unit == null) ? "" : unit.trim();
-        final String namePart = (name == null) ? "" : name.trim();
 
-        StringBuilder sb = new StringBuilder();
+        String amountPart = "";
+        if (amount != null) {
+            amountPart = stripTrailingZeros(amount);
+        }
+
+        String unitPart = "";
+        if (name != null) {
+            unitPart = unit.trim();
+        }
+
+        String namePart = "";
+        if (name != null) {
+            namePart = name.trim();
+        }
+
+        final StringBuilder sb = new StringBuilder();
         if (!amountPart.isEmpty()) {
             sb.append(amountPart);
         }
 
         if (!unitPart.isEmpty()) {
             if (!sb.isEmpty()) {
-                sb.append(" ");
+                sb.append(SPACE);
             }
             sb.append(unitPart);
         }
         if (!namePart.isEmpty()) {
             if (!sb.isEmpty()) {
-                sb.append(" ");
+                sb.append(SPACE);
             }
             sb.append(namePart);
         }
@@ -127,26 +157,72 @@ public final class RecipeMapper {
     }
 
     private static String formatAmount(Double amount, String unit) {
-        if (amount == null && (unit == null || unit.isBlank())) return null;
-        if (amount == null) return unit.trim();
-        String u = (unit == null) ? "" : unit.trim();
-        // compact formatting: "20 g" -> "20g" if unit is a simple token
-        if (!u.isEmpty() && !u.startsWith(" ") && !Character.isWhitespace(u.charAt(0))) {
-            return stripTrailingZeros(amount) + u;
-        }
-        return stripTrailingZeros(amount) + (u.isEmpty() ? "" : (" " + u));
-    }
-
-    private static String stripTrailingZeros(Double d) {
         final String result;
-        if (d == null) {
-            result = "";
+
+        if (isAmountAndUnitEmpty(amount, unit)) {
+            result = null;
         }
-        else if (d == d.longValue()) {
-            result = Long.toString(d.longValue());
+        else if (amount == null) {
+            result = formatUnitOnly(unit);
         }
         else {
-            result = Double.toString(d);
+            result = formatAmountAndUnit(amount, unit);
+        }
+
+        return result;
+    }
+
+    private static boolean isAmountAndUnitEmpty(Double amount, String unit) {
+        final boolean amountIsNull = amount == null;
+        final boolean unitIsNull = unit == null;
+        final boolean unitIsBlank = !unitIsNull && unit.isBlank();
+
+        return amountIsNull && (unitIsNull || unitIsBlank);
+    }
+
+    private static String formatUnitOnly(String unit) {
+        String result = null;
+        if (unit != null) {
+            result = unit.trim();
+        }
+        return result;
+    }
+
+    private static String formatAmountAndUnit(Double amount, String unit) {
+        String trimmedUnit = "";
+        if (unit != null) {
+            trimmedUnit = unit.trim();
+        }
+
+        final String result;
+        if (!trimmedUnit.isEmpty()
+                && !trimmedUnit.startsWith(SPACE)
+                && !Character.isWhitespace(trimmedUnit.charAt(0))) {
+            // compact: "20g"
+            result = stripTrailingZeros(amount) + trimmedUnit;
+        }
+        else if (trimmedUnit.isEmpty()) {
+            // just the amount: "20"
+            result = stripTrailingZeros(amount);
+        }
+        else {
+            // standard: "20 g"
+            result = stripTrailingZeros(amount) + SPACE + trimmedUnit;
+        }
+
+        return result;
+    }
+
+    private static String stripTrailingZeros(Double aDouble) {
+        final String result;
+        if (aDouble == null) {
+            result = "";
+        }
+        else if (aDouble == aDouble.longValue()) {
+            result = Long.toString(aDouble.longValue());
+        }
+        else {
+            result = Double.toString(aDouble);
         }
 
         return result;
