@@ -1,12 +1,13 @@
 package domain.entity;
+
 import org.json.JSONObject;
 
 public class NutritionInfo {
     private Long id;
-    private Double calories; // per serving 
-    private String protein; // e.g., "20g" 
-    private String fat; // e.g., "15g" 
-    private String carbohydrates; // e.g., "30g" 
+    private Double calories;
+    private String protein;
+    private String fat;
+    private String carbohydrates;
 
     public NutritionInfo(Long id, Double calories, String protein, String fat, String carbohydrates) {
         this.id = id;
@@ -18,11 +19,25 @@ public class NutritionInfo {
 
     // Situation for getting recipe from JSON
     public NutritionInfo(JSONObject jsonObject) {
-        this.id = jsonObject.has("id") ? jsonObject.getLong("id") : null;
-        this.calories = jsonObject.has("calories") ? jsonObject.getDouble("calories") : null;
-        this.protein = jsonObject.has("protein") ? jsonObject.getString("protein") : null;
-        this.fat = jsonObject.has("fat") ? jsonObject.getString("fat") : null;
-        this.carbohydrates = jsonObject.has("carbohydrates") ? jsonObject.getString("carbohydrates") : null;
+        if (jsonObject.has("id")) {
+            this.id = jsonObject.getLong("id");
+        }
+        
+        if (jsonObject.has("calories")) {
+            this.calories = jsonObject.getDouble("calories");
+        }
+
+        if (jsonObject.has("protein")) {
+            this.protein = jsonObject.getString("protein");
+        }
+
+        if (jsonObject.has("fat")) {
+            this.calories = jsonObject.getDouble("fat");
+        }
+
+        if (jsonObject.has("carbohydrates")) {
+            this.carbohydrates = jsonObject.getString("carbohydrates");
+        }
     }
 
     // create a JSON for recipe
@@ -37,24 +52,53 @@ public class NutritionInfo {
     }
 
     // Getters and Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public Double getCalories() { return calories; }
-    public void setCalories(Double calories) { this.calories = calories; }
-    public String getProtein() { return protein; }
-    public void setProtein(String protein) { this.protein = protein; }
-    public String getFat() { return fat; }
-    public void setFat(String fat) { this.fat = fat; }
-    public String getCarbohydrates() { return carbohydrates; }
-    public void setCarbohydrates(String carbohydrates) { this.carbohydrates = carbohydrates; }
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Double getCalories() {
+        return calories;
+    }
+
+    public void setCalories(Double calories) {
+        this.calories = calories;
+    }
+
+    public String getProtein() {
+        return protein;
+    }
+
+    public void setProtein(String protein) {
+        this.protein = protein;
+    }
+
+    public String getFat() {
+        return fat;
+    }
+
+    public void setFat(String fat) {
+        this.fat = fat;
+    }
+
+    public String getCarbohydrates() {
+        return carbohydrates;
+    }
+
+    public void setCarbohydrates(String carbohydrates) {
+        this.carbohydrates = carbohydrates;
+    }
 
     @Override
     public String toString() {
-        return "Nutrition: " +
-                "Calories=" + calories +
-                ", Protein='" + protein + '\'' +
-                ", Fat='" + fat + '\'' +
-                ", Carbs='" + carbohydrates + '\'';
+        return "Nutrition: "
+                + "Calories=" + calories
+                + ", Protein='" + protein + '\''
+                + ", Fat='" + fat + '\''
+                + ", Carbs='" + carbohydrates + '\'';
     }
 
 }
