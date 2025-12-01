@@ -283,7 +283,7 @@ public class CategoryView extends JFrame {
                 return;
             }
             String token = parseLeadingToken(savedModel.get(idx));
-            Long recipeId = Long.parseLong(token);
+            String recipeId = token;
 
             assignInteractor.execute(
                     new AssignCategoryInputData(USER_ID, cid,
@@ -302,7 +302,7 @@ public class CategoryView extends JFrame {
                 return;
             }
             String token = parseLeadingToken(categoryRecipeModel.get(idx));
-            Long recipeId = Long.parseLong(token);
+            String recipeId = token;
 
             removeInteractor.execute(
                     new RemoveRecipeFromCategoryInputData(USER_ID, cid, recipeId)

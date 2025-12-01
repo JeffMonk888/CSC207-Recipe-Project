@@ -47,10 +47,10 @@ public class ViewRecipeViewDemo {
         ViewRecipeController controller =
                 new ViewRecipeController(interactor);
 
-        ViewRecipeView viewRecipeView =
-                new ViewRecipeView(viewRecipeViewModel);
+        /**ViewRecipeView viewRecipeView =
+                new ViewRecipeView(viewRecipeViewModel, saveRecipeController, viewManagerModel);
 
-        viewManager.addView(viewRecipeView, viewRecipeViewModel.getViewName());
+        viewManager.addView(viewRecipeView, viewRecipeViewModel.getViewName());*/
 
         viewManagerModel.setActiveViewName(viewRecipeViewModel.getViewName());
 

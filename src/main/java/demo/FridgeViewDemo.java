@@ -38,7 +38,7 @@ public class FridgeViewDemo {
 
             Long demoUserId = 1L;
 
-            FridgeView fridgeView = new FridgeView(fridgeController, fridgeViewModel, demoUserId);
+            //FridgeView fridgeView = new FridgeView(fridgeController, fridgeViewModel, demoUserId);
 
             FridgeState initialState = fridgeViewModel.getState();
             initialState.setIngredients(fridgeAccess.getItems(demoUserId));
@@ -47,7 +47,7 @@ public class FridgeViewDemo {
 
             JFrame frame = new JFrame("Fridge View Demo");
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.setContentPane(fridgeView);
+            //frame.setContentPane(fridgeView);
             frame.pack();
             frame.setLocationRelativeTo(null);
             frame.setVisible(true);

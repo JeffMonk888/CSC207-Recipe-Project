@@ -14,11 +14,11 @@ public class UserRating {
 
     private Long id;
     private Long userId;
-    private Long recipeId;
+    private String recipeId;
     private double stars;          // 0.0 .. 5.0, step 0.5
     private Instant updatedAt;
 
-    public UserRating(Long id, Long userId, Long recipeId, double stars, Instant updatedAt) {
+    public UserRating(Long id, Long userId, String recipeId, double stars, Instant updatedAt) {
         this.id = id;
         this.userId = userId;
         this.recipeId = recipeId;
@@ -30,7 +30,7 @@ public class UserRating {
      * Convenience constructor used by most code paths.
      * Sets updatedAt to "now" and leaves id null (data layer may assign it).
      */
-    public UserRating(long userId, long recipeId, double stars) {
+    public UserRating(long userId, String recipeId, double stars) {
         this(null, userId, recipeId, stars, Instant.now());
     }
 
@@ -40,8 +40,8 @@ public class UserRating {
     public Long getUserId() { return userId; }
     public void setUserId(Long userId) { this.userId = userId; }
 
-    public Long getRecipeId() { return recipeId; }
-    public void setRecipeId(Long recipeId) { this.recipeId = recipeId; }
+    public String getRecipeId() { return recipeId; }
+    public void setRecipeId(String recipeId) { this.recipeId = recipeId; }
 
     public double getStars() { return stars; }
     public void setStars(double stars) { this.stars = stars; }

@@ -34,18 +34,18 @@ public interface CategoryDataAccessInterface {
      * Adds the given recipe ids to the category for this user.
      * The ids are the numeric form of the recipeKey (for example "201" -> 201L).
      */
-    void assignRecipesToCategory(Long userId, Long categoryId, List<Long> recipeIds);
+    void assignRecipesToCategory(Long userId, Long categoryId, List<String> recipeIds);
 
     /**
      * Returns the list of recipe ids (numeric) assigned to this category for this user.
      */
-    List<Long> getRecipeIdsForCategory(Long userId, Long categoryId);
+    List<String> getRecipeIdsForCategory(Long userId, Long categoryId);
 
     /**
      * Removes a single recipe from the category for this user.
      * If the category does not exist for the user, this method does nothing.
      */
-    void removeRecipeFromCategory(Long userId, Long categoryId, Long recipeId);
+    void removeRecipeFromCategory(Long userId, Long categoryId, String recipeId);
 
     /**
      * Deletes the category (and all its assignments) for this user.

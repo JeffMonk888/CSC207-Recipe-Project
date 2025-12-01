@@ -11,7 +11,7 @@ public interface UserRatingDataAccessInterface {
     /**
      * Find an existing rating for (userId, recipeId); return null if none exists.
      */
-    UserRating findByUserAndRecipe(long userId, long recipeId);
+    UserRating findByUserAndRecipe(long userId, String recipeId);
 
     /**
      * Save (insert or update) the rating.
@@ -21,5 +21,5 @@ public interface UserRatingDataAccessInterface {
     /**
      * Remove rating for (userId, recipeId) if it exists.
      */
-    void deleteRating(long userId, long recipeId);
+    void deleteRating(long userId, String recipeId);
 }

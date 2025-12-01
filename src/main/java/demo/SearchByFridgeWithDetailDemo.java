@@ -1,4 +1,4 @@
-package demo;
+/**package demo;
 
 import data.api.SpoonacularClient;
 import data.saved_ingredient.FileFridgeAccessObject;
@@ -26,7 +26,7 @@ import javax.swing.*;
 /**
  * Demo that links SearchByFridgeView with ViewRecipeView:
  * - Double-click a recipe in the search results to open its details.
- */
+
 public class SearchByFridgeWithDetailDemo {
 
     public static void main(String[] args) {
@@ -91,3 +91,4 @@ public class SearchByFridgeWithDetailDemo {
         });
     }
 }
+*/

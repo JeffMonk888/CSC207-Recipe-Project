@@ -15,13 +15,16 @@ public class Main {
 
             AppBuilder builder = new AppBuilder(fridgeAccess);
 
-            Long dummyUserId = 1L;  // later replaced with real logged-in ID
-
             builder
                     .addLoginView()
                     .addSignUpView()
                     .addHomeView()
-                    .addFridgeFeature(dummyUserId)
+                    .addFindRecipe()
+                    .addFridgeFeature()
+                    .addCreateRecipeFeature()
+                    .addSavedRecipesFeature()
+                    .addSearchByFridgeFeature()
+                    .addFilterRecipesFeature()
                     .show();
         });
     }

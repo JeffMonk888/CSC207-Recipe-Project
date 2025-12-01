@@ -3,6 +3,7 @@ package data.category;
 import domain.entity.Category;
 import usecase.category.CategoryDataAccessInterface;
 
+import java.lang.reflect.Array;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
@@ -19,7 +20,7 @@ import java.util.stream.Collectors;
 public class InMemoryCategoryGateway implements CategoryDataAccessInterface {
 
     private final Map<Long, Category> categories = new HashMap<>();
-    private final Map<Long, Set<Long>> categoryToRecipeIds = new HashMap<>();
+    private final Map<Long, Set<String>> categoryToRecipeIds = new HashMap<>();
 
     private final AtomicLong idCounter = new AtomicLong(0L);
 
@@ -60,29 +61,29 @@ public class InMemoryCategoryGateway implements CategoryDataAccessInterface {
     }
 
     @Override
-    public void assignRecipesToCategory(Long userId, Long categoryId, List<Long> recipeIds) {
+    public void assignRecipesToCategory(Long userId, Long categoryId, List<String> recipeIds) {
         if (!categoryExistsForUser(userId, categoryId) || recipeIds == null || recipeIds.isEmpty()) {
             return;
         }
-        Set<Long> set = categoryToRecipeIds.computeIfAbsent(categoryId, k -> new HashSet<>());
+        Set<String> set = categoryToRecipeIds.computeIfAbsent(categoryId, k -> new HashSet<>());
         set.addAll(recipeIds);
     }
 
     @Override
-    public List<Long> getRecipeIdsForCategory(Long userId, Long categoryId) {
+    public List<String> getRecipeIdsForCategory(Long userId, Long categoryId) {
         if (!categoryExistsForUser(userId, categoryId)) {
             return Collections.emptyList();
         }
-        Set<Long> set = categoryToRecipeIds.getOrDefault(categoryId, Collections.emptySet());
+        Set<String> set = categoryToRecipeIds.getOrDefault(categoryId, Collections.emptySet());
         return new ArrayList<>(set);
     }
 
     @Override
-    public void removeRecipeFromCategory(Long userId, Long categoryId, Long recipeId) {
+    public void removeRecipeFromCategory(Long userId, Long categoryId, String recipeId) {
         if (!categoryExistsForUser(userId, categoryId) || recipeId == null) {
             return;
         }
-        Set<Long> set = categoryToRecipeIds.get(categoryId);
+        Set<String> set = categoryToRecipeIds.get(categoryId);
         if (set != null) {
             set.remove(recipeId);
             if (set.isEmpty()) {

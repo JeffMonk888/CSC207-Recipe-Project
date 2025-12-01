@@ -22,7 +22,7 @@ public class RemoveRecipeFromCategoryInteractor implements RemoveRecipeFromCateg
     public void execute(RemoveRecipeFromCategoryInputData inputData) {
         Long userId = inputData.getUserId();
         Long categoryId = inputData.getCategoryId();
-        Long recipeId = inputData.getRecipeId();
+        String recipeId = inputData.getRecipeId();
 
         if (userId == null || categoryId == null || recipeId == null) {
             presenter.presentFailure("Missing user, category or recipe id.");
@@ -34,7 +34,7 @@ public class RemoveRecipeFromCategoryInteractor implements RemoveRecipeFromCateg
             return;
         }
 
-        List<Long> assigned = gateway.getRecipeIdsForCategory(userId, categoryId);
+        List<String> assigned = gateway.getRecipeIdsForCategory(userId, categoryId);
         if (assigned == null || !assigned.contains(recipeId)) {
             presenter.presentFailure("Recipe is not currently in this category.");
             return;
