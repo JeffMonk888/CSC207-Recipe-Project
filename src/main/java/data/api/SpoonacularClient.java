@@ -230,7 +230,7 @@ public class SpoonacularClient implements RecipeByIngredientsAccess {
             }
 
             if (code < 200 || code >= 300) {
-                String msg = mapHttpErrorMessage(code);
+                final String msg = mapHttpErrorMessage(code);
                 throw new ApiException(msg, code, body);
             }
 
