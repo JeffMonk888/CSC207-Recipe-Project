@@ -40,7 +40,10 @@ public class SavedRecipesView extends JPanel implements PropertyChangeListener {
 
         add(scrollPane, BorderLayout.CENTER);
 
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JPanel bottomPanel = new JPanel(new BorderLayout());
+
+        // Left side: Refresh, View Details, Delete
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JButton refreshButton = new JButton("Refresh");
         JButton viewButton = new JButton("View Details");
         JButton deleteButton = new JButton("Delete");
@@ -53,7 +56,15 @@ public class SavedRecipesView extends JPanel implements PropertyChangeListener {
         buttonPanel.add(viewButton);
         buttonPanel.add(deleteButton);
 
-        add(buttonPanel, BorderLayout.SOUTH);
+        JPanel backPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JButton backButton = new JButton("Back to Home");
+        backButton.addActionListener(e -> viewManagerModel.setActiveViewName("home"));
+        backPanel.add(backButton);
+
+        bottomPanel.add(buttonPanel, BorderLayout.WEST);
+        bottomPanel.add(backPanel, BorderLayout.EAST);
+
+        add(bottomPanel, BorderLayout.SOUTH);
     }
 
     private void onRefresh(ActionEvent e) {
@@ -117,11 +128,22 @@ public class SavedRecipesView extends JPanel implements PropertyChangeListener {
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        SavedRecipeState state = (SavedRecipeState) evt.getNewValue();
+        // Only react to state changes
+        if (!"state".equals(evt.getPropertyName())) {
+            return;
+        }
+
+        SavedRecipeState state = viewModel.getState();
+        if (state == null) {
+            return; // nothing to display yet
+        }
+
+        // Show any error message
         if (state.getErrorMessage() != null) {
             JOptionPane.showMessageDialog(this, state.getErrorMessage());
         }
 
+        // Populate the center list with saved recipes
         listModel.clear();
         for (String recipeStr : state.getSavedRecipes()) {
             listModel.addElement(recipeStr);

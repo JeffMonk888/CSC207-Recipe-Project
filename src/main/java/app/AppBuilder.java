@@ -16,7 +16,6 @@ import view.FindRecipeView;
 import interface_adapter.fridge.FridgeController;
 import interface_adapter.fridge.FridgePresenter;
 import interface_adapter.fridge.FridgeViewModel;
-
 // Saved Recipes + View Recipe adapters
 import interface_adapter.saved_recipe.SavedRecipeController;
 import interface_adapter.saved_recipe.SavedRecipePresenter;
@@ -25,6 +24,15 @@ import interface_adapter.saved_recipe.SavedRecipeViewModel;
 import interface_adapter.view_recipe.ViewRecipeController;
 import interface_adapter.view_recipe.ViewRecipePresenter;
 import interface_adapter.view_recipe.ViewRecipeViewModel;
+
+// NEW: Save Recipe adapters
+import interface_adapter.saved_recipe.SaveRecipeController;
+import interface_adapter.saved_recipe.SaveRecipePresenter;
+
+// NEW: Save Recipe use case
+import usecase.save_recipe.SaveRecipeInputBoundary;
+import usecase.save_recipe.SaveRecipeInteractor;
+import usecase.save_recipe.SaveRecipeOutputBoundary;
 
 // Search-by-fridge feature
 import view.SearchByFridgeView;
@@ -176,6 +184,12 @@ public class AppBuilder {
                 new UserSavedRecipeAccessObject("user_recipe_links.csv");
         RecipeDataAssessObject recipeDAO =
                 new RecipeDataAssessObject("recipe_cache.json");
+        SaveRecipeOutputBoundary saveRecipePresenter =
+                new SaveRecipePresenter();
+        SaveRecipeInputBoundary saveRecipeInteractor =
+                new SaveRecipeInteractor(userSavedRecipeDAO, saveRecipePresenter);
+        SaveRecipeController saveRecipeController =
+                new SaveRecipeController(saveRecipeInteractor);
 
         // 2) VIEW RECIPE (details) wiring
         ViewRecipeViewModel viewRecipeViewModel = new ViewRecipeViewModel();
@@ -185,7 +199,7 @@ public class AppBuilder {
                 new ViewRecipeInteractor(apiClient, recipeDAO, viewRecipePresenter);
         viewRecipeController = new ViewRecipeController(viewRecipeInteractor);
         ViewRecipeView viewRecipeView =
-                new ViewRecipeView(viewRecipeViewModel);
+                new ViewRecipeView(viewRecipeViewModel, saveRecipeController, viewManagerModel);
 
         // register view recipe screen with ViewManager
         viewManager.addView(viewRecipeView, viewRecipeViewModel.getViewName());

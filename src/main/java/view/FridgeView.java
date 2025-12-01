@@ -29,7 +29,7 @@ public class FridgeView extends JPanel implements ActionListener, PropertyChange
     private final JTextField ingredientField = new JTextField(20);
     private final JButton addButton = new JButton("Add");
     private final JButton removeButton = new JButton("Remove Selected");
-
+    private final JButton backButton = new JButton("Back to Home");
     private final DefaultListModel<String> listModel = new DefaultListModel<>();
     private final JList<String> ingredientList = new JList<>(listModel);
 
@@ -69,6 +69,7 @@ public class FridgeView extends JPanel implements ActionListener, PropertyChange
         JLabel title = new JLabel("Ingredient in Fridge");
         title.setFont(title.getFont().deriveFont(Font.BOLD, 18f));
         JPanel titlePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+
         titlePanel.add(title);
 
         // Center: list of ingredients
@@ -89,9 +90,13 @@ public class FridgeView extends JPanel implements ActionListener, PropertyChange
 
         errorLabel.setForeground(Color.RED);
 
+        JPanel backPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        backPanel.add(backButton);
+
         inputPanel.add(addPanel);
         inputPanel.add(removePanel);
         inputPanel.add(errorLabel);
+        inputPanel.add(backPanel);
 
         add(titlePanel, BorderLayout.NORTH);
         add(scrollPane, BorderLayout.CENTER);
@@ -101,7 +106,8 @@ public class FridgeView extends JPanel implements ActionListener, PropertyChange
     private void setupListeners() {
         addButton.setActionCommand("add");
         removeButton.setActionCommand("remove");
-
+        backButton.setActionCommand("back");
+        backButton.addActionListener(this);
         addButton.addActionListener(this);
         removeButton.addActionListener(this);
     }
@@ -125,6 +131,9 @@ public class FridgeView extends JPanel implements ActionListener, PropertyChange
                 Long userId = viewManagerModel.getCurrentUserId();
                 controller.removeIngredient(userId, selected);
             }
+        }
+        else if ("back".equals(cmd)) {
+            viewManagerModel.setActiveViewName("home");
         }
     }
 
