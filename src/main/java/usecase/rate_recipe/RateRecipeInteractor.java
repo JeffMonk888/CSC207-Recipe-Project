@@ -27,7 +27,7 @@ public class RateRecipeInteractor implements RateRecipeInputBoundary {
     @Override
     public void execute(RateRecipeInputData inputData) {
         long userId = inputData.getUserId();
-        long recipeId = inputData.getRecipeId();
+        String recipeId = inputData.getRecipeId();
 
         // 1. Clear rating mode
         if (inputData.isClearRating()) {

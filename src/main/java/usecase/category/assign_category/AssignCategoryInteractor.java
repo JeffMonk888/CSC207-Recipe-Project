@@ -19,7 +19,7 @@ public class AssignCategoryInteractor implements AssignCategoryInputBoundary {
     public void execute(AssignCategoryInputData inputData) {
         Long userId = inputData.getUserId();
         Long categoryId = inputData.getCategoryId();
-        List<Long> recipeIds = inputData.getRecipeIds();
+        List<String> recipeIds = inputData.getRecipeIds();
 
         if (!gateway.categoryExistsForUser(userId, categoryId)) {
             presenter.presentFailure("Category not found for this user.");

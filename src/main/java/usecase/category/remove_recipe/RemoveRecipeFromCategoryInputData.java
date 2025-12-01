@@ -7,9 +7,9 @@ public class RemoveRecipeFromCategoryInputData {
 
     private final Long userId;
     private final Long categoryId;
-    private final Long recipeId;
+    private final String recipeId;
 
-    public RemoveRecipeFromCategoryInputData(Long userId, Long categoryId, Long recipeId) {
+    public RemoveRecipeFromCategoryInputData(Long userId, Long categoryId, String recipeId) {
         this.userId = userId;
         this.categoryId = categoryId;
         this.recipeId = recipeId;
@@ -23,7 +23,7 @@ public class RemoveRecipeFromCategoryInputData {
         return categoryId;
     }
 
-    public Long getRecipeId() {
+    public String getRecipeId() {
         return recipeId;
     }
 }

@@ -115,7 +115,7 @@ public class RateRecipeView extends JFrame {
                 return;
             }
 
-            long recipeId = Long.parseLong(listModel.get(index).split("\\s+")[0]);
+            String recipeId = listModel.get(index).split("\\s+")[0];
             double stars = (double) spinner.getValue();
 
             interactor.execute(RateRecipeInputData.forRating(USER_ID, recipeId, stars));
@@ -131,7 +131,7 @@ public class RateRecipeView extends JFrame {
                 return;
             }
 
-            long recipeId = Long.parseLong(listModel.get(index).split("\\s+")[0]);
+            String recipeId = listModel.get(index).split("\\s+")[0];
             interactor.execute(RateRecipeInputData.forClear(USER_ID, recipeId));
             refreshList();
         });
@@ -155,7 +155,7 @@ public class RateRecipeView extends JFrame {
     private void refreshList() {
         listModel.clear();
         for (SavedRecipe sr : gateway.findByUserId(USER_ID)) {
-            long recipeId = Long.parseLong(sr.getRecipeKey());
+            String recipeId = sr.getRecipeKey();
             UserRating rating = gateway.findByUserAndRecipe(USER_ID, recipeId);
             String ratingStr = (rating == null ? "(no rating)" : rating.getStars() + "★");
             listModel.addElement(recipeId + "  " + ratingStr);

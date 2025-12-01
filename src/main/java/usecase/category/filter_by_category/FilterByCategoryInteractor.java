@@ -33,14 +33,14 @@ public class FilterByCategoryInteractor implements FilterByCategoryInputBoundary
             return;
         }
 
-        List<Long> recipeIds = categoryGateway.getRecipeIdsForCategory(userId, categoryId);
+        List<String> recipeIds = categoryGateway.getRecipeIdsForCategory(userId, categoryId);
         if (recipeIds == null || recipeIds.isEmpty()) {
             presenter.presentSuccess(new FilterByCategoryOutputData(new ArrayList<>()));
             return;
         }
 
         Set<String> recipeKeySet = new HashSet<>();
-        for (Long rid : recipeIds) {
+        for (String rid : recipeIds) {
             recipeKeySet.add(String.valueOf(rid));
         }
 
