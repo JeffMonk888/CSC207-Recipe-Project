@@ -49,7 +49,7 @@ public class Recipe {
         this.sourceName = obj.getString("sourceName");
         this.sourceUrl = obj.getString("sourceUrl");
         this.image = obj.getString("image");
-        this.recipeKey = obj.getString("recipeid");
+        this.recipeKey = obj.optString("recipeid", null);
 
         if (obj.has("nutritionInfo")) {
             this.nutritionInfo = new NutritionInfo(obj.getJSONObject("nutritionInfo"));
