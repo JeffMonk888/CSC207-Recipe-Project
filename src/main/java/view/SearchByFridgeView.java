@@ -34,6 +34,7 @@ public class SearchByFridgeView extends JPanel
     // UI components
     private final JButton searchButton = new JButton("Search with my fridge");
     private final JButton loadMoreButton = new JButton("Load more");
+    private final JButton backButton = new JButton("Back to Home"); // <--- ADDED
     private final DefaultListModel<String> listModel = new DefaultListModel<>();
     private final JList<String> recipesList = new JList<>(listModel);
     private final JLabel errorLabel = new JLabel();
@@ -79,15 +80,25 @@ public class SearchByFridgeView extends JPanel
         JScrollPane scrollPane = new JScrollPane(recipesList);
 
         // Bottom: info + error label
-        JPanel bottomPanel = new JPanel();
-        bottomPanel.setLayout(new BoxLayout(bottomPanel, BoxLayout.Y_AXIS));
+        JPanel bottomPanel = new JPanel(new BorderLayout());
+
+// Left/center: stacked info + error labels
+        JPanel messagePanel = new JPanel();
+        messagePanel.setLayout(new BoxLayout(messagePanel, BoxLayout.Y_AXIS));
 
         infoLabel.setForeground(Color.DARK_GRAY);
         errorLabel.setForeground(Color.RED);
 
-        bottomPanel.add(infoLabel);
-        bottomPanel.add(errorLabel);
+        messagePanel.add(infoLabel);
+        messagePanel.add(errorLabel);
 
+// Add labels to the left/center
+        bottomPanel.add(messagePanel, BorderLayout.CENTER);
+
+// Back button on bottom-right
+        bottomPanel.add(backButton, BorderLayout.EAST);
+
+// Add panels to main layout
         add(titlePanel, BorderLayout.NORTH);
         add(controlPanel, BorderLayout.BEFORE_FIRST_LINE);
         add(scrollPane, BorderLayout.CENTER);
@@ -100,6 +111,10 @@ public class SearchByFridgeView extends JPanel
 
         searchButton.addActionListener(this);
         loadMoreButton.addActionListener(this);
+
+        backButton.addActionListener(e ->
+                viewManagerModel.setActiveViewName("home")
+        );
 
         recipesList.addMouseListener(new MouseAdapter() {
             @Override
@@ -176,3 +191,4 @@ public class SearchByFridgeView extends JPanel
         return VIEW_NAME;
     }
 }
+

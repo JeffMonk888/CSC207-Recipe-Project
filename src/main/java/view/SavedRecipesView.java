@@ -33,6 +33,23 @@ public class SavedRecipesView extends JPanel implements PropertyChangeListener {
         this.viewManagerModel = viewManagerModel;
         this.viewModel.addPropertyChangeListener(this);
 
+        // 1) Initial load (in case user is already logged in)
+        Long initialUserId = viewManagerModel.getCurrentUserId();
+        if (initialUserId != null) {
+            savedController.executeRetrieve(initialUserId);
+        }
+
+// 2) Every time this view becomes active, reload the list
+        this.viewManagerModel.addPropertyChangeListener(evt -> {
+            if ("activeView".equals(evt.getPropertyName())
+                    && SavedRecipeViewModel.VIEW_NAME.equals(evt.getNewValue())) {
+                Long userId = viewManagerModel.getCurrentUserId();
+                if (userId != null) {
+                    savedController.executeRetrieve(userId);
+                }
+            }
+        });
+
         setPreferredSize(new Dimension(600, 400));
         setLayout(new BorderLayout(10, 10));
 
@@ -106,15 +123,54 @@ public class SavedRecipesView extends JPanel implements PropertyChangeListener {
     private void onView(ActionEvent e) {
         int index = recipeList.getSelectedIndex();
         if (index < 0) {
-            JOptionPane.showMessageDialog(this, "Please select a recipe first.");
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Please select a recipe first.",
+                    "No Selection",
+                    JOptionPane.WARNING_MESSAGE
+            );
             return;
         }
+
         String item = listModel.get(index);
         String recipeKey = parseRecipeKey(item);
         if (recipeKey == null || recipeKey.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Invalid recipe entry.");
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Invalid recipe entry.",
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
             return;
         }
+
+        // --- NEW LOGIC: Different behaviour for user-made vs API recipes ---
+
+        if (recipeKey.startsWith("c")) {
+            // This is a USER-MADE recipe (custom recipe: "c" + numericId)
+            Object[] options = {"Open Recipe Details", "Cancel"};
+
+            int choice = JOptionPane.showOptionDialog(
+                    this,
+                    "This is a recipe you created.\nWhat would you like to do?",
+                    "My Recipe",
+                    JOptionPane.DEFAULT_OPTION,
+                    JOptionPane.QUESTION_MESSAGE,
+                    null,
+                    options,
+                    options[0]
+            );
+
+            if (choice != 0) {
+                // User chose Cancel or closed the dialog -> do nothing
+                return;
+            }
+            // If choice == 0, fall through to controller call below
+        }
+
+        // For both API ("a" + id) and custom ("c" + id) recipes,
+        // delegate to the ViewRecipe use case. The presenter will
+        // update the ViewRecipeViewModel and switch screens for us.
         viewRecipeController.execute(recipeKey);
     }
 
@@ -143,8 +199,8 @@ public class SavedRecipesView extends JPanel implements PropertyChangeListener {
     }
 
     /**
-     * Our presenter formats each row as "id - title".
-     * This helper returns the id part (before " - ").
+     * Presenter formats each row as "<key> - <title>".
+     * This returns the key part (before " - ").
      */
     private String parseRecipeKey(String line) {
         if (line == null) return null;

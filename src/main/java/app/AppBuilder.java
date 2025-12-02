@@ -72,8 +72,10 @@ import view.SavedRecipesView;
 import view.SignUpView;
 import view.ViewManager;
 import view.ViewRecipeView;
+import view.ViewRecipeNoSave;
 
 public class AppBuilder {
+    String masterApiKey = "7dc1e21978e841d2885f8f6f0580f422";
     private final ViewManagerModel viewManagerModel;
     private final ViewManager viewManager;
     private final FridgeAccess fridgeAccess;
@@ -165,7 +167,7 @@ public class AppBuilder {
         String apiKey = System.getenv("SPOONACULAR_API_KEY");
         if (apiKey == null || apiKey.isBlank()) {
             // same fallback key as your demos
-            apiKey = "6586492a77f54829ba878d12fb62832d";
+            apiKey = masterApiKey;
         }
 
         SpoonacularClient apiClient = new SpoonacularClient(apiKey);
@@ -192,7 +194,9 @@ public class AppBuilder {
 
         // register view recipe screen with ViewManager
         viewManager.addView(viewRecipeView, viewRecipeViewModel.getViewName());
-
+        ViewRecipeNoSave viewRecipeNoSave =
+                new ViewRecipeNoSave(viewRecipeViewModel, null, viewManagerModel);
+        viewManager.addView(viewRecipeNoSave, ViewRecipeNoSave.VIEW_NAME);
         // 3) SAVED RECIPES (list) wiring
         SavedRecipeViewModel savedRecipeViewModel = new SavedRecipeViewModel();
         SavedRecipePresenter savedPresenter =
@@ -221,6 +225,7 @@ public class AppBuilder {
         // API client for searching recipes by ingredients
         String apiKey = System.getenv("SPOONACULAR_API_KEY");
         if (apiKey == null || apiKey.isBlank()) {
+            apiKey = masterApiKey; // same key you use in demos
             apiKey = "ef09f685ac104edbbac1ce1bc9ff8028"; // same key you use in demos
         }
         SpoonacularClient spoonacularClient = new SpoonacularClient(apiKey);
@@ -258,6 +263,7 @@ public class AppBuilder {
         viewManager.addView(findRecipeView, findRecipeView.getViewName());
         return this;
     }
+
 
     public void show() {
         viewManagerModel.setActiveViewName(loginView.getViewName());
