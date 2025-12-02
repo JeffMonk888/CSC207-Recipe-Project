@@ -85,7 +85,7 @@ import view.ViewRecipeView;
 import view.ViewRecipeNoSave;
 
 public class AppBuilder {
-    String masterApiKey = "dc0c68e1d23b41fba2813b51dfbc5125";
+    String masterApiKey = "7dc1e21978e841d2885f8f6f0580f422";
     private final ViewManagerModel viewManagerModel;
     private final ViewManager viewManager;
     private final FridgeAccess fridgeAccess;
@@ -274,17 +274,6 @@ public class AppBuilder {
         return this;
     }
 
-    public AppBuilder addFilterRecipesFeature() {
-        FilterRecipesViewModel vm = new FilterRecipesViewModel();
-        FilterRecipesOutputBoundary presenter = new FilterRecipesPresenter(vm);
-        FilterRecipesInputBoundary interactor = new FilterRecipesInteractor(presenter);
-        FilterRecipesController controller = new FilterRecipesController(interactor);
-
-        filterRecipeView = new FilterRecipeView(vm, controller, viewManagerModel);
-
-        viewManager.addView(filterRecipeView, filterRecipeView.getViewName());
-        return this;
-    }
 
     public void show() {
         viewManagerModel.setActiveViewName(loginView.getViewName());

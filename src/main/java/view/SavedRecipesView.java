@@ -92,20 +92,24 @@ public class SavedRecipesView extends JPanel implements PropertyChangeListener {
     private void onView(ActionEvent e) {
         int index = recipeList.getSelectedIndex();
         if (index < 0) {
-            JOptionPane.showMessageDialog(this,
+            JOptionPane.showMessageDialog(
+                    this,
                     "Please select a recipe first.",
                     "No Selection",
-                    JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.WARNING_MESSAGE
+            );
             return;
         }
 
         String item = listModel.get(index);
         String recipeKey = parseRecipeKey(item);
         if (recipeKey == null || recipeKey.isEmpty()) {
-            JOptionPane.showMessageDialog(this,
+            JOptionPane.showMessageDialog(
+                    this,
                     "Invalid recipe entry.",
                     "Error",
-                    JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.ERROR_MESSAGE
+            );
             return;
         }
 
@@ -126,19 +130,17 @@ public class SavedRecipesView extends JPanel implements PropertyChangeListener {
                     options[0]
             );
 
-            if (choice == 0) {
-                // User chose "Open Recipe Details"
-                viewRecipeController.execute(recipeKey);
-                viewManagerModel.setActiveViewName(ViewRecipeNoSave.VIEW_NAME);
-            } else {
-                // Cancel or closed dialog -> do nothing
+            if (choice != 0) {
+                // User chose Cancel or closed the dialog -> do nothing
                 return;
             }
-        } else {
-            // API recipe ("a" + id) — same behaviour as before
-            viewRecipeController.execute(recipeKey);
-            viewManagerModel.setActiveViewName(ViewRecipeNoSave.VIEW_NAME);
+            // If choice == 0, fall through to controller call below
         }
+
+        // For both API ("a" + id) and custom ("c" + id) recipes,
+        // delegate to the ViewRecipe use case. The presenter will
+        // update the ViewRecipeViewModel and switch screens for us.
+        viewRecipeController.execute(recipeKey);
     }
 
     private void onDelete(ActionEvent e) {
