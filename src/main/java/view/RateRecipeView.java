@@ -178,11 +178,11 @@ public class RateRecipeView extends JFrame {
             return; // already has data, do not duplicate
         }
 
-        SavedRecipe r1 = new SavedRecipe(USER_ID, "101");
+        SavedRecipe r1 = new SavedRecipe(USER_ID, "c101");
         r1.setFavourite(false);
         gateway.save(r1);
 
-        SavedRecipe r2 = new SavedRecipe(USER_ID, "102");
+        SavedRecipe r2 = new SavedRecipe(USER_ID, "c102");
         r2.setFavourite(false);
         gateway.save(r2);
 
