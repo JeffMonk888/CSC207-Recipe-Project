@@ -75,7 +75,7 @@ import view.ViewRecipeView;
 import view.ViewRecipeNoSave;
 
 public class AppBuilder {
-    String masterApiKey = "7dc1e21978e841d2885f8f6f0580f422";
+    String masterApiKey = "42a05b3e54c04b9aabd9d4ae75bd485e";
     private final ViewManagerModel viewManagerModel;
     private final ViewManager viewManager;
     private final FridgeAccess fridgeAccess;
