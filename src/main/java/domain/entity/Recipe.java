@@ -34,7 +34,7 @@ public class Recipe {
         this.sourceName = sourceName;
         this.sourceUrl = sourceUrl;
         this.image = image;
-
+        this.recipeKey = apiId;
         this.nutritionInfo = nutritionInfo;
         this.ingredients = new ArrayList<>();
         this.instructionSteps = new ArrayList<>();
@@ -49,6 +49,7 @@ public class Recipe {
         this.sourceName = obj.getString("sourceName");
         this.sourceUrl = obj.getString("sourceUrl");
         this.image = obj.getString("image");
+        this.recipeKey = obj.has("recipeid") ? obj.optString("recipeid", null) : null;
         this.recipeKey = obj.optString("recipeid", null);
 
         if (obj.has("nutritionInfo")) {
@@ -102,51 +103,19 @@ public class Recipe {
 
         return obj;
     }
-
     // Getters
-    public Long getId() {
-        return id;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public Integer getServings() {
-        return servings;
-    }
-
-    public Integer getPrepTimeInMinutes() {
-        return prepTimeInMinutes;
-    }
-
-    public String getSourceName() {
-        return sourceName;
-    }
-
-    public String getSourceUrl() {
-        return sourceUrl;
-    }
-
-    public String getImage() {
-        return image;
-    }
-
-    public NutritionInfo getNutritionInfo() {
-        return nutritionInfo;
-    }
-
-    public ArrayList<Ingredient> getIngredients() {
-        return ingredients;
-    }
-
-    public ArrayList<InstructionStep> getInstructionSteps() {
-        return instructionSteps;
-    }
+    public Long getId() { return id; }
+    public String getTitle() { return title; }
+    public String getDescription() { return description; }
+    public Integer getServings() { return servings; }
+    public Integer getPrepTimeInMinutes() { return prepTimeInMinutes; }
+    public String getSourceName() { return sourceName; }
+    public String getSourceUrl() { return sourceUrl; }
+    public String getImage() { return image; }
+    public NutritionInfo getNutritionInfo() { return nutritionInfo; }
+    public ArrayList<Ingredient> getIngredients() { return ingredients; }
+    public ArrayList<InstructionStep> getInstructionSteps() { return instructionSteps; }
+    public String getRecipeKey() { return recipeKey; }
 
     public String getRecipeKey() { return recipeKey; }
 
