@@ -5,7 +5,7 @@
 <html id="htmlId">
 <head>
   <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
-  <title>Coverage Report > AddIngredientOutputBoundary</title>
+  <title>Coverage Report > RemoveIngredientInputBoundary</title>
   <style type="text/css">
     @import "../../css/coverage.css";
     @import "../../css/idea.min.css";
@@ -19,17 +19,17 @@
 <div class="breadCrumbs">
 Current scope:     <a href="../../index.html">all classes</a>
     <span class="separator">|</span>
-    <a href="../index.html">usecase.add_ingredient</a>
+    <a href="../index.html">usecase.remove_ingredient</a>
 </div>
 
-<h1>Coverage Summary for Class: AddIngredientOutputBoundary (usecase.add_ingredient)</h1>
+<h1>Coverage Summary for Class: RemoveIngredientInputBoundary (usecase.remove_ingredient)</h1>
 
 <table class="coverageStats">
 <tr>
   <th class="name">Class</th>
 </tr>
 <tr>
-  <td class="name">AddIngredientOutputBoundary</td>
+  <td class="name">RemoveIngredientInputBoundary</td>
 </tr>
 
 </table>
@@ -39,27 +39,18 @@ Current scope:     <a href="../../index.html">all classes</a>
 
 
 <pre>
-<code class="sourceCode" id="sourceCode">&nbsp;package usecase.add_ingredient;
+<code class="sourceCode" id="sourceCode">&nbsp;package usecase.remove_ingredient;
 &nbsp;
 &nbsp;/**
-&nbsp; * Output boundary for the Add Ingredient usecase.
+&nbsp; * Input boundary for the Remove Ingredient use case.
 &nbsp; */
-&nbsp;public interface AddIngredientOutputBoundary {
-&nbsp;
+&nbsp;public interface RemoveIngredientInputBoundary {
 &nbsp;    /**
-&nbsp;     * Presents the successful result of the Add Ingredient use case.
+&nbsp;     * Executes the Remove Ingredient use case.
 &nbsp;     *
-&nbsp;     * @param outputData the data object containing the user ID
-&nbsp;     *                  and the ingredient that was successfully added
+&nbsp;     * @param inputData the data required to attempt removal
 &nbsp;     */
-&nbsp;    void presentSuccess(AddIngredientOutputData outputData);
-&nbsp;
-&nbsp;    /**
-&nbsp;     * Presents an error message when the ingredient cannot be added.
-&nbsp;     *
-&nbsp;     * @param errorMessage an understable explanation of why the operation failed
-&nbsp;     */
-&nbsp;    void presentFailure(String errorMessage);
+&nbsp;    void execute(RemoveIngredientInputData inputData);
 &nbsp;}
 </code>
 </pre>
@@ -84,7 +75,7 @@ Current scope:     <a href="../../index.html">all classes</a>
 
 <div class="footer">
     
-    <div style="float:right;">generated on 2025-12-01 23:44</div>
+    <div style="float:right;">generated on 2025-12-01 23:53</div>
 </div>
 </body>
 </html>
