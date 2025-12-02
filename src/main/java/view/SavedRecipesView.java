@@ -1,17 +1,24 @@
 package view;
 
+import data.saved_recipe.UserSavedRecipeAccessObject;
+import interface_adapter.ViewManagerModel;
+import interface_adapter.rate_recipe.RateRecipeController;
+import interface_adapter.rate_recipe.RateRecipePresenter;
+import interface_adapter.rate_recipe.RateRecipeViewModel;
 import interface_adapter.saved_recipe.SavedRecipeController;
 import interface_adapter.saved_recipe.SavedRecipeState;
 import interface_adapter.saved_recipe.SavedRecipeViewModel;
 import interface_adapter.view_recipe.ViewRecipeController;
-import interface_adapter.ViewManagerModel;
+import usecase.rate_recipe.RateRecipeInputBoundary;
+import usecase.rate_recipe.RateRecipeInteractor;
+import usecase.rate_recipe.RateRecipeOutputBoundary;
+import demo.CategoryDemo;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import demo.CategoryDemo;
-import demo.RateRecipeDemo;
 
 public class SavedRecipesView extends JPanel implements PropertyChangeListener {
 
@@ -44,7 +51,7 @@ public class SavedRecipesView extends JPanel implements PropertyChangeListener {
 
         JPanel bottomPanel = new JPanel(new BorderLayout());
 
-        // Left side: Refresh, View Details, Delete
+        // Left buttons
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JButton refreshButton = new JButton("Refresh");
         JButton viewButton = new JButton("View Details");
@@ -58,6 +65,7 @@ public class SavedRecipesView extends JPanel implements PropertyChangeListener {
         buttonPanel.add(viewButton);
         buttonPanel.add(deleteButton);
 
+        // Right "Back to Home"
         JPanel backPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         JButton backButton = new JButton("Back to Home");
         backButton.addActionListener(e -> viewManagerModel.setActiveViewName("home"));
@@ -67,42 +75,60 @@ public class SavedRecipesView extends JPanel implements PropertyChangeListener {
         bottomPanel.add(backPanel, BorderLayout.EAST);
 
         add(bottomPanel, BorderLayout.SOUTH);
-        // --- Right-side panel for demo buttons ---
-        JPanel demoPanel = new JPanel();
-        demoPanel.setLayout(new BoxLayout(demoPanel, BoxLayout.Y_AXIS));
-        demoPanel.setBorder(BorderFactory.createTitledBorder("Extra"));
 
-// Buttons
-        JButton rateDemoButton = new JButton("Rate Recipe");
-        JButton categoryDemoButton = new JButton("Category ");
+        // Right side "Extra" panel
+        JPanel extraPanel = new JPanel();
+        extraPanel.setLayout(new BoxLayout(extraPanel, BoxLayout.Y_AXIS));
+        extraPanel.setBorder(BorderFactory.createTitledBorder("Extra"));
 
-// Add actions to run the demo classes
-        rateDemoButton.addActionListener(e -> {
-            // Run the RateRecipe demo in its own window
-            RateRecipeDemo.main(new String[0]);
+        JButton rateButton = new JButton("Rate Recipe");
+        JButton categoryButton = new JButton("Category");
+
+        // Open real RateRecipeView for the CURRENT USER
+        rateButton.addActionListener(e -> {
+            Long currentUserId = viewManagerModel.getCurrentUserId();
+            if (currentUserId == null) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "No logged-in user found. Please sign in first."
+                );
+                return;
+            }
+
+            UserSavedRecipeAccessObject gateway =
+                    new UserSavedRecipeAccessObject("user_recipe_links.csv");
+
+            RateRecipeViewModel rateRecipeViewModel = new RateRecipeViewModel();
+            RateRecipeOutputBoundary presenter =
+                    new RateRecipePresenter(rateRecipeViewModel, viewManagerModel);
+            RateRecipeInputBoundary interactor =
+                    new RateRecipeInteractor(gateway, presenter);
+            RateRecipeController controller = new RateRecipeController(interactor);
+
+            RateRecipeView rateRecipeView =
+                    new RateRecipeView(controller, rateRecipeViewModel, gateway, currentUserId);
+            rateRecipeView.setVisible(true);
         });
 
-        categoryDemoButton.addActionListener(e -> {
-            // Run the Category demo in its own window
-            CategoryDemo.main(new String[0]);
-        });
+        // Category demo stays unchanged
+        categoryButton.addActionListener(e -> CategoryDemo.main(new String[0]));
 
-// Layout: push them to the top or center as you like
-        demoPanel.add(Box.createVerticalStrut(10));
-        demoPanel.add(rateDemoButton);
-        demoPanel.add(Box.createVerticalStrut(10));
-        demoPanel.add(categoryDemoButton);
-        demoPanel.add(Box.createVerticalGlue());
+        extraPanel.add(Box.createVerticalStrut(10));
+        extraPanel.add(rateButton);
+        extraPanel.add(Box.createVerticalStrut(10));
+        extraPanel.add(categoryButton);
+        extraPanel.add(Box.createVerticalGlue());
 
-// Add the panel on the right side of SavedRecipesView
-        this.add(demoPanel, BorderLayout.EAST);
+        add(extraPanel, BorderLayout.EAST);
     }
 
+    // Retrieve using current userId
     private void onRefresh(ActionEvent e) {
         Long userId = viewManagerModel.getCurrentUserId();
         savedController.executeRetrieve(userId);
     }
 
+    // View Details button
     private void onView(ActionEvent e) {
         int index = recipeList.getSelectedIndex();
         if (index < 0) {
@@ -118,6 +144,7 @@ public class SavedRecipesView extends JPanel implements PropertyChangeListener {
         viewRecipeController.execute(recipeKey);
     }
 
+    // Delete button – restored original behaviour
     private void onDelete(ActionEvent e) {
         int index = recipeList.getSelectedIndex();
         if (index < 0) {
@@ -138,12 +165,12 @@ public class SavedRecipesView extends JPanel implements PropertyChangeListener {
                 JOptionPane.OK_CANCEL_OPTION);
         if (confirm == JOptionPane.OK_OPTION) {
             savedController.executeDelete(userId, recipeKey);
-            savedController.executeRetrieve(userId); // refresh after delete
+            savedController.executeRetrieve(userId); // refresh list after delete
         }
     }
 
     /**
-     * Our presenter formats each row as "id - title".
+     * Presenter formats each row as "id - title".
      * This helper returns the id part (before " - ").
      */
     private String parseRecipeKey(String line) {
@@ -159,22 +186,19 @@ public class SavedRecipesView extends JPanel implements PropertyChangeListener {
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        // Only react to state changes
         if (!"state".equals(evt.getPropertyName())) {
             return;
         }
 
         SavedRecipeState state = viewModel.getState();
         if (state == null) {
-            return; // nothing to display yet
+            return;
         }
 
-        // Show any error message
         if (state.getErrorMessage() != null) {
             JOptionPane.showMessageDialog(this, state.getErrorMessage());
         }
 
-        // Populate the center list with saved recipes
         listModel.clear();
         for (String recipeStr : state.getSavedRecipes()) {
             listModel.addElement(recipeStr);

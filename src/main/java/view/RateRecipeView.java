@@ -16,7 +16,8 @@ import java.util.List;
 
 public class RateRecipeView extends JFrame {
 
-    private static final long USER_ID = 1L;
+    // Use the actual logged-in user id (passed from constructor)
+    private final long userId;
 
     private final UserSavedRecipeAccessObject savedRecipeGateway;
     private final RateRecipeController controller;
@@ -28,12 +29,14 @@ public class RateRecipeView extends JFrame {
 
     public RateRecipeView(RateRecipeController controller,
                           RateRecipeViewModel viewModel,
-                          UserSavedRecipeAccessObject savedRecipeGateway) {
+                          UserSavedRecipeAccessObject savedRecipeGateway,
+                          long userId) {
         super("Rate Recipe");
 
         this.controller = controller;
         this.viewModel = viewModel;
         this.savedRecipeGateway = savedRecipeGateway;
+        this.userId = userId;
 
         this.viewModel.addPropertyChangeListener(new PropertyChangeListener() {
             @Override
@@ -56,10 +59,12 @@ public class RateRecipeView extends JFrame {
                     );
                 }
 
+                // Update spinner when state contains a star value
                 if (state.getStars() != null) {
                     spinner.setValue(state.getStars());
                 }
 
+                // If no error, refresh list to reflect new rating
                 if (state.getErrorMessage() == null) {
                     refreshList();
                 }
@@ -77,7 +82,7 @@ public class RateRecipeView extends JFrame {
         recipeList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         JScrollPane scrollPane = new JScrollPane(recipeList);
         scrollPane.setBorder(
-                BorderFactory.createTitledBorder("Saved Recipes (user " + USER_ID + ")"));
+                BorderFactory.createTitledBorder("Saved Recipes (user " + userId + ")"));
         scrollPane.setViewportBorder(new EmptyBorder(5, 5, 5, 5));
         scrollPane.setPreferredSize(new Dimension(260, 360));
         root.add(scrollPane, BorderLayout.WEST);
@@ -119,7 +124,8 @@ public class RateRecipeView extends JFrame {
             String recipeId = extractRecipeId(listEntry);
             double stars = (double) spinner.getValue();
 
-            controller.rate(USER_ID, recipeId, stars);
+            // Use the actual userId instead of 1L
+            controller.rate(userId, recipeId, stars);
         });
 
         clear.addActionListener(e -> {
@@ -135,7 +141,8 @@ public class RateRecipeView extends JFrame {
             String listEntry = listModel.get(index);
             String recipeId = extractRecipeId(listEntry);
 
-            controller.clearRating(USER_ID, recipeId);
+            // Use the actual userId instead of 1L
+            controller.clearRating(userId, recipeId);
         });
 
         ratingPanel.add(new JLabel("Stars:"));
@@ -149,20 +156,24 @@ public class RateRecipeView extends JFrame {
 
         JButton backButton = new JButton("Back to Saved Recipes");
         backButton.addActionListener(e -> dispose());
-        JPanel bottomPanel = new JPanel();
+        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         bottomPanel.add(backButton);
-        this.getContentPane().add(bottomPanel, BorderLayout.SOUTH);
+        root.add(bottomPanel, BorderLayout.SOUTH);
 
+        // Initial load
         refreshList();
     }
 
+    /**
+     * Refresh the left list using this user's saved recipes and ratings.
+     */
     private void refreshList() {
         listModel.clear();
-        java.util.List<SavedRecipe> savedRecipes = savedRecipeGateway.findByUserId(USER_ID);
+        List<SavedRecipe> savedRecipes = savedRecipeGateway.findByUserId(userId);
 
         for (SavedRecipe sr : savedRecipes) {
             String recipeId = sr.getRecipeKey();
-            UserRating rating = savedRecipeGateway.findByUserAndRecipe(USER_ID, recipeId);
+            UserRating rating = savedRecipeGateway.findByUserAndRecipe(userId, recipeId);
             String ratingStr = (rating == null ? "(no rating)" : rating.getStars() + "★");
             listModel.addElement(recipeId + "  " + ratingStr);
         }
