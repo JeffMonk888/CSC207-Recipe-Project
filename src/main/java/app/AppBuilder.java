@@ -79,6 +79,8 @@ public class AppBuilder {
     private final ViewManagerModel viewManagerModel;
     private final ViewManager viewManager;
     private final FridgeAccess fridgeAccess;
+    private final UserSavedRecipeAccessObject userSavedRecipeDAO;
+    private final RecipeDataAssessObject recipeDAO;
 
     private LoginView loginView;
     private SignUpView signUpView;
@@ -111,6 +113,8 @@ public class AppBuilder {
         this.viewManagerModel = new ViewManagerModel();
         this.viewManager = new ViewManager(viewManagerModel);
         this.fridgeAccess = fridgeAccess;
+        this.userSavedRecipeDAO = new UserSavedRecipeAccessObject("user_recipe_links.csv");
+        this.recipeDAO = new RecipeDataAssessObject("recipe_cache.json");
     }
 
     public AppBuilder addFridgeFeature() {
@@ -134,11 +138,6 @@ public class AppBuilder {
     }
 
     public AppBuilder addCreateRecipeFeature() {
-        // Data access, same as in CreateRecipeDemo
-        UserSavedRecipeAccessObject userSavedRecipeDAO =
-                new UserSavedRecipeAccessObject("user_recipe_links.csv");
-        RecipeDataAssessObject recipeDAO =
-                new RecipeDataAssessObject("recipe_cache.json");
 
         // View model & presenter
         CreateRecipeViewModel createRecipeViewModel = new CreateRecipeViewModel();
@@ -147,7 +146,7 @@ public class AppBuilder {
 
         // Interactor & controller
         CreateRecipeInputBoundary interactor =
-                new CreateRecipeInteractor(recipeDAO, userSavedRecipeDAO, presenter);
+                new CreateRecipeInteractor(this.recipeDAO, this.userSavedRecipeDAO, presenter);
         CreateRecipeController controller =
                 new CreateRecipeController(interactor);
 
@@ -171,14 +170,10 @@ public class AppBuilder {
         }
 
         SpoonacularClient apiClient = new SpoonacularClient(apiKey);
-        UserSavedRecipeAccessObject userSavedRecipeDAO =
-                new UserSavedRecipeAccessObject("user_recipe_links.csv");
-        RecipeDataAssessObject recipeDAO =
-                new RecipeDataAssessObject("recipe_cache.json");
         SaveRecipeOutputBoundary saveRecipePresenter =
                 new SaveRecipePresenter();
         SaveRecipeInputBoundary saveRecipeInteractor =
-                new SaveRecipeInteractor(userSavedRecipeDAO, saveRecipePresenter);
+                new SaveRecipeInteractor(this.userSavedRecipeDAO, saveRecipePresenter);
         SaveRecipeController saveRecipeController =
                 new SaveRecipeController(saveRecipeInteractor);
 
@@ -187,7 +182,7 @@ public class AppBuilder {
         ViewRecipeOutputBoundary viewRecipePresenter =
                 new ViewRecipePresenter(viewRecipeViewModel, viewManagerModel);
         ViewRecipeInputBoundary viewRecipeInteractor =
-                new ViewRecipeInteractor(apiClient, recipeDAO, viewRecipePresenter);
+                new ViewRecipeInteractor(apiClient, this.recipeDAO, viewRecipePresenter);
         viewRecipeController = new ViewRecipeController(viewRecipeInteractor);
         ViewRecipeView viewRecipeView =
                 new ViewRecipeView(viewRecipeViewModel, saveRecipeController, viewManagerModel);
@@ -203,9 +198,9 @@ public class AppBuilder {
                 new SavedRecipePresenter(savedRecipeViewModel, viewManagerModel);
 
         RetrieveSavedInputBoundary retrieveInteractor =
-                new RetrieveSavedInteractor(userSavedRecipeDAO, recipeDAO, apiClient, savedPresenter);
+                new RetrieveSavedInteractor(this.userSavedRecipeDAO, this.recipeDAO, apiClient, savedPresenter);
         DeleteSavedInputBoundary deleteInteractor =
-                new DeleteSavedInteractor(userSavedRecipeDAO, savedPresenter);
+                new DeleteSavedInteractor(this.userSavedRecipeDAO, savedPresenter);
 
         SavedRecipeController savedController =
                 new SavedRecipeController(retrieveInteractor, deleteInteractor);
