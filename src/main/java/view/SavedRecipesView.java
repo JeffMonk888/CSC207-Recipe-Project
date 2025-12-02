@@ -1,17 +1,24 @@
 package view;
 
+import data.saved_recipe.UserSavedRecipeAccessObject;
+import interface_adapter.ViewManagerModel;
+import interface_adapter.rate_recipe.RateRecipeController;
+import interface_adapter.rate_recipe.RateRecipePresenter;
+import interface_adapter.rate_recipe.RateRecipeViewModel;
 import interface_adapter.saved_recipe.SavedRecipeController;
 import interface_adapter.saved_recipe.SavedRecipeState;
 import interface_adapter.saved_recipe.SavedRecipeViewModel;
 import interface_adapter.view_recipe.ViewRecipeController;
-import interface_adapter.ViewManagerModel;
+import usecase.rate_recipe.RateRecipeInputBoundary;
+import usecase.rate_recipe.RateRecipeInteractor;
+import usecase.rate_recipe.RateRecipeOutputBoundary;
+import demo.CategoryDemo;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import demo.CategoryDemo;
-import demo.RateRecipeDemo;
 
 public class SavedRecipesView extends JPanel implements PropertyChangeListener {
 
@@ -33,23 +40,6 @@ public class SavedRecipesView extends JPanel implements PropertyChangeListener {
         this.viewManagerModel = viewManagerModel;
         this.viewModel.addPropertyChangeListener(this);
 
-        // 1) Initial load (in case user is already logged in)
-        Long initialUserId = viewManagerModel.getCurrentUserId();
-        if (initialUserId != null) {
-            savedController.executeRetrieve(initialUserId);
-        }
-
-// 2) Every time this view becomes active, reload the list
-        this.viewManagerModel.addPropertyChangeListener(evt -> {
-            if ("activeView".equals(evt.getPropertyName())
-                    && SavedRecipeViewModel.VIEW_NAME.equals(evt.getNewValue())) {
-                Long userId = viewManagerModel.getCurrentUserId();
-                if (userId != null) {
-                    savedController.executeRetrieve(userId);
-                }
-            }
-        });
-
         setPreferredSize(new Dimension(600, 400));
         setLayout(new BorderLayout(10, 10));
 
@@ -61,7 +51,7 @@ public class SavedRecipesView extends JPanel implements PropertyChangeListener {
 
         JPanel bottomPanel = new JPanel(new BorderLayout());
 
-        // Left side: Refresh, View Details, Delete
+        // Left buttons
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JButton refreshButton = new JButton("Refresh");
         JButton viewButton = new JButton("View Details");
@@ -75,6 +65,7 @@ public class SavedRecipesView extends JPanel implements PropertyChangeListener {
         buttonPanel.add(viewButton);
         buttonPanel.add(deleteButton);
 
+        // Right "Back to Home"
         JPanel backPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         JButton backButton = new JButton("Back to Home");
         backButton.addActionListener(e -> viewManagerModel.setActiveViewName("home"));
@@ -84,93 +75,74 @@ public class SavedRecipesView extends JPanel implements PropertyChangeListener {
         bottomPanel.add(backPanel, BorderLayout.EAST);
 
         add(bottomPanel, BorderLayout.SOUTH);
-        // --- Right-side panel for demo buttons ---
-        JPanel demoPanel = new JPanel();
-        demoPanel.setLayout(new BoxLayout(demoPanel, BoxLayout.Y_AXIS));
-        demoPanel.setBorder(BorderFactory.createTitledBorder("Extra"));
 
-// Buttons
-        JButton rateDemoButton = new JButton("Rate Recipe");
-        JButton categoryDemoButton = new JButton("Category ");
+        // Right side "Extra" panel
+        JPanel extraPanel = new JPanel();
+        extraPanel.setLayout(new BoxLayout(extraPanel, BoxLayout.Y_AXIS));
+        extraPanel.setBorder(BorderFactory.createTitledBorder("Extra"));
 
-// Add actions to run the demo classes
-        rateDemoButton.addActionListener(e -> {
-            // Run the RateRecipe demo in its own window
-            RateRecipeDemo.main(new String[0]);
+        JButton rateButton = new JButton("Rate Recipe");
+        JButton categoryButton = new JButton("Category");
+
+        // === IMPORTANT: open real RateRecipeView for the CURRENT USER ===
+        rateButton.addActionListener(e -> {
+            Long currentUserId = viewManagerModel.getCurrentUserId();
+            if (currentUserId == null) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "No logged-in user found. Please sign in first."
+                );
+                return;
+            }
+
+            UserSavedRecipeAccessObject gateway =
+                    new UserSavedRecipeAccessObject("user_recipe_links.csv");
+
+            RateRecipeViewModel rateRecipeViewModel = new RateRecipeViewModel();
+            RateRecipeOutputBoundary presenter =
+                    new RateRecipePresenter(rateRecipeViewModel, viewManagerModel);
+            RateRecipeInputBoundary interactor =
+                    new RateRecipeInteractor(gateway, presenter);
+            RateRecipeController controller = new RateRecipeController(interactor);
+
+            RateRecipeView rateRecipeView =
+                    new RateRecipeView(controller, rateRecipeViewModel, gateway, currentUserId);
+            rateRecipeView.setVisible(true);
         });
 
-        categoryDemoButton.addActionListener(e -> {
-            // Run the Category demo in its own window
-            CategoryDemo.main(new String[0]);
-        });
+        // Category demo stays unchanged
+        categoryButton.addActionListener(e -> CategoryDemo.main(new String[0]));
 
-// Layout: push them to the top or center as you like
-        demoPanel.add(Box.createVerticalStrut(10));
-        demoPanel.add(rateDemoButton);
-        demoPanel.add(Box.createVerticalStrut(10));
-        demoPanel.add(categoryDemoButton);
-        demoPanel.add(Box.createVerticalGlue());
+        extraPanel.add(Box.createVerticalStrut(10));
+        extraPanel.add(rateButton);
+        extraPanel.add(Box.createVerticalStrut(10));
+        extraPanel.add(categoryButton);
+        extraPanel.add(Box.createVerticalGlue());
 
-// Add the panel on the right side of SavedRecipesView
-        this.add(demoPanel, BorderLayout.EAST);
+        add(extraPanel, BorderLayout.EAST);
     }
 
     private void onRefresh(ActionEvent e) {
         Long userId = viewManagerModel.getCurrentUserId();
+        if (userId == null) {
+            JOptionPane.showMessageDialog(this, "No logged-in user.");
+            return;
+        }
         savedController.executeRetrieve(userId);
     }
 
     private void onView(ActionEvent e) {
         int index = recipeList.getSelectedIndex();
         if (index < 0) {
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Please select a recipe first.",
-                    "No Selection",
-                    JOptionPane.WARNING_MESSAGE
-            );
+            JOptionPane.showMessageDialog(this, "Please select a recipe first.");
             return;
         }
-
         String item = listModel.get(index);
         String recipeKey = parseRecipeKey(item);
         if (recipeKey == null || recipeKey.isEmpty()) {
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Invalid recipe entry.",
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE
-            );
+            JOptionPane.showMessageDialog(this, "Invalid recipe entry.");
             return;
         }
-
-        // --- NEW LOGIC: Different behaviour for user-made vs API recipes ---
-
-        if (recipeKey.startsWith("c")) {
-            // This is a USER-MADE recipe (custom recipe: "c" + numericId)
-            Object[] options = {"Open Recipe Details", "Cancel"};
-
-            int choice = JOptionPane.showOptionDialog(
-                    this,
-                    "This is a recipe you created.\nWhat would you like to do?",
-                    "My Recipe",
-                    JOptionPane.DEFAULT_OPTION,
-                    JOptionPane.QUESTION_MESSAGE,
-                    null,
-                    options,
-                    options[0]
-            );
-
-            if (choice != 0) {
-                // User chose Cancel or closed the dialog -> do nothing
-                return;
-            }
-            // If choice == 0, fall through to controller call below
-        }
-
-        // For both API ("a" + id) and custom ("c" + id) recipes,
-        // delegate to the ViewRecipe use case. The presenter will
-        // update the ViewRecipeViewModel and switch screens for us.
         viewRecipeController.execute(recipeKey);
     }
 
@@ -183,6 +155,10 @@ public class SavedRecipesView extends JPanel implements PropertyChangeListener {
         String item = listModel.get(index);
         String recipeKey = parseRecipeKey(item);
         Long userId = viewManagerModel.getCurrentUserId();
+        if (userId == null) {
+            JOptionPane.showMessageDialog(this, "No logged-in user.");
+            return;
+        }
         if (recipeKey == null || recipeKey.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Invalid recipe entry.");
             return;
@@ -194,14 +170,10 @@ public class SavedRecipesView extends JPanel implements PropertyChangeListener {
                 JOptionPane.OK_CANCEL_OPTION);
         if (confirm == JOptionPane.OK_OPTION) {
             savedController.executeDelete(userId, recipeKey);
-            savedController.executeRetrieve(userId); // refresh after delete
+            savedController.executeRetrieve(userId); // refresh
         }
     }
 
-    /**
-     * Presenter formats each row as "<key> - <title>".
-     * This returns the key part (before " - ").
-     */
     private String parseRecipeKey(String line) {
         if (line == null) return null;
         int idx = line.indexOf(" - ");
@@ -215,22 +187,19 @@ public class SavedRecipesView extends JPanel implements PropertyChangeListener {
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        // Only react to state changes
         if (!"state".equals(evt.getPropertyName())) {
             return;
         }
 
         SavedRecipeState state = viewModel.getState();
         if (state == null) {
-            return; // nothing to display yet
+            return;
         }
 
-        // Show any error message
         if (state.getErrorMessage() != null) {
             JOptionPane.showMessageDialog(this, state.getErrorMessage());
         }
 
-        // Populate the center list with saved recipes
         listModel.clear();
         for (String recipeStr : state.getSavedRecipes()) {
             listModel.addElement(recipeStr);
