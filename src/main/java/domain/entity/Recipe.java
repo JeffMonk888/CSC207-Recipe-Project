@@ -104,62 +104,6 @@ public class Recipe {
         return obj;
     }
 
-    // Getters
-    public Long getId() { return id; }
-    public String getTitle() { return title; }
-    public String getDescription() { return description; }
-    public Integer getServings() { return servings; }
-    public Integer getPrepTimeInMinutes() { return prepTimeInMinutes; }
-    public String getSourceName() { return sourceName; }
-    public String getSourceUrl() { return sourceUrl; }
-    public String getImage() { return image; }
-    public NutritionInfo getNutritionInfo() { return nutritionInfo; }
-    public ArrayList<Ingredient> getIngredients() { return ingredients; }
-    public ArrayList<InstructionStep> getInstructionSteps() { return instructionSteps; }
-    public String getRecipeKey() { return recipeKey; }
-    public Long getId() {
-        return id;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public Integer getServings() {
-        return servings;
-    }
-
-    public Integer getPrepTimeInMinutes() {
-        return prepTimeInMinutes;
-    }
-
-    public String getSourceName() {
-        return sourceName;
-    }
-
-    public String getSourceUrl() {
-        return sourceUrl;
-    }
-
-    public String getImage() {
-        return image;
-    }
-
-    public NutritionInfo getNutritionInfo() {
-        return nutritionInfo;
-    }
-
-    public ArrayList<Ingredient> getIngredients() {
-        return ingredients;
-    }
-
-    public ArrayList<InstructionStep> getInstructionSteps() {
-        return instructionSteps;
-    }
 
     // Setters
     public void setId(Long id) {
