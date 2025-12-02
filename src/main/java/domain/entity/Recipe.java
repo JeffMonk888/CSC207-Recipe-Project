@@ -95,7 +95,7 @@ public class Recipe {
         }
         obj.put("ingredients", iArray);
 
-        JSONArray stepArray = new JSONArray();
+        final JSONArray stepArray = new JSONArray();
         for (InstructionStep step : instructionSteps) {
             stepArray.put(step.toJson());
         }
@@ -104,54 +104,18 @@ public class Recipe {
         return obj;
     }
     // Getters
-    public Long getId() {
-        return id;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public Integer getServings() {
-        return servings;
-    }
-
-    public Integer getPrepTimeInMinutes() {
-        return prepTimeInMinutes;
-    }
-
-    public String getSourceName() {
-        return sourceName;
-    }
-
-    public String getSourceUrl() {
-        return sourceUrl;
-    }
-
-    public String getImage() {
-        return image;
-    }
-
-    public NutritionInfo getNutritionInfo() {
-        return nutritionInfo;
-    }
-
-    public ArrayList<Ingredient> getIngredients() {
-        return ingredients;
-    }
-
-    public ArrayList<InstructionStep> getInstructionSteps() {
-        return instructionSteps;
-    }
-
-    public String getRecipeKey() {
-        return recipeKey;
-    }
-
+    public Long getId() { return id; }
+    public String getTitle() { return title; }
+    public String getDescription() { return description; }
+    public Integer getServings() { return servings; }
+    public Integer getPrepTimeInMinutes() { return prepTimeInMinutes; }
+    public String getSourceName() { return sourceName; }
+    public String getSourceUrl() { return sourceUrl; }
+    public String getImage() { return image; }
+    public NutritionInfo getNutritionInfo() { return nutritionInfo; }
+    public ArrayList<Ingredient> getIngredients() { return ingredients; }
+    public ArrayList<InstructionStep> getInstructionSteps() { return instructionSteps; }
+    public String getRecipeKey() { return recipeKey; }
 
     // Setters
     public void setId(Long id) {
@@ -186,8 +150,6 @@ public class Recipe {
         this.image = image;
     }
 
-    public void setRecipeKey(String recipeKey) { this.recipeKey = recipeKey; }
-
     public void setNutritionInfo(NutritionInfo nutritionInfo) {
         this.nutritionInfo = nutritionInfo;
     }
@@ -198,6 +160,7 @@ public class Recipe {
      * @param ingredient a valid filled Ingredient class
      */
     public void addIngredient(Ingredient ingredient) {
+
         this.ingredients.add(ingredient);
     }
 
