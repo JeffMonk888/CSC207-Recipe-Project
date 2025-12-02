@@ -5,7 +5,7 @@
 <html id="htmlId">
 <head>
   <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
-  <title>Coverage Report > AddIngredientInputData</title>
+  <title>Coverage Report > RemoveIngredientInputData</title>
   <style type="text/css">
     @import "../../css/coverage.css";
     @import "../../css/idea.min.css";
@@ -19,10 +19,10 @@
 <div class="breadCrumbs">
 Current scope:     <a href="../../index.html">all classes</a>
     <span class="separator">|</span>
-    <a href="../index.html">usecase.add_ingredient</a>
+    <a href="../index.html">usecase.remove_ingredient</a>
 </div>
 
-<h1>Coverage Summary for Class: AddIngredientInputData (usecase.add_ingredient)</h1>
+<h1>Coverage Summary for Class: RemoveIngredientInputData (usecase.remove_ingredient)</h1>
 
 <table class="coverageStats">
 <tr>
@@ -41,7 +41,7 @@ Current scope:     <a href="../../index.html">all classes</a>
 </th>
 </tr>
 <tr>
-  <td class="name">AddIngredientInputData</td>
+  <td class="name">RemoveIngredientInputData</td>
 <td class="coverageStat">
   <span class="percent">
     100%
@@ -75,22 +75,23 @@ Current scope:     <a href="../../index.html">all classes</a>
 
 
 <pre>
-<code class="sourceCode" id="sourceCode">&nbsp;package usecase.add_ingredient;
+<code class="sourceCode" id="sourceCode">&nbsp;package usecase.remove_ingredient;
 &nbsp;
-&nbsp;public class AddIngredientInputData {
+&nbsp;public class RemoveIngredientInputData {
+&nbsp;
 &nbsp;    private final Long userId;
 &nbsp;    private final String ingredient;
 &nbsp;
-<b class="fc">&nbsp;    public AddIngredientInputData(Long userId, String ingredient) {</b>
+<b class="fc">&nbsp;    public RemoveIngredientInputData(Long userId, String ingredient) {</b>
 <b class="fc">&nbsp;        this.userId = userId;</b>
 <b class="fc">&nbsp;        this.ingredient = ingredient;</b>
 &nbsp;    }
 &nbsp;
-&nbsp;    Long getUserId() {
+&nbsp;    public Long getUserId() {
 <b class="fc">&nbsp;        return userId;</b>
 &nbsp;    }
 &nbsp;
-&nbsp;    String getIngredient() {
+&nbsp;    public String getIngredient() {
 <b class="fc">&nbsp;        return ingredient;</b>
 &nbsp;    }
 &nbsp;}
@@ -117,7 +118,7 @@ Current scope:     <a href="../../index.html">all classes</a>
 
 <div class="footer">
     
-    <div style="float:right;">generated on 2025-12-01 23:44</div>
+    <div style="float:right;">generated on 2025-12-01 23:53</div>
 </div>
 </body>
 </html>
