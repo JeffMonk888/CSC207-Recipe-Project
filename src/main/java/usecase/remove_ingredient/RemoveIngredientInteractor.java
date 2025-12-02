@@ -15,29 +15,39 @@ public class RemoveIngredientInteractor implements RemoveIngredientInputBoundary
 
     @Override
     public void execute(RemoveIngredientInputData inputData) {
-        Long userId = inputData.getUserId();
-        String ingredient = inputData.getIngredient();
+        String message = null;
+        RemoveIngredientOutputData outputData = null;
+
+        final Long userId = inputData.getUserId();
+        final String ingredient = inputData.getIngredient();
 
         if (userId == null) {
-            presenter.presentFailure("User ID cannot be null.");
-            return;
+            message = "User ID cannot be null.";
+        }
+        else if (ingredient == null || ingredient.trim().isEmpty()) {
+            message = "Ingredient cannot be empty.";
+
+        }
+        else {
+            final String trimmed = ingredient.trim();
+
+            final boolean removed = fridgeAccess.removeItem(userId, trimmed);
+
+            if (removed) {
+                outputData = new RemoveIngredientOutputData(trimmed);
+                presenter.presentSuccess(outputData);
+            }
+            else {
+                message = "Ingredient not found in your fridge.";
+            }
         }
 
-        if (ingredient == null || ingredient.trim().isEmpty()) {
-            presenter.presentFailure("Ingredient cannot be empty.");
-            return;
+        if (message != null) {
+            presenter.presentFailure(message);
         }
-
-        String trimmed = ingredient.trim();
-
-        boolean removed = fridgeAccess.removeItem(userId, trimmed);
-
-        if (removed) {
-            RemoveIngredientOutputData outputData =
-                    new RemoveIngredientOutputData(trimmed);
+        else {
             presenter.presentSuccess(outputData);
-        } else {
-            presenter.presentFailure("Ingredient not found in your fridge.");
         }
+
     }
 }
