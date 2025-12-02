@@ -1,9 +1,9 @@
 package view;
 
+import interface_adapter.ViewManagerModel;
+import interface_adapter.saved_recipe.SaveRecipeController;
 import interface_adapter.view_recipe.ViewRecipeState;
 import interface_adapter.view_recipe.ViewRecipeViewModel;
-import interface_adapter.saved_recipe.SaveRecipeController;
-import interface_adapter.ViewManagerModel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -17,8 +17,8 @@ import java.util.List;
  * This panel observes the ViewRecipeViewModel and updates its labels and
  * text areas whenever the ViewModel's state changes.
  */
-public class ViewRecipeView extends JPanel implements PropertyChangeListener {
-
+public class ViewRecipeNoSave extends JPanel implements PropertyChangeListener {
+    public static final String VIEW_NAME = "view_recipe_from_saved";
     private final ViewRecipeViewModel viewModel;
     private final SaveRecipeController saveRecipeController;
     private final ViewManagerModel viewManagerModel;
@@ -29,14 +29,13 @@ public class ViewRecipeView extends JPanel implements PropertyChangeListener {
     private final JLabel nutritionLabel;
     private final JLabel errorLabel;
     private final JLabel imageLabel;
-    private final JButton saveButton;
     private final JButton backButton;
     private final JTextArea ingredientsArea;
     private final JTextArea stepsArea;
 
-    public ViewRecipeView(ViewRecipeViewModel viewModel,
-                          SaveRecipeController saveRecipeController,
-                          ViewManagerModel viewManagerModel) {
+    public ViewRecipeNoSave(ViewRecipeViewModel viewModel,
+                            SaveRecipeController saveRecipeController,
+                            ViewManagerModel viewManagerModel) {
         this.viewModel = viewModel;
         this.saveRecipeController = saveRecipeController;
         this.viewManagerModel = viewManagerModel;
@@ -71,14 +70,7 @@ public class ViewRecipeView extends JPanel implements PropertyChangeListener {
         textPanel.add(nutritionLabel);
         textPanel.add(Box.createVerticalStrut(4));
         textPanel.add(errorLabel);
-
-        // right side: Save Recipe button
-        saveButton = new JButton("Save Recipe");
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        buttonPanel.add(saveButton);
-
         topPanel.add(textPanel, BorderLayout.CENTER);
-        topPanel.add(buttonPanel, BorderLayout.EAST);
 
         add(topPanel, BorderLayout.NORTH);
 
@@ -123,15 +115,13 @@ public class ViewRecipeView extends JPanel implements PropertyChangeListener {
 
         add(bottomPanel, BorderLayout.SOUTH);
 
-        // wire up Save Recipe button
-        saveButton.addActionListener(e -> handleSaveRecipe());
         backButton.addActionListener(e -> viewManagerModel.setActiveViewName("home"));
         // Initial paint from current state (if any)
         updateFromState();
     }
 
     public String getViewName() {
-        return ViewRecipeViewModel.VIEW_NAME;
+        return VIEW_NAME;   // instead of ViewRecipeViewModel.VIEW_NAME
     }
 
     @Override

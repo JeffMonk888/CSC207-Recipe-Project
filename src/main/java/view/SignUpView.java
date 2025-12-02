@@ -14,6 +14,7 @@ public class SignUpView extends JPanel {
     private final JPasswordField passwordField;
     private final JPasswordField confirmField;
     private final JButton createButton;
+    private final JButton backButton;
     private final JLabel errorLabel;
 
     public SignUpView(ViewManagerModel viewManagerModel) {
@@ -37,14 +38,17 @@ public class SignUpView extends JPanel {
         passwordField = new JPasswordField(18);
         confirmField = new JPasswordField(18);
         createButton = new JButton("Create account");
+        backButton = new JButton("Back to Login");
         errorLabel = new JLabel(" ");
         errorLabel.setForeground(Color.RED);
 
+        // Title row
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.gridwidth = 2;
         add(title, gbc);
 
+        // Username row
         gbc.gridy = 1;
         gbc.gridwidth = 1;
         gbc.gridx = 0;
@@ -52,27 +56,36 @@ public class SignUpView extends JPanel {
         gbc.gridx = 1;
         add(usernameField, gbc);
 
+        // Password row
         gbc.gridy = 2;
         gbc.gridx = 0;
         add(passwordLabel, gbc);
         gbc.gridx = 1;
         add(passwordField, gbc);
 
+        // Confirm password row
         gbc.gridy = 3;
         gbc.gridx = 0;
         add(confirmLabel, gbc);
         gbc.gridx = 1;
         add(confirmField, gbc);
 
+        // Buttons row: Create (left), Back to Login (right)
         gbc.gridy = 4;
         gbc.gridx = 0;
-        gbc.gridwidth = 2;
+        gbc.gridwidth = 1;
         add(createButton, gbc);
+        gbc.gridx = 1;
+        add(backButton, gbc);
 
+        // Error label row
         gbc.gridy = 5;
+        gbc.gridwidth = 2;
         add(errorLabel, gbc);
 
+        // Actions
         createButton.addActionListener(e -> handleCreateClick());
+        backButton.addActionListener(e -> viewManagerModel.setActiveViewName("login"));
     }
 
     public String getViewName() {
