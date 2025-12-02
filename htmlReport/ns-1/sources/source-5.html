@@ -5,7 +5,7 @@
 <html id="htmlId">
 <head>
   <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
-  <title>Coverage Report > ViewRecipeInputBoundary</title>
+  <title>Coverage Report > AddIngredientInputBoundary</title>
   <style type="text/css">
     @import "../../css/coverage.css";
     @import "../../css/idea.min.css";
@@ -19,17 +19,17 @@
 <div class="breadCrumbs">
 Current scope:     <a href="../../index.html">all classes</a>
     <span class="separator">|</span>
-    <a href="../index.html">usecase.view_recipe</a>
+    <a href="../index.html">usecase.add_ingredient</a>
 </div>
 
-<h1>Coverage Summary for Class: ViewRecipeInputBoundary (usecase.view_recipe)</h1>
+<h1>Coverage Summary for Class: AddIngredientInputBoundary (usecase.add_ingredient)</h1>
 
 <table class="coverageStats">
 <tr>
   <th class="name">Class</th>
 </tr>
 <tr>
-  <td class="name">ViewRecipeInputBoundary</td>
+  <td class="name">AddIngredientInputBoundary</td>
 </tr>
 
 </table>
@@ -39,21 +39,19 @@ Current scope:     <a href="../../index.html">all classes</a>
 
 
 <pre>
-<code class="sourceCode" id="sourceCode">&nbsp;package usecase.view_recipe;
+<code class="sourceCode" id="sourceCode">&nbsp;package usecase.add_ingredient;
 &nbsp;
 &nbsp;/**
-&nbsp; * Input boundary for the View Recipe use case
+&nbsp; * Input boundary for the Add Ingredient use case.
 &nbsp; */
-&nbsp;public interface ViewRecipeInputBoundary {
+&nbsp;public interface AddIngredientInputBoundary {
 &nbsp;    /**
-&nbsp;     * Executes the View Recipe use case.
+&nbsp;     * Executes the Add Ingredient use case.
 &nbsp;     *
-&nbsp;     * @param inputData the data needed to retrieve and display a recipe&#39;s
-&nbsp;     *                  full detail.
+&nbsp;     * @param inputData the data required to add ingredient, including the user ID and the ingredient name
 &nbsp;     */
-&nbsp;    void execute(ViewRecipeInputData inputData);
+&nbsp;    void execute(AddIngredientInputData inputData);
 &nbsp;}
-&nbsp;
 </code>
 </pre>
 </div>
@@ -77,7 +75,7 @@ Current scope:     <a href="../../index.html">all classes</a>
 
 <div class="footer">
     
-    <div style="float:right;">generated on 2025-12-01 23:04</div>
+    <div style="float:right;">generated on 2025-12-01 23:44</div>
 </div>
 </body>
 </html>
