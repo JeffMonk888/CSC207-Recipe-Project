@@ -5,7 +5,7 @@
 <html id="htmlId">
 <head>
   <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
-  <title>Coverage Report > ViewRecipeOutputBoundary</title>
+  <title>Coverage Report > AddIngredientOutputBoundary</title>
   <style type="text/css">
     @import "../../css/coverage.css";
     @import "../../css/idea.min.css";
@@ -19,17 +19,17 @@
 <div class="breadCrumbs">
 Current scope:     <a href="../../index.html">all classes</a>
     <span class="separator">|</span>
-    <a href="../index.html">usecase.view_recipe</a>
+    <a href="../index.html">usecase.add_ingredient</a>
 </div>
 
-<h1>Coverage Summary for Class: ViewRecipeOutputBoundary (usecase.view_recipe)</h1>
+<h1>Coverage Summary for Class: AddIngredientOutputBoundary (usecase.add_ingredient)</h1>
 
 <table class="coverageStats">
 <tr>
   <th class="name">Class</th>
 </tr>
 <tr>
-  <td class="name">ViewRecipeOutputBoundary</td>
+  <td class="name">AddIngredientOutputBoundary</td>
 </tr>
 
 </table>
@@ -39,25 +39,25 @@ Current scope:     <a href="../../index.html">all classes</a>
 
 
 <pre>
-<code class="sourceCode" id="sourceCode">&nbsp;package usecase.view_recipe;
+<code class="sourceCode" id="sourceCode">&nbsp;package usecase.add_ingredient;
 &nbsp;
 &nbsp;/**
-&nbsp; * Output boundary for the View Recipe use case.
+&nbsp; * Output boundary for the Add Ingredient usecase.
 &nbsp; */
-&nbsp;public interface ViewRecipeOutputBoundary {
-&nbsp;    /**
-&nbsp;     * Presents the successful result of the View Recipe use case.
-&nbsp;     *
-&nbsp;     * @param outputData the data containing the complete recipe details, including ingredients,
-&nbsp;     *                   instructions, nutrition, infromations, and image url etc.
-&nbsp;     */
-&nbsp;    void presentSuccess(ViewRecipeOutputData outputData);
+&nbsp;public interface AddIngredientOutputBoundary {
 &nbsp;
 &nbsp;    /**
-&nbsp;     * Presents an error message when the recipe details cannot be retrieved.
+&nbsp;     * Presents the successful result of the Add Ingredient use case.
 &nbsp;     *
-&nbsp;     * @param errorMessage an explanation of why the recipe could nto be displayed.
+&nbsp;     * @param outputData the data object containing the user ID
+&nbsp;     *                  and the ingredient that was successfully added
+&nbsp;     */
+&nbsp;    void presentSuccess(AddIngredientOutputData outputData);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Presents an error message when the ingredient cannot be added.
 &nbsp;     *
+&nbsp;     * @param errorMessage an understable explanation of why the operation failed
 &nbsp;     */
 &nbsp;    void presentFailure(String errorMessage);
 &nbsp;}
@@ -84,7 +84,7 @@ Current scope:     <a href="../../index.html">all classes</a>
 
 <div class="footer">
     
-    <div style="float:right;">generated on 2025-12-01 23:04</div>
+    <div style="float:right;">generated on 2025-12-01 23:44</div>
 </div>
 </body>
 </html>

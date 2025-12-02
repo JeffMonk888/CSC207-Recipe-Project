@@ -5,7 +5,7 @@
 <html id="htmlId">
 <head>
   <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
-  <title>Coverage Report > ViewRecipeInputData</title>
+  <title>Coverage Report > AddIngredientInputData</title>
   <style type="text/css">
     @import "../../css/coverage.css";
     @import "../../css/idea.min.css";
@@ -19,10 +19,10 @@
 <div class="breadCrumbs">
 Current scope:     <a href="../../index.html">all classes</a>
     <span class="separator">|</span>
-    <a href="../index.html">usecase.view_recipe</a>
+    <a href="../index.html">usecase.add_ingredient</a>
 </div>
 
-<h1>Coverage Summary for Class: ViewRecipeInputData (usecase.view_recipe)</h1>
+<h1>Coverage Summary for Class: AddIngredientInputData (usecase.add_ingredient)</h1>
 
 <table class="coverageStats">
 <tr>
@@ -41,7 +41,7 @@ Current scope:     <a href="../../index.html">all classes</a>
 </th>
 </tr>
 <tr>
-  <td class="name">ViewRecipeInputData</td>
+  <td class="name">AddIngredientInputData</td>
 <td class="coverageStat">
   <span class="percent">
     100%
@@ -55,7 +55,7 @@ Current scope:     <a href="../../index.html">all classes</a>
     100%
   </span>
   <span class="absValue">
-    (2/2)
+    (3/3)
   </span>
 </td>
 <td class="coverageStat">
@@ -63,7 +63,7 @@ Current scope:     <a href="../../index.html">all classes</a>
     100%
   </span>
   <span class="absValue">
-    (3/3)
+    (5/5)
   </span>
 </td>
 </tr>
@@ -75,18 +75,23 @@ Current scope:     <a href="../../index.html">all classes</a>
 
 
 <pre>
-<code class="sourceCode" id="sourceCode">&nbsp;package usecase.view_recipe;
+<code class="sourceCode" id="sourceCode">&nbsp;package usecase.add_ingredient;
 &nbsp;
-&nbsp;public class ViewRecipeInputData {
+&nbsp;public class AddIngredientInputData {
+&nbsp;    private final Long userId;
+&nbsp;    private final String ingredient;
 &nbsp;
-&nbsp;    private final String recipeKey;
-&nbsp;
-<b class="fc">&nbsp;    public ViewRecipeInputData(String recipeId) {</b>
-<b class="fc">&nbsp;        this.recipeKey = recipeId;</b>
+<b class="fc">&nbsp;    public AddIngredientInputData(Long userId, String ingredient) {</b>
+<b class="fc">&nbsp;        this.userId = userId;</b>
+<b class="fc">&nbsp;        this.ingredient = ingredient;</b>
 &nbsp;    }
 &nbsp;
-&nbsp;    public String getRecipeKey() {
-<b class="fc">&nbsp;        return recipeKey;</b>
+&nbsp;    Long getUserId() {
+<b class="fc">&nbsp;        return userId;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    String getIngredient() {
+<b class="fc">&nbsp;        return ingredient;</b>
 &nbsp;    }
 &nbsp;}
 </code>
@@ -112,7 +117,7 @@ Current scope:     <a href="../../index.html">all classes</a>
 
 <div class="footer">
     
-    <div style="float:right;">generated on 2025-12-01 23:04</div>
+    <div style="float:right;">generated on 2025-12-01 23:44</div>
 </div>
 </body>
 </html>
