@@ -45,7 +45,6 @@ import usecase.search_by_fridge.SearchByFridgeInteractor;
 import usecase.search_by_fridge.SearchByFridgeOutputBoundary;
 
 import usecase.common.RecipeByIngredientsAccess;
-import data.api.SpoonacularClient;
 
 // Use cases
 import usecase.add_ingredient.AddIngredientInputBoundary;
@@ -63,15 +62,6 @@ import usecase.view_recipe.ViewRecipeInteractor;
 import usecase.view_recipe.ViewRecipeOutputBoundary;
 import usecase.remove_ingredient.RemoveIngredientInputBoundary;
 import usecase.remove_ingredient.RemoveIngredientInteractor;
-
-// Filter recipes (UC4)
-import interface_adapter.filter_recipes.FilterRecipesController;
-import interface_adapter.filter_recipes.FilterRecipesPresenter;
-import interface_adapter.filter_recipes.FilterRecipesViewModel;
-import usecase.filter_recipes.FilterRecipesInputBoundary;
-import usecase.filter_recipes.FilterRecipesInteractor;
-import usecase.filter_recipes.FilterRecipesOutputBoundary;
-import view.FilterRecipeView;
 
 // Views
 import view.CreateRecipeView;
@@ -98,7 +88,6 @@ public class AppBuilder {
     private SavedRecipesView savedRecipesView;
     private FindRecipeView findRecipeView;
     private SearchByFridgeView searchByFridgeView;
-    private FilterRecipeView filterRecipeView;
     private ViewRecipeController viewRecipeController;
 
     public AppBuilder addLoginView() {
@@ -237,6 +226,7 @@ public class AppBuilder {
         String apiKey = System.getenv("SPOONACULAR_API_KEY");
         if (apiKey == null || apiKey.isBlank()) {
             apiKey = masterApiKey; // same key you use in demos
+            apiKey = "ef09f685ac104edbbac1ce1bc9ff8028"; // same key you use in demos
         }
         SpoonacularClient spoonacularClient = new SpoonacularClient(apiKey);
         RecipeByIngredientsAccess recipeAccess = spoonacularClient;

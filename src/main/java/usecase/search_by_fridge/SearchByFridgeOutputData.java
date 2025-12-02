@@ -1,8 +1,8 @@
 package usecase.search_by_fridge;
 
+import java.util.List;
 
 import domain.entity.RecipePreview;
-import java.util.List;
 
 public class SearchByFridgeOutputData {
 

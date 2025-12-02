@@ -1,19 +1,19 @@
 package usecase.search_by_fridge;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import domain.entity.RecipePreview;
 import usecase.common.FridgeAccess;
 import usecase.common.RecipeByIngredientsAccess;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Interactor for the Search By Fridge use case.
  *
- * Business rules:
+ * <p>Business rules:
  * - Uses all ingredients in the user's fridge.
  * - Only returns recipes where no ingredients are missing
- *   (missedIngredientCount == 0).
+ *   (missedIngredientCount == 0). </p>
  */
 public class SearchByFridgeInteractor implements SearchByFridgeInputBoundary {
 
@@ -31,48 +31,54 @@ public class SearchByFridgeInteractor implements SearchByFridgeInputBoundary {
 
     @Override
     public void execute(SearchByFridgeInputData inputData) {
-        Long userId = inputData.getUserId();
-        int number = inputData.getNumber();
-        int offset = inputData.getOffset();
+        final Long userId = inputData.getUserId();
+        final int number = inputData.getNumber();
+        final int offset = inputData.getOffset();
+
+        String error = null;
+        SearchByFridgeOutputData outputData = null;
 
         if (userId == null) {
-            presenter.presentFailure("User ID cannot be null.");
-            return;
+            error = "User ID cannot be null.";
+
         }
+        else {
 
-        // 1. Get fridge ingredients
-        List<String> ingredients = fridgeAccess.getItems(userId);
-        if (ingredients.isEmpty()) {
-            presenter.presentFailure("Your fridge is empty. Please add some ingredients first.");
-            return;
-        }
-
-        try {
-            List<RecipePreview> apiResults =
-                    recipeAccess.getRecipesForIngredients(ingredients, number, offset);
-
-            List<RecipePreview> filtered = new ArrayList<>();
-            for (RecipePreview recipe : apiResults) {
-                // assuming RecipePreview has missedIngredientCount field
-                /**
-                 * Add more filter here
-                 */
-
-                if (recipe.missedIngredientCount == 0) {
-                    filtered.add(recipe);
-                }
+            // 1. Get fridge ingredients
+            final List<String> ingredients = fridgeAccess.getItems(userId);
+            if (ingredients.isEmpty()) {
+                error = "Your fridge is empty. Please add some ingredients first.";
             }
+            try {
+                final List<RecipePreview> apiResults =
+                        recipeAccess.getRecipesForIngredients(ingredients, number, offset);
 
-            int nextOffset = offset + apiResults.size();
-            boolean hasMore = apiResults.size() == number;
+                final List<RecipePreview> filtered = new ArrayList<>();
+                for (RecipePreview recipe : apiResults) {
+                    // assuming RecipePreview has missedIngredientCount field
 
-            SearchByFridgeOutputData outputData =
-                    new SearchByFridgeOutputData(filtered, nextOffset, hasMore);
+                    if (recipe.missedIngredientCount == 0) {
+                        filtered.add(recipe);
+                    }
+                }
 
+                final int nextOffset = offset + apiResults.size();
+                final boolean hasMore = apiResults.size() == number;
+
+                outputData = new SearchByFridgeOutputData(filtered, nextOffset, hasMore);
+
+                presenter.presentSuccess(outputData);
+
+            }
+            catch (Exception exception) {
+                error = "Failed to fetch recipes: " + exception.getMessage();
+            }
+        }
+        if (error != null) {
+            presenter.presentFailure(error);
+        }
+        else {
             presenter.presentSuccess(outputData);
-
-        } catch (Exception e) {
-            presenter.presentFailure("Failed to fetch recipes: " + e.getMessage());
         }
     }
 }

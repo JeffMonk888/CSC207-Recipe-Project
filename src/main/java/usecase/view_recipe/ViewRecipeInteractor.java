@@ -2,7 +2,7 @@ package usecase.view_recipe;
 
 import data.api.SpoonacularClient;
 import data.api.SpoonacularClient.ApiException;
-import data.dto.RecipeInformationDTO;
+import data.dto.RecipeInformationDto;
 import data.mapper.RecipeMapper;
 import data.saved_recipe.RecipeDataAssessObject;
 import domain.entity.Recipe;
@@ -25,33 +25,35 @@ public class ViewRecipeInteractor implements ViewRecipeInputBoundary {
 
     @Override
     public void execute(ViewRecipeInputData inputData) {
-        String key = inputData.getRecipeKey();
+        final String key = inputData.getRecipeKey();
         try {
-            Recipe recipe;
+            final Recipe recipe;
 
-            if (key.startsWith("a")){
-                long apiId = Long.parseLong(key.substring(1));
-                RecipeInformationDTO dto =
+            if (key.startsWith("a")) {
+                final long apiId = Long.parseLong(key.substring(1));
+                final RecipeInformationDto dto =
                         client.getRecipeInformation(apiId, true);
 
                 recipe = RecipeMapper.toDomain(dto);
                 presenter.presentSuccess(new ViewRecipeOutputData(recipe));
-            } else if (key.startsWith("c")){
-                long customId = Long.parseLong(key.substring(1));
+            }
+            else if (key.startsWith("c")) {
+                final long customId = Long.parseLong(key.substring(1));
                 recipe = recipeCache.findById(customId)
-                        .orElseThrow(() -> new RuntimeException(
-                                "Custom recipe not found in cache: " + customId
-                        ));
+                        .orElseThrow(() -> {
+                            return new RuntimeException(
+                                    "Custom recipe not found in cache: " + customId
+                            );
+                        });
 
-            } else {
+            }
+            else {
                 throw new RuntimeException("Unknown recipe key: " + key);
             }
             presenter.presentSuccess(new ViewRecipeOutputData(recipe));
-
-
-
-        } catch (ApiException e) {
-            presenter.presentFailure(e.getMessage());
+        }
+        catch (ApiException apiException) {
+            presenter.presentFailure(apiException.getMessage());
         }
     }
 }
