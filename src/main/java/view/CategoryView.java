@@ -1,13 +1,12 @@
 package view;
 
 import data.category.InMemoryCategoryGateway;
-import data.saved_recipe.UserSavedRecipeAccessObject;
 import domain.entity.Category;
 import domain.entity.SavedRecipe;
 import interface_adapter.category.CategoryController;
+import interface_adapter.category.CategoryPresenter;
 import interface_adapter.category.CategoryState;
 import interface_adapter.category.CategoryViewModel;
-import interface_adapter.category.CategoryPresenter;
 import usecase.category.CategoryDataAccessInterface;
 import usecase.category.assign_category.AssignCategoryInteractor;
 import usecase.category.create_category.CreateCategoryInteractor;
@@ -27,17 +26,16 @@ import java.util.List;
 /**
  * GUI view for UC10 Category.
  *
- * This version uses:
- *  - CategoryController
- *  - CategoryViewModel
- *  - CategoryPresenter
- *
- * The view never calls the interactors directly anymore.
+ * This version:
+ *  - Uses CategoryController + CategoryViewModel + CategoryPresenter
+ *  - Uses the real MotionForRecipe gateway (injected from SavedRecipesView)
+ *  - Uses the real current userId (injected from SavedRecipesView)
+ *  - Has NO demo seeding of fake recipe ids.
  */
 public class CategoryView extends JFrame implements PropertyChangeListener {
 
-    /** For now we keep a fixed demo user id. */
-    private static final long USER_ID = 1L;
+    /** Real user id passed from SavedRecipesView. */
+    private final long userId;
 
     // ==== Gateways ====
     private final CategoryDataAccessInterface categoryGateway;
@@ -61,12 +59,16 @@ public class CategoryView extends JFrame implements PropertyChangeListener {
     /** Whether the bottom panel is currently filtered by a category. */
     private boolean isFiltered = false;
 
-    public CategoryView() {
-        super("Category Demo");
+    /**
+     * @param userId       current logged-in user id (from ViewManagerModel)
+     * @param savedGateway real saved-recipe gateway used in the app
+     */
+    public CategoryView(long userId, MotionForRecipe savedGateway) {
+        super("Category Manager");
 
-        // ===== Gateways =====
+        this.userId = userId;
+        this.savedGateway = savedGateway;
         this.categoryGateway = new InMemoryCategoryGateway();
-        this.savedGateway = new UserSavedRecipeAccessObject("user_recipe_links.csv");
 
         // ===== ViewModel & Presenter & Interactors & Controller =====
         this.categoryViewModel = new CategoryViewModel();
@@ -116,7 +118,7 @@ public class CategoryView extends JFrame implements PropertyChangeListener {
         // ===== Left: saved recipes =====
         savedList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         JScrollPane savedScroll = new JScrollPane(savedList);
-        savedScroll.setBorder(BorderFactory.createTitledBorder("Saved Recipes"));
+        savedScroll.setBorder(BorderFactory.createTitledBorder("My Saved Recipes"));
 
         JButton refreshSavedButton = new JButton("Refresh Saved");
 
@@ -173,7 +175,7 @@ public class CategoryView extends JFrame implements PropertyChangeListener {
 
         // Row 4: back button
         JPanel row4 = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        JButton backButton = new JButton("Back to Saved Recipes");
+        JButton backButton = new JButton("Close");
         row4.add(backButton);
 
         bottom.add(row1);
@@ -194,8 +196,7 @@ public class CategoryView extends JFrame implements PropertyChangeListener {
         // Create category -> controller + presenter + view model
         createButton.addActionListener(e -> {
             String name = newCategoryField.getText().trim();
-            categoryController.createCategory(USER_ID, name);
-            // We rely on presenter + ViewModel to trigger UI update.
+            categoryController.createCategory(userId, name);
         });
 
         // Delete category
@@ -207,8 +208,7 @@ public class CategoryView extends JFrame implements PropertyChangeListener {
                         JOptionPane.WARNING_MESSAGE);
                 return;
             }
-            categoryController.deleteCategory(USER_ID, cid);
-            // presenter will update state and clear filtered list if needed
+            categoryController.deleteCategory(userId, cid);
         });
 
         // Assign saved recipe to category
@@ -225,7 +225,7 @@ public class CategoryView extends JFrame implements PropertyChangeListener {
             String recipeId = token;
 
             categoryController.assignRecipesToCategory(
-                    USER_ID, cid, Collections.singletonList(recipeId)
+                    userId, cid, Collections.singletonList(recipeId)
             );
 
             // If currently filtered, re-apply filter to reflect new assignment
@@ -245,7 +245,7 @@ public class CategoryView extends JFrame implements PropertyChangeListener {
             String token = parseLeadingToken(categoryRecipeModel.get(idx));
             String recipeId = token;
 
-            categoryController.removeRecipeFromCategory(USER_ID, cid, recipeId);
+            categoryController.removeRecipeFromCategory(userId, cid, recipeId);
 
             // If currently filtered, re-apply filter to reflect removal
             refreshFilteredRecipes();
@@ -272,7 +272,7 @@ public class CategoryView extends JFrame implements PropertyChangeListener {
             categoryViewModel.fireStateChanged();
         });
 
-        // Back button (for demo we just close this window)
+        // Close window
         backButton.addActionListener(e -> dispose());
     }
 
@@ -320,11 +320,11 @@ public class CategoryView extends JFrame implements PropertyChangeListener {
 
     /**
      * Refreshes the left list of saved recipes for the current user.
-     * This still uses the MotionForRecipe gateway directly.
+     * This uses the real MotionForRecipe gateway.
      */
     private void refreshSavedList() {
         savedModel.clear();
-        for (SavedRecipe sr : savedGateway.findByUserId(USER_ID)) {
+        for (SavedRecipe sr : savedGateway.findByUserId(userId)) {
             String text = sr.getRecipeKey();
             if (sr.isFavourite()) {
                 text += " ★";
@@ -338,7 +338,7 @@ public class CategoryView extends JFrame implements PropertyChangeListener {
      * then fires a state change so the UI is updated.
      */
     private void loadInitialCategoriesFromGateway() {
-        List<Category> categories = categoryGateway.findCategoriesForUser(USER_ID);
+        List<Category> categories = categoryGateway.findCategoriesForUser(userId);
         CategoryState state = categoryViewModel.getState();
         state.setCategories(categories);
         categoryViewModel.fireStateChanged();
@@ -359,7 +359,7 @@ public class CategoryView extends JFrame implements PropertyChangeListener {
             categoryViewModel.fireStateChanged();
             return;
         }
-        categoryController.filterByCategory(USER_ID, cid);
+        categoryController.filterByCategory(userId, cid);
     }
 
     /**
@@ -379,7 +379,7 @@ public class CategoryView extends JFrame implements PropertyChangeListener {
     }
 
     /**
-     * Extracts leading token: "c201 ★" → "c201".
+     * Extracts leading token: "c123 ★" → "c123".
      */
     private static String parseLeadingToken(String line) {
         if (line == null) return "";
