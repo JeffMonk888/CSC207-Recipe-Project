@@ -1,7 +1,7 @@
 package usecase.retrieve_saved;
 
-import domain.entity.Recipe; // <-- 更改
-import java.util.List; // <-- 更改
+import domain.entity.Recipe;
+import java.util.List;
 
 public class RetrieveSavedOutputData {
     private final List<Recipe> savedRecipes;
@@ -11,6 +11,7 @@ public class RetrieveSavedOutputData {
     }
 
     public List<Recipe> getSavedRecipes() {
+
         return savedRecipes;
     }
 }

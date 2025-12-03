@@ -13,8 +13,19 @@ public class CreateRecipeInputData {
         this.instructions = instructions;
     }
 
-    public Long getUserId() { return userId; }
-    public String getTitle() { return title; }
-    public String getIngredients() { return ingredients; }
-    public String getInstructions() { return instructions; }
+    public Long getUserId() {
+        return userId;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getIngredients() {
+        return ingredients;
+    }
+
+    public String getInstructions() {
+        return instructions;
+    }
 }

@@ -9,6 +9,11 @@ public class CreateRecipeOutputData {
         this.recipeKey = recipeKey;
     }
 
-    public String getRecipeTitle() { return recipeTitle; }
-    public String getRecipeKey() { return recipeKey; }
+    public String getRecipeTitle() {
+        return recipeTitle;
+    }
+
+    public String getRecipeKey() {
+        return recipeKey;
+    }
 }

@@ -89,7 +89,6 @@ public class CreateRecipeView extends JPanel implements PropertyChangeListener {
                 return;
             }
 
-
             int choice = JOptionPane.showConfirmDialog(
                     this,
                     "Are you sure you want to create and save this recipe?\nTitle: " + title,

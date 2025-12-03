@@ -8,5 +8,8 @@ public class SaveRecipeOutputData {
     public SaveRecipeOutputData(SavedRecipe savedRecipe) {
         this.savedRecipe = savedRecipe;
     }
-    public SavedRecipe getSavedRecipe() { return savedRecipe; }
+
+    public SavedRecipe getSavedRecipe() {
+        return savedRecipe;
+    }
 }

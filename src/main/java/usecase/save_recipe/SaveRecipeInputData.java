@@ -12,8 +12,14 @@ public class SaveRecipeInputData {
         this.userId = userId;
         this.recipeKey = recipeKey;
     }
-    public Long getUserId() { return userId; }
-    public String getRecipeKey() { return recipeKey; }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public String getRecipeKey() {
+        return recipeKey;
+    }
 }
 
 

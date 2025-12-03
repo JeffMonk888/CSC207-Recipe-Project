@@ -101,7 +101,7 @@ public class SavedRecipesView extends JPanel implements PropertyChangeListener {
 
         add(bottomPanel, BorderLayout.SOUTH);
 
-        // Right-side panel for actions (Rate + Category Demo)
+        // Right-side panel for actions (Rate + Category)
         JPanel actionPanel = new JPanel();
         actionPanel.setLayout(new BoxLayout(actionPanel, BoxLayout.Y_AXIS));
         actionPanel.setBorder(BorderFactory.createTitledBorder("Actions"));
@@ -110,9 +110,9 @@ public class SavedRecipesView extends JPanel implements PropertyChangeListener {
         rateButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         rateButton.addActionListener(e -> openRateRecipeWindow());
 
-        JButton categoryButton = new JButton("Category Demo");
+        JButton categoryButton = new JButton("Category");
         categoryButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-        categoryButton.addActionListener(e -> CategoryDemo.main(new String[0]));
+        categoryButton.addActionListener(e -> openCategoryWindow());
 
         actionPanel.add(Box.createVerticalStrut(10));
         actionPanel.add(rateButton);
@@ -145,6 +145,29 @@ public class SavedRecipesView extends JPanel implements PropertyChangeListener {
                 userId
         );
         rateView.setVisible(true);
+    }
+
+    /**
+     * Opens the real CategoryView (using controller + view model + presenter)
+     * for the current user and using the real savedRecipeGateway.
+     */
+    private void openCategoryWindow() {
+        Long userId = viewManagerModel.getCurrentUserId();
+        if (userId == null) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "No user is currently logged in.",
+                    "No User",
+                    JOptionPane.WARNING_MESSAGE
+            );
+            return;
+        }
+
+        CategoryView categoryView = new CategoryView(
+                userId,
+                savedRecipeGateway   // pass the real gateway; it implements MotionForRecipe
+        );
+        categoryView.setVisible(true);
     }
 
     private void onRefresh(ActionEvent e) {

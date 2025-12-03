@@ -151,6 +151,8 @@ public class AppBuilder {
      * @return this builder to enable method chaining
      */
 
+    // ============ Create Recipe feature ============
+
     public AppBuilder addCreateRecipeFeature() {
 
         // View model & presenter
@@ -180,6 +182,8 @@ public class AppBuilder {
      *
      * @return this builder to allow method chaining
      */
+
+    // ============ Saved Recipes + View Recipe + Rate Recipe ============
 
     public AppBuilder addSavedRecipesFeature() {
 
@@ -309,6 +313,8 @@ public class AppBuilder {
      * @return this builder so that calls can be chained
      */
 
+    // ============ Simple Find Recipe (if you still use this) ============
+
     public AppBuilder addFindRecipe() {
         final FindRecipeView findRecipeView = new FindRecipeView(viewManagerModel);
         viewManager.addView(findRecipeView, findRecipeView.getViewName());
@@ -317,6 +323,8 @@ public class AppBuilder {
     /**
      * Shows the application window, starting on the login view.
      */
+
+    // ============ Show app ============
 
     public void show() {
         viewManagerModel.setActiveViewName(loginView.getViewName());
