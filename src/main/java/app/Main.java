@@ -1,30 +1,37 @@
 package app;
 
+import javax.swing.SwingUtilities;
+
 import data.saved_ingredient.FileFridgeAccessObject;
 import usecase.common.FridgeAccess;
 
-import javax.swing.*;
-
 public class Main {
+
+    /**
+     * Program entry point.
+     *
+     * @param args command-line arguments (not used)
+     */
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
+        SwingUtilities.invokeLater(Main::startApp);
+    }
 
-            // Use the REAL fridge access class
-            FridgeAccess fridgeAccess =
-                    new FileFridgeAccessObject("fridge_items.csv");
+    private static void startApp() {
+        // Use the REAL fridge access class
+        final FridgeAccess fridgeAccess =
+                new FileFridgeAccessObject("fridge_items.csv");
 
-            AppBuilder builder = new AppBuilder(fridgeAccess);
+        final AppBuilder builder = new AppBuilder(fridgeAccess);
 
-            builder
-                    .addLoginView()
-                    .addSignUpView()
-                    .addHomeView()
-                    .addFindRecipe()
-                    .addFridgeFeature()
-                    .addCreateRecipeFeature()
-                    .addSavedRecipesFeature()
-                    .addSearchByFridgeFeature()
-                    .show();
-        });
+        builder
+                .addLoginView()
+                .addSignUpView()
+                .addHomeView()
+                .addFindRecipe()
+                .addFridgeFeature()
+                .addCreateRecipeFeature()
+                .addSavedRecipesFeature()
+                .addSearchByFridgeFeature()
+                .show();
     }
 }

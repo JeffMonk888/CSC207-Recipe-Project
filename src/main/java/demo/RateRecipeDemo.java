@@ -1,10 +1,10 @@
 package demo;
 
 import data.saved_recipe.UserSavedRecipeAccessObject;
-import interface_adapter.ViewManagerModel;
-import interface_adapter.rate_recipe.RateRecipeController;
-import interface_adapter.rate_recipe.RateRecipePresenter;
-import interface_adapter.rate_recipe.RateRecipeViewModel;
+import interfaceadapter.ViewManagerModel;
+import interfaceadapter.rate_recipe.RateRecipeController;
+import interfaceadapter.rate_recipe.RateRecipePresenter;
+import interfaceadapter.rate_recipe.RateRecipeAbstractViewModel;
 import usecase.rate_recipe.RateRecipeInputBoundary;
 import usecase.rate_recipe.RateRecipeInteractor;
 import usecase.rate_recipe.RateRecipeOutputBoundary;
@@ -26,7 +26,7 @@ public class RateRecipeDemo {
         ViewManagerModel viewManagerModel = new ViewManagerModel();
 
         // ViewModel + Presenter
-        RateRecipeViewModel rateRecipeViewModel = new RateRecipeViewModel();
+        RateRecipeAbstractViewModel rateRecipeViewModel = new RateRecipeAbstractViewModel();
         RateRecipeOutputBoundary rateRecipePresenter =
                 new RateRecipePresenter(rateRecipeViewModel, viewManagerModel);
 

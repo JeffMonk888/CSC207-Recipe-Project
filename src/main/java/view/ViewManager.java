@@ -1,11 +1,14 @@
 package view;
 
-import interface_adapter.ViewManagerModel;
-
-import javax.swing.*;
-import java.awt.*;
+import java.awt.CardLayout;
+import java.awt.Dimension;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+
+import interfaceadapter.ViewManagerModel;
 
 /**
  * Top-level UI manager for switching between different screens (views)
@@ -16,11 +19,9 @@ public class ViewManager implements PropertyChangeListener {
     private final CardLayout cardLayout;
     private final JPanel viewsPanel;
     private final JFrame window;
-    private final ViewManagerModel viewManagerModel;
 
     public ViewManager(ViewManagerModel viewManagerModel) {
-        this.viewManagerModel = viewManagerModel;
-        this.viewManagerModel.addPropertyChangeListener(this);
+        viewManagerModel.addPropertyChangeListener(this);
 
         window = new JFrame("Recipe App");
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -35,6 +36,8 @@ public class ViewManager implements PropertyChangeListener {
 
     /**
      * Register a new view with a corresponding name.
+     * @param view the Swing panel to add
+     * @param viewName the logical name used by the ViewManager to switch views
      */
     public void addView(JPanel view, String viewName) {
         viewsPanel.add(view, viewName);
@@ -52,7 +55,7 @@ public class ViewManager implements PropertyChangeListener {
     public void propertyChange(PropertyChangeEvent evt) {
         // Listens to ViewManagerModel for "activeVIew" changes
         if (evt.getPropertyName().equals("activeView")) {
-            String newViewName = (String) evt.getNewValue();
+            final String newViewName = (String) evt.getNewValue();
             if (newViewName != null) {
                 cardLayout.show(viewsPanel, newViewName);
             }

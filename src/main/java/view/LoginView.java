@@ -1,10 +1,21 @@
 package view;
 
-import interface_adapter.ViewManagerModel;
-import usecase.auth.SignUpAuth;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+
 import domain.entity.User;
-import javax.swing.*;
-import java.awt.*;
+import interfaceadapter.ViewManagerModel;
+import usecase.auth.SignUpAuth;
 
 public class LoginView extends JPanel {
 
@@ -18,59 +29,114 @@ public class LoginView extends JPanel {
     public LoginView(ViewManagerModel viewManagerModel) {
         this.viewManagerModel = viewManagerModel;
 
-        setPreferredSize(new Dimension(450, 280));
         setLayout(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(8, 8, 8, 8);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        JLabel title = new JLabel("Recipe Manager");
-        title.setFont(title.getFont().deriveFont(Font.BOLD, 22f));
-        title.setHorizontalAlignment(SwingConstants.CENTER);
-
-        JLabel usernameLabel = new JLabel("Username:");
-        JLabel passwordLabel = new JLabel("Password:");
+        final GridBagConstraints constraints = createDefaultConstraints();
+        final JLabel title = createTitleLabel();
+        final JLabel usernameLabel = new JLabel("Username:");
+        final JLabel passwordLabel = new JLabel("Password:");
 
         usernameField = new JTextField(18);
         passwordField = new JPasswordField(18);
-        signupButton = new JButton("Sign up");
         loginButton = new JButton("Log in");
-        errorLabel = new JLabel(" ");
-        errorLabel.setForeground(Color.RED);
+        signupButton = new JButton("Create account");
+        errorLabel = createErrorLabel();
 
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.gridwidth = 2;
-        add(title, gbc);
+        layoutComponents(constraints, title, usernameLabel, passwordLabel);
+        attachListeners();
+    }
 
-        gbc.gridy = 1;
-        gbc.gridwidth = 1;
-        gbc.gridx = 0;
-        add(usernameLabel, gbc);
+    private GridBagConstraints createDefaultConstraints() {
+        final GridBagConstraints constraints = new GridBagConstraints();
+        constraints.insets = new Insets(8, 8, 8, 8);
+        constraints.fill = GridBagConstraints.HORIZONTAL;
+        return constraints;
+    }
 
-        gbc.gridx = 1;
-        add(usernameField, gbc);
+    private JLabel createTitleLabel() {
+        final JLabel title = new JLabel("Welcome back");
+        final Font base = title.getFont();
+        title.setFont(base.deriveFont(Font.BOLD, 22f));
+        title.setHorizontalAlignment(SwingConstants.CENTER);
+        return title;
+    }
 
-        gbc.gridy = 2;
-        gbc.gridx = 0;
-        add(passwordLabel, gbc);
+    private JLabel createErrorLabel() {
+        final JLabel label = new JLabel(" ");
+        label.setForeground(Color.RED);
+        label.setHorizontalAlignment(SwingConstants.CENTER);
+        return label;
+    }
 
-        gbc.gridx = 1;
-        add(passwordField, gbc);
+    private void layoutComponents(
+            GridBagConstraints constraints,
+            JLabel title,
+            JLabel usernameLabel,
+            JLabel passwordLabel
+    ) {
+        layoutTitleRow(constraints, title);
+        layoutUsernameRow(constraints, usernameLabel);
+        layoutPasswordRow(constraints, passwordLabel);
+        layoutButtonsRow(constraints);
+        layoutErrorRow(constraints);
+    }
 
-        gbc.gridy = 3;
-        gbc.gridx = 0;
-        add(signupButton, gbc);
-        gbc.gridx = 1;
-        add(loginButton, gbc);
+    private void layoutTitleRow(GridBagConstraints constraints, JLabel title) {
+        constraints.gridy = 0;
+        constraints.gridx = 0;
+        constraints.gridwidth = 2;
+        constraints.weightx = 1.0;
+        add(title, constraints);
+    }
 
-        gbc.gridy = 4;
-        gbc.gridx = 0;
-        gbc.gridwidth = 2;
-        add(errorLabel, gbc);
+    private void layoutUsernameRow(GridBagConstraints constraints, JLabel usernameLabel) {
+        constraints.gridy = 1;
+        constraints.gridx = 0;
+        constraints.gridwidth = 1;
+        constraints.weightx = 0.0;
+        add(usernameLabel, constraints);
 
-        loginButton.addActionListener(e -> handleLoginClick());
-        signupButton.addActionListener(e -> openSignupView());
+        constraints.gridx = 1;
+        constraints.weightx = 1.0;
+        add(usernameField, constraints);
+    }
+
+    private void layoutPasswordRow(GridBagConstraints constraints, JLabel passwordLabel) {
+        constraints.gridy = 2;
+        constraints.gridx = 0;
+        constraints.weightx = 0.0;
+        add(passwordLabel, constraints);
+
+        constraints.gridx = 1;
+        constraints.weightx = 1.0;
+        add(passwordField, constraints);
+    }
+
+    private void layoutButtonsRow(GridBagConstraints constraints) {
+        constraints.gridy = 3;
+        constraints.gridx = 0;
+        constraints.gridwidth = 1;
+        constraints.weightx = 0.5;
+        add(loginButton, constraints);
+
+        constraints.gridx = 1;
+        constraints.weightx = 0.5;
+        add(signupButton, constraints);
+    }
+
+    private void layoutErrorRow(GridBagConstraints constraints) {
+        constraints.gridy = 4;
+        constraints.gridx = 0;
+        constraints.gridwidth = 2;
+        constraints.weightx = 1.0;
+        add(errorLabel, constraints);
+    }
+
+    private void attachListeners() {
+        loginButton.addActionListener(execute -> handleLoginClick());
+        signupButton.addActionListener(
+                execute -> viewManagerModel.setActiveViewName("signup")
+        );
     }
 
     public String getViewName() {
@@ -78,20 +144,29 @@ public class LoginView extends JPanel {
     }
 
     private void handleLoginClick() {
-        String username = usernameField.getText().trim();
-        String password = new String(passwordField.getPassword());
-        User user = SignUpAuth.authenticateAndGetUser(username, password);
+        final String username = usernameField.getText().trim();
+        final String password = new String(passwordField.getPassword());
+
+        String errorMessage = null;
+        User user = null;
+
         if (username.isEmpty() || password.isEmpty()) {
-            setError("Please enter both username and password");
-            return;
+            errorMessage = "Please enter both username and password";
+        }
+        else {
+            user = SignUpAuth.authenticateAndGetUser(username, password);
+            if (user == null) {
+                errorMessage = "Invalid username or password";
+            }
         }
 
-        if (SignUpAuth.authenticate(username, password)) {
+        if (errorMessage != null) {
+            setError(errorMessage);
+        }
+        else {
             setError(" ");
             viewManagerModel.setActiveViewName("home");
             viewManagerModel.setCurrentUserId(user.getId());
-        } else {
-            setError("Invalid username or password");
         }
     }
 
@@ -99,23 +174,13 @@ public class LoginView extends JPanel {
         viewManagerModel.setActiveViewName("signup");
     }
 
+    /**
+     * Updates the error label with the given message.
+     *
+     * @param message text to display in the error label
+     */
     public void setError(String message) {
         errorLabel.setText(message);
     }
 
-    public String getUsername() {
-        return usernameField.getText().trim();
-    }
-
-    public String getPassword() {
-        return new String(passwordField.getPassword());
-    }
-
-    public JButton getLoginButton() {
-        return loginButton;
-    }
-
-    public JButton getSignupButton() {
-        return signupButton;
-    }
 }

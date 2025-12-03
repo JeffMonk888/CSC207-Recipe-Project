@@ -4,167 +4,168 @@ package app;
 import data.api.SpoonacularClient;
 import data.saved_recipe.RecipeDataAssessObject;
 import data.saved_recipe.UserSavedRecipeAccessObject;
-
-// Create Recipe
-import interface_adapter.ViewManagerModel;
-import interface_adapter.create_recipe.CreateRecipeController;
-import interface_adapter.create_recipe.CreateRecipePresenter;
-import interface_adapter.create_recipe.CreateRecipeViewModel;
-// Find New Recipe
-import view.FindRecipeView;
-
-// Fridge
-import interface_adapter.fridge.FridgeController;
-import interface_adapter.fridge.FridgePresenter;
-import interface_adapter.fridge.FridgeViewModel;
-// Saved Recipes + View Recipe adapters
-import interface_adapter.saved_recipe.SavedRecipeController;
-import interface_adapter.saved_recipe.SavedRecipePresenter;
-import interface_adapter.saved_recipe.SavedRecipeViewModel;
-
-import interface_adapter.view_recipe.ViewRecipeController;
-import interface_adapter.view_recipe.ViewRecipePresenter;
-import interface_adapter.view_recipe.ViewRecipeViewModel;
-import interface_adapter.view_recipe.ViewRecipeFromSavedPresenter;
-
-
-// NEW: Save Recipe adapters
-import interface_adapter.saved_recipe.SaveRecipeController;
-import interface_adapter.saved_recipe.SaveRecipePresenter;
-
-// NEW: Save Recipe use case
-import usecase.save_recipe.SaveRecipeInputBoundary;
-import usecase.save_recipe.SaveRecipeInteractor;
-import usecase.save_recipe.SaveRecipeOutputBoundary;
-
-// Search-by-fridge feature
-import view.SearchByFridgeView;
-import interface_adapter.search_by_fridge.SearchByFridgeController;
-import interface_adapter.search_by_fridge.SearchByFridgePresenter;
-import interface_adapter.search_by_fridge.SearchByFridgeViewModel;
-
-import interface_adapter.rate_recipe.RateRecipeController;
-import interface_adapter.rate_recipe.RateRecipePresenter;
-import interface_adapter.rate_recipe.RateRecipeViewModel;
-
-import usecase.search_by_fridge.SearchByFridgeInputBoundary;
-import usecase.search_by_fridge.SearchByFridgeInteractor;
-import usecase.search_by_fridge.SearchByFridgeOutputBoundary;
-
-import usecase.rate_recipe.RateRecipeInputBoundary;
-import usecase.rate_recipe.RateRecipeInteractor;
-import usecase.rate_recipe.RateRecipeOutputBoundary;
-
-import usecase.common.RecipeByIngredientsAccess;
-
-// Use cases
+import interfaceadapter.ViewManagerModel;
+import interfaceadapter.create_recipe.CreateRecipeAbstractViewModel;
+import interfaceadapter.create_recipe.CreateRecipeController;
+import interfaceadapter.create_recipe.CreateRecipePresenter;
+import interfaceadapter.fridge.FridgeAbstractViewModel;
+import interfaceadapter.fridge.FridgeController;
+import interfaceadapter.fridge.FridgePresenter;
+import interfaceadapter.rate_recipe.RateRecipeAbstractViewModel;
+import interfaceadapter.rate_recipe.RateRecipeController;
+import interfaceadapter.rate_recipe.RateRecipePresenter;
+import interfaceadapter.saved_recipe.SaveRecipeController;
+import interfaceadapter.saved_recipe.SaveRecipePresenter;
+import interfaceadapter.saved_recipe.SavedRecipeAbstractViewModel;
+import interfaceadapter.saved_recipe.SavedRecipeController;
+import interfaceadapter.saved_recipe.SavedRecipePresenter;
+import interfaceadapter.search_by_fridge.SearchByFridgeAbstractViewModel;
+import interfaceadapter.search_by_fridge.SearchByFridgeController;
+import interfaceadapter.search_by_fridge.SearchByFridgePresenter;
+import interfaceadapter.view_recipe.ViewRecipeAbstractViewModel;
+import interfaceadapter.view_recipe.ViewRecipeController;
+import interfaceadapter.view_recipe.ViewRecipeFromSavedPresenter;
+import interfaceadapter.view_recipe.ViewRecipePresenter;
 import usecase.add_ingredient.AddIngredientInputBoundary;
 import usecase.add_ingredient.AddIngredientInteractor;
 import usecase.common.FridgeAccess;
+import usecase.common.RecipeByIngredientsAccess;
 import usecase.create_recipe.CreateRecipeInputBoundary;
 import usecase.create_recipe.CreateRecipeInteractor;
 import usecase.create_recipe.CreateRecipeOutputBoundary;
 import usecase.delete_saved.DeleteSavedInputBoundary;
 import usecase.delete_saved.DeleteSavedInteractor;
+import usecase.rate_recipe.RateRecipeInputBoundary;
+import usecase.rate_recipe.RateRecipeInteractor;
+import usecase.rate_recipe.RateRecipeOutputBoundary;
+import usecase.remove_ingredient.RemoveIngredientInputBoundary;
+import usecase.remove_ingredient.RemoveIngredientInteractor;
 import usecase.retrieve_saved.RetrieveSavedInputBoundary;
 import usecase.retrieve_saved.RetrieveSavedInteractor;
+import usecase.save_recipe.SaveRecipeInputBoundary;
+import usecase.save_recipe.SaveRecipeInteractor;
+import usecase.save_recipe.SaveRecipeOutputBoundary;
+import usecase.search_by_fridge.SearchByFridgeInputBoundary;
+import usecase.search_by_fridge.SearchByFridgeInteractor;
+import usecase.search_by_fridge.SearchByFridgeOutputBoundary;
 import usecase.view_recipe.ViewRecipeInputBoundary;
 import usecase.view_recipe.ViewRecipeInteractor;
 import usecase.view_recipe.ViewRecipeOutputBoundary;
-import usecase.remove_ingredient.RemoveIngredientInputBoundary;
-import usecase.remove_ingredient.RemoveIngredientInteractor;
-
-// Views
 import view.CreateRecipeView;
+import view.FindRecipeView;
 import view.FridgeView;
 import view.HomeView;
 import view.LoginView;
 import view.SavedRecipesView;
+import view.SearchByFridgeView;
 import view.SignUpView;
 import view.ViewManager;
-import view.ViewRecipeView;
 import view.ViewRecipeNoSave;
+import view.ViewRecipeView;
 
+// Choosing to ignore checkstyle warning here, more clean as is.
 public class AppBuilder {
-    String masterApiKey = "ecb55412e8db47218210d2b35c07fc1a";
     private final ViewManagerModel viewManagerModel;
     private final ViewManager viewManager;
     private final FridgeAccess fridgeAccess;
-    private final UserSavedRecipeAccessObject userSavedRecipeDAO;
-    private final RecipeDataAssessObject recipeDAO;
+    private final UserSavedRecipeAccessObject userSavedRecipeDao;
+    private final RecipeDataAssessObject recipeDao;
 
     private LoginView loginView;
-    private SignUpView signUpView;
-    private HomeView homeView;
-    private FridgeView fridgeView;
-    private CreateRecipeView createRecipeView;
-    private SavedRecipesView savedRecipesView;
-    private FindRecipeView findRecipeView;
-    private SearchByFridgeView searchByFridgeView;
     private ViewRecipeController viewRecipeController;
-    private ViewRecipeController viewRecipeFromSavedController;
+
+    public AppBuilder(FridgeAccess fridgeAccess) {
+        this.viewManagerModel = new ViewManagerModel();
+        this.viewManager = new ViewManager(viewManagerModel);
+        this.fridgeAccess = fridgeAccess;
+        this.userSavedRecipeDao = new UserSavedRecipeAccessObject("user_recipe_links.csv");
+        this.recipeDao = new RecipeDataAssessObject("recipe_cache.json");
+    }
+    /**
+     * Creates the {@link LoginView}, registers it with the view manager,
+     * and makes it available to the application.
+     *
+     * @return this builder to allow method chaining
+     */
 
     public AppBuilder addLoginView() {
         loginView = new LoginView(viewManagerModel);
         viewManager.addView(loginView, loginView.getViewName());
         return this;
     }
+    /**
+     * Creates the {@link SignUpView}, registers it with the view manager,
+     * and makes it available to the application.
+     *
+     * @return this builder to allow method chaining
+     */
 
     public AppBuilder addSignUpView() {
-        signUpView = new SignUpView(viewManagerModel);
+        final SignUpView signUpView = new SignUpView(viewManagerModel);
         viewManager.addView(signUpView, signUpView.getViewName());
         return this;
     }
+    /**
+     * Creates the {@link HomeView}, registers it with the view manager,
+     * and makes it available as the main post-login screen.
+     *
+     * @return this builder to allow method chaining
+     */
 
     public AppBuilder addHomeView() {
-        homeView = new HomeView(viewManagerModel);
+        final HomeView homeView = new HomeView(viewManagerModel);
         viewManager.addView(homeView, homeView.getViewName());
         return this;
     }
 
-    public AppBuilder(FridgeAccess fridgeAccess) {
-        this.viewManagerModel = new ViewManagerModel();
-        this.viewManager = new ViewManager(viewManagerModel);
-        this.fridgeAccess = fridgeAccess;
-        this.userSavedRecipeDAO = new UserSavedRecipeAccessObject("user_recipe_links.csv");
-        this.recipeDAO = new RecipeDataAssessObject("recipe_cache.json");
-    }
+    /**
+     * Registers the fridge feature, wiring its view, presenter, interactor,
+     * and data access so users can manage items in their fridge.
+     *
+     * @return this builder to allow method chaining
+     */
 
     public AppBuilder addFridgeFeature() {
 
-        FridgeViewModel fridgeViewModel = new FridgeViewModel();
-        FridgePresenter fridgePresenter = new FridgePresenter(fridgeViewModel);
+        final FridgeAbstractViewModel fridgeViewModel = new FridgeAbstractViewModel();
+        final FridgePresenter fridgePresenter = new FridgePresenter(fridgeViewModel);
 
-        AddIngredientInputBoundary addInteractor =
+        final AddIngredientInputBoundary addInteractor =
                 new AddIngredientInteractor(fridgeAccess, fridgePresenter);
 
-        RemoveIngredientInputBoundary removeInteractor =
+        final RemoveIngredientInputBoundary removeInteractor =
                 new RemoveIngredientInteractor(fridgeAccess, fridgePresenter);
 
-        FridgeController fridgeController =
+        final FridgeController fridgeController =
                 new FridgeController(addInteractor, removeInteractor);
 
-        fridgeView = new FridgeView(fridgeController, fridgeViewModel, viewManagerModel);
+        final FridgeView fridgeView = new FridgeView(fridgeController, fridgeViewModel, viewManagerModel);
         viewManager.addView(fridgeView, fridgeView.getViewName());
 
         return this;
     }
+    /**
+     * Registers the feature that allows users to create and submit
+     * new recipes in the application.
+     *
+     * @return this builder to enable method chaining
+     */
 
     public AppBuilder addCreateRecipeFeature() {
 
         // View model & presenter
-        CreateRecipeViewModel createRecipeViewModel = new CreateRecipeViewModel();
-        CreateRecipeOutputBoundary presenter =
+        final CreateRecipeAbstractViewModel createRecipeViewModel = new CreateRecipeAbstractViewModel();
+        final CreateRecipeOutputBoundary presenter =
                 new CreateRecipePresenter(createRecipeViewModel, viewManagerModel);
 
         // Interactor & controller
-        CreateRecipeInputBoundary interactor =
-                new CreateRecipeInteractor(this.recipeDAO, this.userSavedRecipeDAO, presenter);
-        CreateRecipeController controller =
+        final CreateRecipeInputBoundary interactor =
+                new CreateRecipeInteractor(this.recipeDao, this.userSavedRecipeDao, presenter);
+        final CreateRecipeController controller =
                 new CreateRecipeController(interactor);
 
         // Swing view
-        createRecipeView = new CreateRecipeView(
+        final CreateRecipeView createRecipeView = new CreateRecipeView(
                 createRecipeViewModel,
                 controller,
                 viewManagerModel
@@ -173,127 +174,149 @@ public class AppBuilder {
         viewManager.addView(createRecipeView, createRecipeView.getViewName());
         return this;
     }
+    /**
+     * Registers the feature that allows users to view and manage
+     * their saved recipes within the application.
+     *
+     * @return this builder to allow method chaining
+     */
 
     public AppBuilder addSavedRecipesFeature() {
 
         // 1) API + DAOs
         String apiKey = System.getenv("SPOONACULAR_API_KEY");
         if (apiKey == null || apiKey.isBlank()) {
-            apiKey = masterApiKey;
+            apiKey = "ecb55412e8db47218210d2b35c07fc1a";
         }
-        SpoonacularClient apiClient = new SpoonacularClient(apiKey);
+        final SpoonacularClient apiClient = new SpoonacularClient(apiKey);
 
         // 2) SAVE RECIPE USE CASE
-        SaveRecipeOutputBoundary saveRecipePresenter =
+        final SaveRecipeOutputBoundary saveRecipePresenter =
                 new SaveRecipePresenter();
-        SaveRecipeInputBoundary saveRecipeInteractor =
-                new SaveRecipeInteractor(this.userSavedRecipeDAO, saveRecipePresenter);
-        SaveRecipeController saveRecipeController =
+        final SaveRecipeInputBoundary saveRecipeInteractor =
+                new SaveRecipeInteractor(this.userSavedRecipeDao, saveRecipePresenter);
+        final SaveRecipeController saveRecipeController =
                 new SaveRecipeController(saveRecipeInteractor);
 
         // 3) SHARED ViewRecipeViewModel
-        ViewRecipeViewModel viewRecipeViewModel = new ViewRecipeViewModel();
+        final ViewRecipeAbstractViewModel viewRecipeViewModel = new ViewRecipeAbstractViewModel();
 
         // 4) NORMAL VIEW RECIPE (WITH SAVE) – used by search/API flows
-        ViewRecipeOutputBoundary viewRecipePresenter =
+        final ViewRecipeOutputBoundary viewRecipePresenter =
                 new ViewRecipePresenter(viewRecipeViewModel, viewManagerModel);
 
-        ViewRecipeInputBoundary viewRecipeInteractor =
-                new ViewRecipeInteractor(apiClient, this.recipeDAO, viewRecipePresenter);
+        final ViewRecipeInputBoundary viewRecipeInteractor =
+                new ViewRecipeInteractor(apiClient, this.recipeDao, viewRecipePresenter);
 
         viewRecipeController = new ViewRecipeController(viewRecipeInteractor);
 
-        ViewRecipeView viewRecipeView =
+        final ViewRecipeView viewRecipeView =
                 new ViewRecipeView(viewRecipeViewModel, saveRecipeController, viewManagerModel);
 
         viewManager.addView(viewRecipeView, viewRecipeViewModel.getViewName());
 
         // 5) NO-SAVE VIEW RECIPE – used ONLY from SavedRecipesView
-        ViewRecipeOutputBoundary fromSavedPresenter =
+        final ViewRecipeOutputBoundary fromSavedPresenter =
                 new ViewRecipeFromSavedPresenter(viewRecipeViewModel, viewManagerModel);
 
-        ViewRecipeInputBoundary fromSavedInteractor =
-                new ViewRecipeInteractor(apiClient, this.recipeDAO, fromSavedPresenter);
+        final ViewRecipeInputBoundary fromSavedInteractor =
+                new ViewRecipeInteractor(apiClient, this.recipeDao, fromSavedPresenter);
 
-        viewRecipeFromSavedController = new ViewRecipeController(fromSavedInteractor);
+        final ViewRecipeController viewRecipeFromSavedController = new ViewRecipeController(fromSavedInteractor);
 
-        ViewRecipeNoSave viewRecipeNoSave =
+        final ViewRecipeNoSave viewRecipeNoSave =
                 new ViewRecipeNoSave(viewRecipeViewModel, null, viewManagerModel);
 
         viewManager.addView(viewRecipeNoSave, ViewRecipeNoSave.VIEW_NAME);
 
         // 6) RATE RECIPE USE CASE – for SavedRecipesView -> RateRecipeView
-        RateRecipeViewModel rateRecipeViewModel = new RateRecipeViewModel();
-        RateRecipeOutputBoundary rateRecipePresenter =
+        final RateRecipeAbstractViewModel rateRecipeViewModel =
+                new RateRecipeAbstractViewModel();
+        final RateRecipeOutputBoundary rateRecipePresenter =
                 new RateRecipePresenter(rateRecipeViewModel, viewManagerModel);
-        RateRecipeInputBoundary rateRecipeInteractor =
-                new RateRecipeInteractor(this.userSavedRecipeDAO, rateRecipePresenter);
-        RateRecipeController rateRecipeController =
+        final RateRecipeInputBoundary rateRecipeInteractor =
+                new RateRecipeInteractor(this.userSavedRecipeDao, rateRecipePresenter);
+        final RateRecipeController rateRecipeController =
                 new RateRecipeController(rateRecipeInteractor);
 
         // 7) SAVED RECIPES LIST
-        SavedRecipeViewModel savedRecipeViewModel = new SavedRecipeViewModel();
-        SavedRecipePresenter savedPresenter =
+        final SavedRecipeAbstractViewModel savedRecipeViewModel = new SavedRecipeAbstractViewModel();
+
+        final SavedRecipePresenter savedPresenter =
                 new SavedRecipePresenter(savedRecipeViewModel, viewManagerModel);
 
-        RetrieveSavedInputBoundary retrieveInteractor =
-                new RetrieveSavedInteractor(this.userSavedRecipeDAO, this.recipeDAO, apiClient, savedPresenter);
-        DeleteSavedInputBoundary deleteInteractor =
-                new DeleteSavedInteractor(this.userSavedRecipeDAO, savedPresenter);
+        final RetrieveSavedInputBoundary retrieveInteractor =
+                new RetrieveSavedInteractor(this.userSavedRecipeDao, this.recipeDao, apiClient, savedPresenter);
+        final DeleteSavedInputBoundary deleteInteractor =
+                new DeleteSavedInteractor(this.userSavedRecipeDao, savedPresenter);
 
-        SavedRecipeController savedController =
+        final SavedRecipeController savedController =
                 new SavedRecipeController(retrieveInteractor, deleteInteractor);
 
         // Inject from-saved controller + rate recipe wiring
-        savedRecipesView = new SavedRecipesView(
+        final SavedRecipesView savedRecipesView = new SavedRecipesView(
                 savedController,
                 savedRecipeViewModel,
                 viewRecipeFromSavedController,
                 viewManagerModel,
                 rateRecipeController,
                 rateRecipeViewModel,
-                this.userSavedRecipeDAO
+                this.userSavedRecipeDao
         );
 
         viewManager.addView(savedRecipesView, savedRecipesView.getViewName());
         return this;
     }
 
+    /**
+     * Configures and registers the “search by fridge contents” feature
+     * in the application.
+     *
+     * @return this builder to allow method chaining
+     */
+
     public AppBuilder addSearchByFridgeFeature() {
         String apiKey = System.getenv("SPOONACULAR_API_KEY");
         if (apiKey == null || apiKey.isBlank()) {
-            apiKey = masterApiKey;
+            apiKey = "ecb55412e8db47218210d2b35c07fc1a";
         }
-        SpoonacularClient spoonacularClient = new SpoonacularClient(apiKey);
-        RecipeByIngredientsAccess recipeAccess = spoonacularClient;
+        final RecipeByIngredientsAccess recipeAccess = new SpoonacularClient(apiKey);
 
-        SearchByFridgeViewModel vm = new SearchByFridgeViewModel();
-        SearchByFridgeOutputBoundary presenter = new SearchByFridgePresenter(vm);
-
-        SearchByFridgeInputBoundary interactor =
+        final SearchByFridgeAbstractViewModel vm = new SearchByFridgeAbstractViewModel();
+        final SearchByFridgeOutputBoundary presenter = new SearchByFridgePresenter(vm);
+        final SearchByFridgeInputBoundary interactor =
                 new SearchByFridgeInteractor(fridgeAccess, recipeAccess, presenter);
-        SearchByFridgeController controller =
+        final SearchByFridgeController controller =
                 new SearchByFridgeController(interactor);
 
-        SearchByFridgeView.RecipeSelectionListener listener = recipeKey -> {
+        final SearchByFridgeView.RecipeSelectionListener listener = recipeKey -> {
             if (viewRecipeController != null) {
                 viewRecipeController.execute(recipeKey);
-            } else {
+            }
+            else {
                 System.err.println("ViewRecipeController is null. Did you call addSavedRecipesFeature()?");
             }
         };
-        searchByFridgeView =
+        final SearchByFridgeView searchByFridgeView =
                 new SearchByFridgeView(controller, vm, viewManagerModel, listener);
 
         viewManager.addView(searchByFridgeView, searchByFridgeView.getViewName());
         return this;
     }
+    /**
+     * Creates and registers the {@link FindRecipeView} with the view manager.
+     *
+     * @return this builder so that calls can be chained
+     */
 
     public AppBuilder addFindRecipe() {
-        findRecipeView = new FindRecipeView(viewManagerModel);
+        final FindRecipeView findRecipeView = new FindRecipeView(viewManagerModel);
         viewManager.addView(findRecipeView, findRecipeView.getViewName());
         return this;
     }
+    /**
+     * Shows the application window, starting on the login view.
+     */
 
     public void show() {
         viewManagerModel.setActiveViewName(loginView.getViewName());

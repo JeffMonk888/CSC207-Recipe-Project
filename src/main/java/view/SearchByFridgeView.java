@@ -1,10 +1,10 @@
 package view;
 
 import domain.entity.RecipePreview;
-import interface_adapter.search_by_fridge.SearchByFridgeController;
-import interface_adapter.search_by_fridge.SearchByFridgeState;
-import interface_adapter.search_by_fridge.SearchByFridgeViewModel;
-import interface_adapter.ViewManagerModel;
+import interfaceadapter.search_by_fridge.SearchByFridgeController;
+import interfaceadapter.search_by_fridge.SearchByFridgeState;
+import interfaceadapter.search_by_fridge.SearchByFridgeAbstractViewModel;
+import interfaceadapter.ViewManagerModel;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -27,7 +27,7 @@ public class SearchByFridgeView extends JPanel
     private static final int PAGE_SIZE = 10;
 
     private final SearchByFridgeController controller;
-    private final SearchByFridgeViewModel viewModel;
+    private final SearchByFridgeAbstractViewModel viewModel;
     private final ViewManagerModel viewManagerModel;
     private final RecipeSelectionListener recipeSelectionListener; // NEW
 
@@ -41,7 +41,7 @@ public class SearchByFridgeView extends JPanel
     private final JLabel infoLabel = new JLabel();
 
     public SearchByFridgeView(SearchByFridgeController controller,
-                              SearchByFridgeViewModel viewModel,
+                              SearchByFridgeAbstractViewModel viewModel,
                               ViewManagerModel viewManagerModel,
                               RecipeSelectionListener recipeSelectionListener) {
         this.controller = controller;

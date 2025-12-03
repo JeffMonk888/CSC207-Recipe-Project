@@ -1,9 +1,9 @@
 package view;
 
-import interface_adapter.ViewManagerModel;
-import interface_adapter.saved_recipe.SaveRecipeController;
-import interface_adapter.view_recipe.ViewRecipeState;
-import interface_adapter.view_recipe.ViewRecipeViewModel;
+import interfaceadapter.ViewManagerModel;
+import interfaceadapter.saved_recipe.SaveRecipeController;
+import interfaceadapter.view_recipe.ViewRecipeState;
+import interfaceadapter.view_recipe.ViewRecipeAbstractViewModel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -19,7 +19,7 @@ import java.util.List;
  */
 public class ViewRecipeNoSave extends JPanel implements PropertyChangeListener {
     public static final String VIEW_NAME = "view_recipe_from_saved";
-    private final ViewRecipeViewModel viewModel;
+    private final ViewRecipeAbstractViewModel viewModel;
     private final SaveRecipeController saveRecipeController;
     private final ViewManagerModel viewManagerModel;
 
@@ -33,7 +33,7 @@ public class ViewRecipeNoSave extends JPanel implements PropertyChangeListener {
     private final JTextArea ingredientsArea;
     private final JTextArea stepsArea;
 
-    public ViewRecipeNoSave(ViewRecipeViewModel viewModel,
+    public ViewRecipeNoSave(ViewRecipeAbstractViewModel viewModel,
                             SaveRecipeController saveRecipeController,
                             ViewManagerModel viewManagerModel) {
         this.viewModel = viewModel;

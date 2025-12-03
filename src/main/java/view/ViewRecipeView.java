@@ -1,9 +1,9 @@
 package view;
 
-import interface_adapter.view_recipe.ViewRecipeState;
-import interface_adapter.view_recipe.ViewRecipeViewModel;
-import interface_adapter.saved_recipe.SaveRecipeController;
-import interface_adapter.ViewManagerModel;
+import interfaceadapter.view_recipe.ViewRecipeState;
+import interfaceadapter.view_recipe.ViewRecipeAbstractViewModel;
+import interfaceadapter.saved_recipe.SaveRecipeController;
+import interfaceadapter.ViewManagerModel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -19,7 +19,7 @@ import java.util.List;
  */
 public class ViewRecipeView extends JPanel implements PropertyChangeListener {
 
-    private final ViewRecipeViewModel viewModel;
+    private final ViewRecipeAbstractViewModel viewModel;
     private final SaveRecipeController saveRecipeController;
     private final ViewManagerModel viewManagerModel;
 
@@ -34,7 +34,7 @@ public class ViewRecipeView extends JPanel implements PropertyChangeListener {
     private final JTextArea ingredientsArea;
     private final JTextArea stepsArea;
 
-    public ViewRecipeView(ViewRecipeViewModel viewModel,
+    public ViewRecipeView(ViewRecipeAbstractViewModel viewModel,
                           SaveRecipeController saveRecipeController,
                           ViewManagerModel viewManagerModel) {
         this.viewModel = viewModel;
@@ -131,7 +131,7 @@ public class ViewRecipeView extends JPanel implements PropertyChangeListener {
     }
 
     public String getViewName() {
-        return ViewRecipeViewModel.VIEW_NAME;
+        return ViewRecipeAbstractViewModel.VIEW_NAME;
     }
 
     @Override

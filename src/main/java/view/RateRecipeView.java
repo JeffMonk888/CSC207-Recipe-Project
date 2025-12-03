@@ -3,9 +3,9 @@ package view;
 import data.saved_recipe.UserSavedRecipeAccessObject;
 import domain.entity.SavedRecipe;
 import domain.entity.UserRating;
-import interface_adapter.rate_recipe.RateRecipeController;
-import interface_adapter.rate_recipe.RateRecipeState;
-import interface_adapter.rate_recipe.RateRecipeViewModel;
+import interfaceadapter.rate_recipe.RateRecipeController;
+import interfaceadapter.rate_recipe.RateRecipeState;
+import interfaceadapter.rate_recipe.RateRecipeAbstractViewModel;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -41,14 +41,14 @@ public class RateRecipeView extends JFrame {
     private final UserSavedRecipeAccessObject savedRecipeGateway;
 
     private final RateRecipeController controller;
-    private final RateRecipeViewModel viewModel;
+    private final RateRecipeAbstractViewModel viewModel;
 
     private final DefaultListModel<String> listModel = new DefaultListModel<>();
     private final JList<String> recipeList = new JList<>(listModel);
     private final JSpinner spinner;
 
     public RateRecipeView(RateRecipeController controller,
-                          RateRecipeViewModel viewModel,
+                          RateRecipeAbstractViewModel viewModel,
                           UserSavedRecipeAccessObject savedRecipeGateway,
                           long userId) {
         super("Rate Recipe");

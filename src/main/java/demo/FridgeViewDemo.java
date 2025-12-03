@@ -1,16 +1,16 @@
 package demo;
 
 import data.saved_ingredient.FileFridgeAccessObject;
-import interface_adapter.fridge.FridgeController;
-import interface_adapter.fridge.FridgePresenter;
-import interface_adapter.fridge.FridgeState;
-import interface_adapter.fridge.FridgeViewModel;
+import interfaceadapter.fridge.FridgeController;
+import interfaceadapter.fridge.FridgePresenter;
+import interfaceadapter.fridge.FridgeState;
+import interfaceadapter.fridge.FridgeAbstractViewModel;
 import usecase.add_ingredient.AddIngredientInputBoundary;
 import usecase.add_ingredient.AddIngredientInteractor;
 import usecase.remove_ingredient.RemoveIngredientInputBoundary;
 import usecase.remove_ingredient.RemoveIngredientInteractor;
 import usecase.common.FridgeAccess;
-import view.FridgeView;
+
 import javax.swing.*;
 
 /**
@@ -25,7 +25,7 @@ public class FridgeViewDemo {
             String csvPath = "fridge_items.csv"; // adjust path if needed
             FridgeAccess fridgeAccess = new FileFridgeAccessObject(csvPath);
 
-            FridgeViewModel fridgeViewModel = new FridgeViewModel();
+            FridgeAbstractViewModel fridgeViewModel = new FridgeAbstractViewModel();
             FridgePresenter fridgePresenter = new FridgePresenter(fridgeViewModel);
 
             AddIngredientInputBoundary addInteractor =
