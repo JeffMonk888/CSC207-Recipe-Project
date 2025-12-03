@@ -1,9 +1,9 @@
 package view;
 
-import interface_adapter.fridge.FridgeController;
-import interface_adapter.fridge.FridgeViewModel;
-import interface_adapter.fridge.FridgeState;
-import interface_adapter.ViewManagerModel;
+import interfaceadapter.fridge.FridgeController;
+import interfaceadapter.fridge.FridgeAbstractViewModel;
+import interfaceadapter.fridge.FridgeState;
+import interfaceadapter.ViewManagerModel;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -22,7 +22,7 @@ import data.saved_ingredient.FileFridgeAccessObject;
 public class FridgeView extends JPanel implements ActionListener, PropertyChangeListener {
 
     private final FridgeController controller;
-    private final FridgeViewModel viewModel;
+    private final FridgeAbstractViewModel viewModel;
     private final ViewManagerModel viewManagerModel;
 
     // UI components
@@ -36,7 +36,7 @@ public class FridgeView extends JPanel implements ActionListener, PropertyChange
     private final JLabel errorLabel = new JLabel();
 
     public FridgeView(FridgeController controller,
-                      FridgeViewModel viewModel,
+                      FridgeAbstractViewModel viewModel,
                       ViewManagerModel viewManagerModel) {
         this.controller = controller;
         this.viewModel = viewModel;
@@ -49,7 +49,7 @@ public class FridgeView extends JPanel implements ActionListener, PropertyChange
         this.viewManagerModel.addPropertyChangeListener(evt -> {
             if ("activeView".equals(evt.getPropertyName())) {
                 String newView = (String) evt.getNewValue();
-                if (FridgeViewModel.VIEW_NAME.equals(newView)) {
+                if (FridgeAbstractViewModel.VIEW_NAME.equals(newView)) {
                     loadIngredientsFromStorageForCurrentUser();
                 }
             }
@@ -179,6 +179,6 @@ public class FridgeView extends JPanel implements ActionListener, PropertyChange
     }
 
     public String getViewName() {
-        return FridgeViewModel.VIEW_NAME; // "fridge"
+        return FridgeAbstractViewModel.VIEW_NAME; // "fridge"
     }
 }

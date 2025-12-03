@@ -1,13 +1,14 @@
 package view;
 
 import data.saved_recipe.UserSavedRecipeAccessObject;
-import interface_adapter.saved_recipe.SavedRecipeController;
-import interface_adapter.saved_recipe.SavedRecipeState;
-import interface_adapter.saved_recipe.SavedRecipeViewModel;
-import interface_adapter.view_recipe.ViewRecipeController;
-import interface_adapter.ViewManagerModel;
-import interface_adapter.rate_recipe.RateRecipeController;
-import interface_adapter.rate_recipe.RateRecipeViewModel;
+import interfaceadapter.saved_recipe.SavedRecipeController;
+import interfaceadapter.saved_recipe.SavedRecipeState;
+import interfaceadapter.saved_recipe.SavedRecipeAbstractViewModel;
+import interfaceadapter.view_recipe.ViewRecipeController;
+import interfaceadapter.ViewManagerModel;
+import interfaceadapter.rate_recipe.RateRecipeController;
+import interfaceadapter.rate_recipe.RateRecipeAbstractViewModel;
+import demo.CategoryDemo;
 
 import javax.swing.*;
 import java.awt.*;
@@ -18,24 +19,24 @@ import java.beans.PropertyChangeListener;
 public class SavedRecipesView extends JPanel implements PropertyChangeListener {
 
     private final SavedRecipeController savedController;
-    private final SavedRecipeViewModel viewModel;
+    private final SavedRecipeAbstractViewModel viewModel;
     private final ViewRecipeController viewRecipeController;
     private final ViewManagerModel viewManagerModel;
 
     // For Rate Recipe
     private final RateRecipeController rateRecipeController;
-    private final RateRecipeViewModel rateRecipeViewModel;
+    private final RateRecipeAbstractViewModel rateRecipeViewModel;
     private final UserSavedRecipeAccessObject savedRecipeGateway;
 
     private final DefaultListModel<String> listModel = new DefaultListModel<>();
     private final JList<String> recipeList = new JList<>(listModel);
 
     public SavedRecipesView(SavedRecipeController savedController,
-                            SavedRecipeViewModel viewModel,
+                            SavedRecipeAbstractViewModel viewModel,
                             ViewRecipeController viewRecipeController,
                             ViewManagerModel viewManagerModel,
                             RateRecipeController rateRecipeController,
-                            RateRecipeViewModel rateRecipeViewModel,
+                            RateRecipeAbstractViewModel rateRecipeViewModel,
                             UserSavedRecipeAccessObject savedRecipeGateway) {
         this.savedController = savedController;
         this.viewModel = viewModel;
@@ -57,7 +58,7 @@ public class SavedRecipesView extends JPanel implements PropertyChangeListener {
         // Every time this view becomes active, reload the list
         this.viewManagerModel.addPropertyChangeListener(evt -> {
             if ("activeView".equals(evt.getPropertyName())
-                    && SavedRecipeViewModel.VIEW_NAME.equals(evt.getNewValue())) {
+                    && SavedRecipeAbstractViewModel.VIEW_NAME.equals(evt.getNewValue())) {
                 Long userId = viewManagerModel.getCurrentUserId();
                 if (userId != null) {
                     savedController.executeRetrieve(userId);
@@ -258,7 +259,7 @@ public class SavedRecipesView extends JPanel implements PropertyChangeListener {
     }
 
     public String getViewName() {
-        return SavedRecipeViewModel.VIEW_NAME;
+        return SavedRecipeAbstractViewModel.VIEW_NAME;
     }
 
     @Override

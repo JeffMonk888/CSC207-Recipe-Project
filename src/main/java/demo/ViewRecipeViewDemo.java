@@ -2,15 +2,14 @@ package demo;  // <-- change or remove this to match your project structure
 
 import data.api.SpoonacularClient;
 import data.saved_recipe.RecipeDataAssessObject;
-import interface_adapter.ViewManagerModel;
-import interface_adapter.view_recipe.ViewRecipeController;
-import interface_adapter.view_recipe.ViewRecipePresenter;
-import interface_adapter.view_recipe.ViewRecipeViewModel;
+import interfaceadapter.ViewManagerModel;
+import interfaceadapter.view_recipe.ViewRecipeController;
+import interfaceadapter.view_recipe.ViewRecipePresenter;
+import interfaceadapter.view_recipe.ViewRecipeAbstractViewModel;
 import usecase.view_recipe.ViewRecipeInputBoundary;
 import usecase.view_recipe.ViewRecipeInteractor;
 import usecase.view_recipe.ViewRecipeOutputBoundary;
 import view.ViewManager;
-import view.ViewRecipeView;
 
 /**
  * Full end-to-end demo:
@@ -36,7 +35,7 @@ public class ViewRecipeViewDemo {
         ViewManagerModel viewManagerModel = new ViewManagerModel();
         ViewManager viewManager = new ViewManager(viewManagerModel);
 
-        ViewRecipeViewModel viewRecipeViewModel = new ViewRecipeViewModel();
+        ViewRecipeAbstractViewModel viewRecipeViewModel = new ViewRecipeAbstractViewModel();
 
         ViewRecipeOutputBoundary presenter =
                 new ViewRecipePresenter(viewRecipeViewModel, viewManagerModel);

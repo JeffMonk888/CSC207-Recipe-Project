@@ -1,9 +1,9 @@
 package view;
 
-import interface_adapter.ViewManagerModel;
-import interface_adapter.create_recipe.CreateRecipeController;
-import interface_adapter.create_recipe.CreateRecipeState;
-import interface_adapter.create_recipe.CreateRecipeViewModel;
+import interfaceadapter.ViewManagerModel;
+import interfaceadapter.create_recipe.CreateRecipeController;
+import interfaceadapter.create_recipe.CreateRecipeState;
+import interfaceadapter.create_recipe.CreateRecipeAbstractViewModel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -13,7 +13,7 @@ import java.beans.PropertyChangeListener;
 public class CreateRecipeView extends JPanel implements PropertyChangeListener {
     public final String viewName = "create recipe";
 
-    private final CreateRecipeViewModel viewModel;
+    private final CreateRecipeAbstractViewModel viewModel;
     private final CreateRecipeController controller;
     private final ViewManagerModel viewManagerModel;
 
@@ -25,7 +25,7 @@ public class CreateRecipeView extends JPanel implements PropertyChangeListener {
     private final JButton createButton = new JButton("Create Recipe");
     private final JButton backButton = new JButton("Back to Home");
 
-    public CreateRecipeView(CreateRecipeViewModel viewModel,
+    public CreateRecipeView(CreateRecipeAbstractViewModel viewModel,
                             CreateRecipeController controller,
                             ViewManagerModel viewManagerModel
                             ) {

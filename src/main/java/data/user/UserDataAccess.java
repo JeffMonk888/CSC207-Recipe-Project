@@ -1,12 +1,17 @@
 package data.user;
 
-import domain.entity.User;
-import usecase.auth.UserDataAccessInterface;
-
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
+
+import domain.entity.User;
+import usecase.auth.UserDataAccessInterface;
 
 public class UserDataAccess implements UserDataAccessInterface {
 
@@ -21,43 +26,47 @@ public class UserDataAccess implements UserDataAccessInterface {
 
     // ------------ load users from file on startup ------------
     private void loadFromFile() {
-        if (!storageFile.exists()) {
-            return; // no users yet
-        }
+        if (storageFile.exists()) {
 
-        long maxId = 0;
+            long maxId = 0;
 
-        try (BufferedReader br = new BufferedReader(new FileReader(storageFile))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                if (line.trim().isEmpty()) continue;
+            try (BufferedReader br = new BufferedReader(new FileReader(storageFile))) {
+                String line;
+                while ((line = br.readLine()) != null) {
+                    if (line.trim().isEmpty()) {
+                        continue;
+                    }
 
-                // Expected format: id,username,passwordHash,createdAtMillis
-                String[] parts = line.split(",", -1);
-                if (parts.length < 4) continue;
+                    // Expected format: id,username,passwordHash,createdAtMillis
+                    final String[] parts = line.split(",", -1);
+                    if (parts.length < 4) {
+                        continue;
+                    }
 
-                long id = Long.parseLong(parts[0]);
-                String username = parts[1];
-                String passwordHash = parts[2];
-                long createdAtMillis = Long.parseLong(parts[3]);
+                    final long id = Long.parseLong(parts[0]);
+                    final String username = parts[1];
+                    final String passwordHash = parts[2];
+                    final long createdAtMillis = Long.parseLong(parts[3]);
 
-                User user = new User(
-                        id,
-                        username,
-                        passwordHash,
-                        Instant.ofEpochMilli(createdAtMillis)
-                );
+                    final User user = new User(
+                            id,
+                            username,
+                            passwordHash,
+                            Instant.ofEpochMilli(createdAtMillis)
+                    );
 
-                usersByUsername.put(username, user);
-                if (id > maxId) {
-                    maxId = id;
+                    usersByUsername.put(username, user);
+                    if (id > maxId) {
+                        maxId = id;
+                    }
                 }
             }
-        } catch (IOException e) {
-            e.printStackTrace(); // for now just log
-        }
+            catch (IOException ex) {
+                ex.printStackTrace();
+            }
 
-        nextId = maxId + 1;
+            nextId = maxId + 1;
+        }
     }
 
     // ------------ write all users back to file ------------
@@ -70,8 +79,9 @@ public class UserDataAccess implements UserDataAccessInterface {
                         user.getPasswordHash(),
                         user.getCreatedAt().toEpochMilli());
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+        }
+        catch (IOException ex) {
+            ex.printStackTrace();
         }
     }
 
