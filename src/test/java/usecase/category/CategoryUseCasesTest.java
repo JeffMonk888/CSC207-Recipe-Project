@@ -600,7 +600,7 @@ class CategoryUseCasesTest {
     // ---- Tests for RemoveRecipeFromCategoryInteractor ----
 
     @Test
-    void removeRecipe_failsWhenIdsMissing() {
+    void removeRecipe_failsWhenIdsMissing_userIdNull() {
         FakeCategoryGateway gateway = new FakeCategoryGateway();
         FakeRemovePresenter presenter = new FakeRemovePresenter();
         RemoveRecipeFromCategoryInteractor interactor =
@@ -608,6 +608,44 @@ class CategoryUseCasesTest {
 
         RemoveRecipeFromCategoryInputData input =
                 new RemoveRecipeFromCategoryInputData(null, 1L, "10");
+        interactor.execute(input);
+
+        assertEquals(0, gateway.categoryExistsCallCount);
+        assertEquals(0, gateway.removeCallCount);
+        assertEquals(0, presenter.successCount);
+        assertEquals(1, presenter.failureCount);
+        assertEquals("Missing user, category or recipe id.",
+                presenter.lastError);
+    }
+
+    @Test
+    void removeRecipe_failsWhenIdsMissing_categoryIdNull() {
+        FakeCategoryGateway gateway = new FakeCategoryGateway();
+        FakeRemovePresenter presenter = new FakeRemovePresenter();
+        RemoveRecipeFromCategoryInteractor interactor =
+                new RemoveRecipeFromCategoryInteractor(gateway, presenter);
+
+        RemoveRecipeFromCategoryInputData input =
+                new RemoveRecipeFromCategoryInputData(1L, null, "10");
+        interactor.execute(input);
+
+        assertEquals(0, gateway.categoryExistsCallCount);
+        assertEquals(0, gateway.removeCallCount);
+        assertEquals(0, presenter.successCount);
+        assertEquals(1, presenter.failureCount);
+        assertEquals("Missing user, category or recipe id.",
+                presenter.lastError);
+    }
+
+    @Test
+    void removeRecipe_failsWhenIdsMissing_recipeIdNull() {
+        FakeCategoryGateway gateway = new FakeCategoryGateway();
+        FakeRemovePresenter presenter = new FakeRemovePresenter();
+        RemoveRecipeFromCategoryInteractor interactor =
+                new RemoveRecipeFromCategoryInteractor(gateway, presenter);
+
+        RemoveRecipeFromCategoryInputData input =
+                new RemoveRecipeFromCategoryInputData(1L, 2L, null);
         interactor.execute(input);
 
         assertEquals(0, gateway.categoryExistsCallCount);
@@ -651,6 +689,30 @@ class CategoryUseCasesTest {
 
         RemoveRecipeFromCategoryInputData input =
                 new RemoveRecipeFromCategoryInputData(1L, 2L, "5");
+        interactor.execute(input);
+
+        assertEquals(1, gateway.categoryExistsCallCount);
+        assertEquals(1, gateway.getRecipeIdsCallCount);
+        assertEquals(0, gateway.removeCallCount);
+        assertEquals(0, presenter.successCount);
+        assertEquals(1, presenter.failureCount);
+        assertEquals("Recipe is not currently in this category.",
+                presenter.lastError);
+    }
+
+    @Test
+    void removeRecipe_failsWhenRecipeListNull() {
+        // Covers the branch where assigned == null
+        FakeCategoryGateway gateway = new FakeCategoryGateway();
+        gateway.categoryExistsForUserReturn = true;
+        gateway.recipeIdsForCategoryReturn = null;
+
+        FakeRemovePresenter presenter = new FakeRemovePresenter();
+        RemoveRecipeFromCategoryInteractor interactor =
+                new RemoveRecipeFromCategoryInteractor(gateway, presenter);
+
+        RemoveRecipeFromCategoryInputData input =
+                new RemoveRecipeFromCategoryInputData(1L, 2L, "10");
         interactor.execute(input);
 
         assertEquals(1, gateway.categoryExistsCallCount);
@@ -721,6 +783,31 @@ class CategoryUseCasesTest {
         FakeCategoryGateway gateway = new FakeCategoryGateway();
         gateway.categoryExistsForUserReturn = true;
         gateway.recipeIdsForCategoryReturn = Collections.emptyList();
+
+        FakeSavedRecipeGateway savedGateway = new FakeSavedRecipeGateway();
+        FakeFilterPresenter presenter = new FakeFilterPresenter();
+        FilterByCategoryInteractor interactor =
+                new FilterByCategoryInteractor(gateway, savedGateway, presenter);
+
+        FilterByCategoryInputData input =
+                new FilterByCategoryInputData(1L, 3L);
+        interactor.execute(input);
+
+        assertEquals(1, gateway.categoryExistsCallCount);
+        assertEquals(1, gateway.getRecipeIdsCallCount);
+        assertEquals(0, savedGateway.findCallCount);
+        assertEquals(1, presenter.successCount);
+        assertEquals(0, presenter.failureCount);
+        assertNotNull(presenter.lastSuccess);
+        assertTrue(presenter.lastSuccess.getSavedRecipes().isEmpty());
+    }
+
+    @Test
+    void filterByCategory_succeedsWithEmptyResultWhenRecipeListNull() {
+        // Covers the branch where recipeIds == null
+        FakeCategoryGateway gateway = new FakeCategoryGateway();
+        gateway.categoryExistsForUserReturn = true;
+        gateway.recipeIdsForCategoryReturn = null;
 
         FakeSavedRecipeGateway savedGateway = new FakeSavedRecipeGateway();
         FakeFilterPresenter presenter = new FakeFilterPresenter();
