@@ -1,10 +1,14 @@
 package usecase.delete_saved;
 
 public class DeleteSavedOutputData {
-    private final String deletedRecipeKey; // Confirm which recipe was deleted
+    // Confirm which recipe was deleted
+    private final String deletedRecipeKey;
 
     public DeleteSavedOutputData(String deletedRecipeKey) {
         this.deletedRecipeKey = deletedRecipeKey;
     }
-    public String getDeletedRecipeKey() { return deletedRecipeKey; }
+
+    public String getDeletedRecipeKey() {
+        return deletedRecipeKey;
+    }
 }
