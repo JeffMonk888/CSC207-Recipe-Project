@@ -1,20 +1,51 @@
 package demo;
 
+import data.saved_recipe.UserSavedRecipeAccessObject;
+import interface_adapter.ViewManagerModel;
+import interface_adapter.rate_recipe.RateRecipeController;
+import interface_adapter.rate_recipe.RateRecipePresenter;
+import interface_adapter.rate_recipe.RateRecipeViewModel;
+import usecase.rate_recipe.RateRecipeInputBoundary;
+import usecase.rate_recipe.RateRecipeInteractor;
+import usecase.rate_recipe.RateRecipeOutputBoundary;
 import view.RateRecipeView;
 
-import javax.swing.*;
-
 /**
- * Demo entry point for UC9 Rate Recipe view.
- *
- * This class only creates and shows the RateRecipeView.
+ * Standalone demo for the Rate Recipe use case.
+ * Uses the real RateRecipeView from the view package.
  */
 public class RateRecipeDemo {
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            RateRecipeView view = new RateRecipeView();
-            view.setVisible(true);
-        });
+
+        // Saved-recipe gateway (same file as your app)
+        UserSavedRecipeAccessObject gateway =
+                new UserSavedRecipeAccessObject("user_recipe_links.csv");
+
+        // Dummy ViewManagerModel just to satisfy presenter constructor
+        ViewManagerModel viewManagerModel = new ViewManagerModel();
+
+        // ViewModel + Presenter
+        RateRecipeViewModel rateRecipeViewModel = new RateRecipeViewModel();
+        RateRecipeOutputBoundary rateRecipePresenter =
+                new RateRecipePresenter(rateRecipeViewModel, viewManagerModel);
+
+        // Use case + Controller
+        RateRecipeInputBoundary rateRecipeInteractor =
+                new RateRecipeInteractor(gateway, rateRecipePresenter);
+        RateRecipeController rateRecipeController =
+                new RateRecipeController(rateRecipeInteractor);
+
+        // For demo, we just use user 1L
+        long demoUserId = 1L;
+
+        // Open the real RateRecipeView
+        RateRecipeView view = new RateRecipeView(
+                rateRecipeController,
+                rateRecipeViewModel,
+                gateway,
+                demoUserId
+        );
+        view.setVisible(true);
     }
 }

@@ -3,66 +3,94 @@ package view;
 import data.saved_recipe.UserSavedRecipeAccessObject;
 import domain.entity.SavedRecipe;
 import domain.entity.UserRating;
-import usecase.rate_recipe.*;
+import interface_adapter.rate_recipe.RateRecipeController;
+import interface_adapter.rate_recipe.RateRecipeState;
+import interface_adapter.rate_recipe.RateRecipeViewModel;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.util.List;
 
 /**
  * GUI view for UC9: Rate Recipe.
  *
  * Features:
- *  - Shows saved recipes for USER_ID in a list
+ *  - Shows saved recipes for a given userId in a list
  *  - Allows selecting a recipe and setting a star rating (0.0–5.0 step 0.5)
  *  - Allows clearing the rating for the selected recipe
  *
- * This view talks directly to the rate-recipe use case and its gateway.
+ * This view talks to the RateRecipeController and RateRecipeViewModel
+ * (Clean Architecture: view -> controller -> use case -> gateway).
+ *
+ * NOTE:
+ *  This class does NOT generate any demo data. It only reads saved recipes
+ *  from the provided UserSavedRecipeAccessObject. Demo seeding logic lives
+ *  in the demo package.
  */
 public class RateRecipeView extends JFrame {
 
-    private static final long USER_ID = 1L;
+    private final long userId;
 
-    private final UserSavedRecipeAccessObject gateway;
-    private final RateRecipeInputBoundary interactor;
+    /**
+     * Read-only access to saved recipes for populating the list.
+     * The write operations (updating rating) go through the use case.
+     */
+    private final UserSavedRecipeAccessObject savedRecipeGateway;
+
+    private final RateRecipeController controller;
+    private final RateRecipeViewModel viewModel;
 
     private final DefaultListModel<String> listModel = new DefaultListModel<>();
     private final JList<String> recipeList = new JList<>(listModel);
     private final JSpinner spinner;
 
-    public RateRecipeView() {
+    public RateRecipeView(RateRecipeController controller,
+                          RateRecipeViewModel viewModel,
+                          UserSavedRecipeAccessObject savedRecipeGateway,
+                          long userId) {
         super("Rate Recipe");
 
-        // ===== Gateway =====
-        this.gateway = new UserSavedRecipeAccessObject("user_recipe_links.csv");
+        this.controller = controller;
+        this.viewModel = viewModel;
+        this.savedRecipeGateway = savedRecipeGateway;
+        this.userId = userId;
 
-        // Seed demo data if this user has no saved recipes yet
-        seedDemoData(gateway);
-
-        // ===== Presenter =====
-        RateRecipeOutputBoundary presenter = new RateRecipeOutputBoundary() {
+        // Subscribe to ViewModel changes
+        this.viewModel.addPropertyChangeListener(new PropertyChangeListener() {
             @Override
-            public void presentSuccess(RateRecipeOutputData outputData) {
-                if (outputData.isRemoved()) {
-                    System.out.println("[UC9] Rating cleared.");
-                } else {
-                    System.out.println("[UC9] Rating saved: " + outputData.getRating());
+            public void propertyChange(PropertyChangeEvent evt) {
+                RateRecipeState state = RateRecipeView.this.viewModel.getState();
+
+                if (state.getErrorMessage() != null && !state.getErrorMessage().isEmpty()) {
+                    JOptionPane.showMessageDialog(
+                            RateRecipeView.this,
+                            state.getErrorMessage(),
+                            "Rating Error",
+                            JOptionPane.ERROR_MESSAGE
+                    );
+                } else if (state.getMessage() != null && !state.getMessage().isEmpty()) {
+                    JOptionPane.showMessageDialog(
+                            RateRecipeView.this,
+                            state.getMessage(),
+                            "Rating Info",
+                            JOptionPane.INFORMATION_MESSAGE
+                    );
+                }
+
+                if (state.getStars() != null) {
+                    spinner.setValue(state.getStars());
+                }
+
+                if (state.getErrorMessage() == null) {
+                    refreshList();
                 }
             }
+        });
 
-            @Override
-            public void presentFailure(String errorMessage) {
-                JOptionPane.showMessageDialog(RateRecipeView.this,
-                        errorMessage,
-                        "Rating Error",
-                        JOptionPane.ERROR_MESSAGE);
-            }
-        };
-
-        // ===== Interactor =====
-        this.interactor = new RateRecipeInteractor(gateway, presenter);
-
-        // ===== UI components =====
+        // UI components
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setSize(580, 420);
         setLocationRelativeTo(null);
@@ -75,7 +103,7 @@ public class RateRecipeView extends JFrame {
         recipeList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         JScrollPane scrollPane = new JScrollPane(recipeList);
         scrollPane.setBorder(
-                BorderFactory.createTitledBorder("Saved Recipes (user " + USER_ID + ")"));
+                BorderFactory.createTitledBorder("Saved Recipes (user " + userId + ")"));
         scrollPane.setViewportBorder(new EmptyBorder(5, 5, 5, 5));
         scrollPane.setPreferredSize(new Dimension(260, 360));
         root.add(scrollPane, BorderLayout.WEST);
@@ -89,12 +117,10 @@ public class RateRecipeView extends JFrame {
         ratingPanel.setBorder(BorderFactory.createTitledBorder("Rating"));
         ratingPanel.setPreferredSize(new Dimension(260, 200));
 
-        // ===== Bigger spinner for stars =====
         SpinnerNumberModel spinnerModel = new SpinnerNumberModel(0.0, 0.0, 5.0, 0.5);
         spinner = new JSpinner(spinnerModel);
         spinner.setPreferredSize(new Dimension(80, 32));
 
-        // Enlarge font inside the spinner editor
         JComponent editor = spinner.getEditor();
         if (editor instanceof JSpinner.DefaultEditor) {
             JFormattedTextField tf = ((JSpinner.DefaultEditor) editor).getTextField();
@@ -106,34 +132,39 @@ public class RateRecipeView extends JFrame {
         JButton save = new JButton("Save Rating");
         JButton clear = new JButton("Clear Rating");
 
-        // Save button
+        // Save button -> goes through controller
         save.addActionListener(e -> {
             int index = recipeList.getSelectedIndex();
             if (index < 0) {
-                JOptionPane.showMessageDialog(RateRecipeView.this,
-                        "Select a recipe first.");
+                JOptionPane.showMessageDialog(
+                        RateRecipeView.this,
+                        "Select a recipe first."
+                );
                 return;
             }
 
-            String recipeId = listModel.get(index).split("\\s+")[0];
+            String listEntry = listModel.get(index);
+            String recipeId = extractRecipeId(listEntry);
             double stars = (double) spinner.getValue();
 
-            interactor.execute(RateRecipeInputData.forRating(USER_ID, recipeId, stars));
-            refreshList();
+            controller.rate(userId, recipeId, stars);
         });
 
-        // Clear button
+        // Clear button -> goes through controller
         clear.addActionListener(e -> {
             int index = recipeList.getSelectedIndex();
             if (index < 0) {
-                JOptionPane.showMessageDialog(RateRecipeView.this,
-                        "Select a recipe first.");
+                JOptionPane.showMessageDialog(
+                        RateRecipeView.this,
+                        "Select a recipe first."
+                );
                 return;
             }
 
-            String recipeId = listModel.get(index).split("\\s+")[0];
-            interactor.execute(RateRecipeInputData.forClear(USER_ID, recipeId));
-            refreshList();
+            String listEntry = listModel.get(index);
+            String recipeId = extractRecipeId(listEntry);
+
+            controller.clearRating(userId, recipeId);
         });
 
         ratingPanel.add(new JLabel("Stars:"));
@@ -145,15 +176,13 @@ public class RateRecipeView extends JFrame {
         right.add(Box.createVerticalGlue());
         root.add(right, BorderLayout.CENTER);
 
-        refreshList();
         JButton backButton = new JButton("Back to Saved Recipes");
-        backButton.addActionListener(e -> {
-            // Close this demo window; SavedRecipesView stays open behind it
-            dispose();
-        });
+        backButton.addActionListener(e -> dispose());
         JPanel bottomPanel = new JPanel();
         bottomPanel.add(backButton);
         this.getContentPane().add(bottomPanel, BorderLayout.SOUTH);
+
+        refreshList();
     }
 
     /**
@@ -161,31 +190,24 @@ public class RateRecipeView extends JFrame {
      */
     private void refreshList() {
         listModel.clear();
-        for (SavedRecipe sr : gateway.findByUserId(USER_ID)) {
+        List<SavedRecipe> savedRecipes = savedRecipeGateway.findByUserId(userId);
+
+        for (SavedRecipe sr : savedRecipes) {
             String recipeId = sr.getRecipeKey();
-            UserRating rating = gateway.findByUserAndRecipe(USER_ID, recipeId);
+            UserRating rating = savedRecipeGateway.findByUserAndRecipe(userId, recipeId);
             String ratingStr = (rating == null ? "(no rating)" : rating.getStars() + "★");
             listModel.addElement(recipeId + "  " + ratingStr);
         }
     }
 
     /**
-     * Seed two demo recipes for USER_ID if none exist yet.
-     * We use numeric keys so UC9 (which expects long recipeId) can parse them.
+     * Extract the recipeId from a list entry "<recipeId>  <rating>".
      */
-    private static void seedDemoData(UserSavedRecipeAccessObject gateway) {
-        if (!gateway.findByUserId(USER_ID).isEmpty()) {
-            return; // already has data, do not duplicate
+    private String extractRecipeId(String listEntry) {
+        int spaceIndex = listEntry.indexOf(' ');
+        if (spaceIndex == -1) {
+            return listEntry;
         }
-
-        SavedRecipe r1 = new SavedRecipe(USER_ID, "101");
-        r1.setFavourite(false);
-        gateway.save(r1);
-
-        SavedRecipe r2 = new SavedRecipe(USER_ID, "102");
-        r2.setFavourite(false);
-        gateway.save(r2);
-
-        System.out.println("[Seed] Added demo recipes 101 and 102 for user " + USER_ID);
+        return listEntry.substring(0, spaceIndex).trim();
     }
 }

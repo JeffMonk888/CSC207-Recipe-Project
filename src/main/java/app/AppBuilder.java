@@ -1,4 +1,5 @@
 package app;
+
 // API + saved-recipe data access
 import data.api.SpoonacularClient;
 import data.saved_recipe.RecipeDataAssessObject;
@@ -9,7 +10,7 @@ import interface_adapter.ViewManagerModel;
 import interface_adapter.create_recipe.CreateRecipeController;
 import interface_adapter.create_recipe.CreateRecipePresenter;
 import interface_adapter.create_recipe.CreateRecipeViewModel;
-//Find New Recipe
+// Find New Recipe
 import view.FindRecipeView;
 
 // Fridge
@@ -42,9 +43,17 @@ import interface_adapter.search_by_fridge.SearchByFridgeController;
 import interface_adapter.search_by_fridge.SearchByFridgePresenter;
 import interface_adapter.search_by_fridge.SearchByFridgeViewModel;
 
+import interface_adapter.rate_recipe.RateRecipeController;
+import interface_adapter.rate_recipe.RateRecipePresenter;
+import interface_adapter.rate_recipe.RateRecipeViewModel;
+
 import usecase.search_by_fridge.SearchByFridgeInputBoundary;
 import usecase.search_by_fridge.SearchByFridgeInteractor;
 import usecase.search_by_fridge.SearchByFridgeOutputBoundary;
+
+import usecase.rate_recipe.RateRecipeInputBoundary;
+import usecase.rate_recipe.RateRecipeInteractor;
+import usecase.rate_recipe.RateRecipeOutputBoundary;
 
 import usecase.common.RecipeByIngredientsAccess;
 
@@ -106,6 +115,7 @@ public class AppBuilder {
         viewManager.addView(signUpView, signUpView.getViewName());
         return this;
     }
+
     public AppBuilder addHomeView() {
         homeView = new HomeView(viewManagerModel);
         viewManager.addView(homeView, homeView.getViewName());
@@ -173,7 +183,7 @@ public class AppBuilder {
         }
         SpoonacularClient apiClient = new SpoonacularClient(apiKey);
 
-        // 2) SAVE RECIPE USE CASE (unchanged)
+        // 2) SAVE RECIPE USE CASE
         SaveRecipeOutputBoundary saveRecipePresenter =
                 new SaveRecipePresenter();
         SaveRecipeInputBoundary saveRecipeInteractor =
@@ -184,47 +194,44 @@ public class AppBuilder {
         // 3) SHARED ViewRecipeViewModel
         ViewRecipeViewModel viewRecipeViewModel = new ViewRecipeViewModel();
 
-        // ------------------------------------------------------------
         // 4) NORMAL VIEW RECIPE (WITH SAVE) – used by search/API flows
-        // ------------------------------------------------------------
         ViewRecipeOutputBoundary viewRecipePresenter =
                 new ViewRecipePresenter(viewRecipeViewModel, viewManagerModel);
 
         ViewRecipeInputBoundary viewRecipeInteractor =
                 new ViewRecipeInteractor(apiClient, this.recipeDAO, viewRecipePresenter);
 
-        // Controller used by SearchByFridge / other flows
         viewRecipeController = new ViewRecipeController(viewRecipeInteractor);
 
-        // Swing view WITH Save button
         ViewRecipeView viewRecipeView =
                 new ViewRecipeView(viewRecipeViewModel, saveRecipeController, viewManagerModel);
 
-        // Register normal "view_recipe" view
         viewManager.addView(viewRecipeView, viewRecipeViewModel.getViewName());
 
-        // ------------------------------------------------------------
         // 5) NO-SAVE VIEW RECIPE – used ONLY from SavedRecipesView
-        // ------------------------------------------------------------
         ViewRecipeOutputBoundary fromSavedPresenter =
                 new ViewRecipeFromSavedPresenter(viewRecipeViewModel, viewManagerModel);
 
         ViewRecipeInputBoundary fromSavedInteractor =
                 new ViewRecipeInteractor(apiClient, this.recipeDAO, fromSavedPresenter);
 
-        // Controller ONLY for SavedRecipesView → ViewRecipeNoSave
         viewRecipeFromSavedController = new ViewRecipeController(fromSavedInteractor);
 
-        // Swing view WITHOUT Save button (shares state)
         ViewRecipeNoSave viewRecipeNoSave =
                 new ViewRecipeNoSave(viewRecipeViewModel, null, viewManagerModel);
 
-        // Register "view_recipe_from_saved"
         viewManager.addView(viewRecipeNoSave, ViewRecipeNoSave.VIEW_NAME);
 
-        // ------------------------------------------------------------
-        // 6) SAVED RECIPES LIST
-        // ------------------------------------------------------------
+        // 6) RATE RECIPE USE CASE – for SavedRecipesView -> RateRecipeView
+        RateRecipeViewModel rateRecipeViewModel = new RateRecipeViewModel();
+        RateRecipeOutputBoundary rateRecipePresenter =
+                new RateRecipePresenter(rateRecipeViewModel, viewManagerModel);
+        RateRecipeInputBoundary rateRecipeInteractor =
+                new RateRecipeInteractor(this.userSavedRecipeDAO, rateRecipePresenter);
+        RateRecipeController rateRecipeController =
+                new RateRecipeController(rateRecipeInteractor);
+
+        // 7) SAVED RECIPES LIST
         SavedRecipeViewModel savedRecipeViewModel = new SavedRecipeViewModel();
         SavedRecipePresenter savedPresenter =
                 new SavedRecipePresenter(savedRecipeViewModel, viewManagerModel);
@@ -237,52 +244,47 @@ public class AppBuilder {
         SavedRecipeController savedController =
                 new SavedRecipeController(retrieveInteractor, deleteInteractor);
 
-        // ⬅️ IMPORTANT: inject the *from-saved* controller here
+        // Inject from-saved controller + rate recipe wiring
         savedRecipesView = new SavedRecipesView(
                 savedController,
                 savedRecipeViewModel,
-                viewRecipeFromSavedController,   // now opens ViewRecipeNoSave
-                viewManagerModel
+                viewRecipeFromSavedController,
+                viewManagerModel,
+                rateRecipeController,
+                rateRecipeViewModel,
+                this.userSavedRecipeDAO
         );
 
         viewManager.addView(savedRecipesView, savedRecipesView.getViewName());
         return this;
     }
 
-
     public AppBuilder addSearchByFridgeFeature() {
-        // API client for searching recipes by ingredients
         String apiKey = System.getenv("SPOONACULAR_API_KEY");
         if (apiKey == null || apiKey.isBlank()) {
-            apiKey = masterApiKey; // same key you use in demos
             apiKey = masterApiKey;
         }
         SpoonacularClient spoonacularClient = new SpoonacularClient(apiKey);
         RecipeByIngredientsAccess recipeAccess = spoonacularClient;
 
-        // ViewModel + presenter
         SearchByFridgeViewModel vm = new SearchByFridgeViewModel();
         SearchByFridgeOutputBoundary presenter = new SearchByFridgePresenter(vm);
 
-        // Interactor + controller
         SearchByFridgeInputBoundary interactor =
                 new SearchByFridgeInteractor(fridgeAccess, recipeAccess, presenter);
         SearchByFridgeController controller =
                 new SearchByFridgeController(interactor);
 
-        // View – for now, pass null as the RecipeSelectionListener (double-click does nothing yet)
         SearchByFridgeView.RecipeSelectionListener listener = recipeKey -> {
             if (viewRecipeController != null) {
                 viewRecipeController.execute(recipeKey);
             } else {
-                // Optional debug help if someone forgets to call addSavedRecipesFeature()
                 System.err.println("ViewRecipeController is null. Did you call addSavedRecipesFeature()?");
             }
         };
         searchByFridgeView =
                 new SearchByFridgeView(controller, vm, viewManagerModel, listener);
 
-        // Register with ViewManager using the view's name
         viewManager.addView(searchByFridgeView, searchByFridgeView.getViewName());
         return this;
     }
@@ -292,7 +294,6 @@ public class AppBuilder {
         viewManager.addView(findRecipeView, findRecipeView.getViewName());
         return this;
     }
-
 
     public void show() {
         viewManagerModel.setActiveViewName(loginView.getViewName());

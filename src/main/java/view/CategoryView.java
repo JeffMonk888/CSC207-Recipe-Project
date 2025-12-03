@@ -401,7 +401,7 @@ public class CategoryView extends JFrame {
         for (SavedRecipe sr : gateway.findByUserId(USER_ID)) {
             existing.add(sr.getRecipeKey());
         }
-        String[] demo = {"201", "202", "203", "204", "205"};
+        String[] demo = {"c201", "c202", "c203", "c204", "c205"};
         for (String k : demo) {
             if (!existing.contains(k)) {
                 gateway.save(new SavedRecipe(USER_ID, k));
