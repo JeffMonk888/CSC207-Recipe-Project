@@ -11,7 +11,10 @@ public class RetrieveSavedInputData {
     public RetrieveSavedInputData(Long userId) {
         this.userId = userId;
     }
-    public Long getUserId() { return userId; }
+
+    public Long getUserId() {
+        return userId;
+    }
 }
 
 

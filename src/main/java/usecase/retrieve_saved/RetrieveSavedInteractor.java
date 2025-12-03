@@ -40,11 +40,14 @@ public class RetrieveSavedInteractor implements RetrieveSavedInputBoundary {
             Recipe recipe = null;
 
             if (saved.isCustomRecipe()) {
-                long id = saved.getNumericRecipeId();   // "c1" -> 1
+                // "c1" -> 1
+                long id = saved.getNumericRecipeId();
                 recipe = recipeDataGateway.findById(id).orElse(null);
 
-            } else if (saved.isApiRecipe()) {
-                long apiId = saved.getNumericRecipeId();   // "a72345" -> 72345
+            }
+            else if (saved.isApiRecipe()) {
+                // "a72345" -> 72345
+                long apiId = saved.getNumericRecipeId();
 
                 try {
                     var dto = spoonacularClient.getRecipeInformation(apiId, true);
@@ -57,7 +60,8 @@ public class RetrieveSavedInteractor implements RetrieveSavedInputBoundary {
 
             if (recipe != null) {
                 fullRecipes.add(recipe);
-            } else {
+            }
+            else {
                 System.err.println("Warning: missing data for saved key: " + saved.getRecipeKey());
             }
         }
