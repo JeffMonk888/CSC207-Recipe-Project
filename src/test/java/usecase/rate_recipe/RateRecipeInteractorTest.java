@@ -9,13 +9,13 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Unit tests for RateRecipeInteractor.
- * Designed to achieve 100% line coverage for the rate_recipe use case classes.
+ * Aims for 100% line and branch coverage of the rate_recipe use case.
  */
 class RateRecipeInteractorTest {
 
     /**
      * Simple fake data access implementation for UserRatingDataAccessInterface.
-     * Records method calls so tests can assert on behaviour.
+     * Records method calls so tests can assert behaviour.
      */
     private static class FakeRatingDataAccess implements UserRatingDataAccessInterface {
 
@@ -30,10 +30,7 @@ class RateRecipeInteractorTest {
         UserRating lastSavedRating;
         int saveCallCount = 0;
 
-        /**
-         * Rating that will be returned from findByUserAndRecipe.
-         * Tests can configure this directly.
-         */
+        // Rating that will be returned from findByUserAndRecipe.
         UserRating ratingToReturn;
 
         @Override
@@ -117,9 +114,7 @@ class RateRecipeInteractorTest {
     void execute_clearsRating_whenClearRatingIsTrue() {
         FakeRatingDataAccess dataAccess = new FakeRatingDataAccess();
         FakePresenter presenter = new FakePresenter();
-
-        RateRecipeInteractor interactor =
-                new RateRecipeInteractor(dataAccess, presenter);
+        RateRecipeInteractor interactor = new RateRecipeInteractor(dataAccess, presenter);
 
         long userId = 1L;
         String recipeId = "abc123";
@@ -134,7 +129,7 @@ class RateRecipeInteractorTest {
         assertEquals(0, dataAccess.findCallCount);
         assertEquals(0, dataAccess.saveCallCount);
 
-        // Presenter: success with removed=true and rating=null.
+        // Presenter: success with removed = true and rating = null.
         assertEquals(1, presenter.successCount);
         assertEquals(0, presenter.failureCount);
         assertNotNull(presenter.lastSuccess);
@@ -146,11 +141,9 @@ class RateRecipeInteractorTest {
     void execute_fails_whenStarsNullAndNotClearing() {
         FakeRatingDataAccess dataAccess = new FakeRatingDataAccess();
         FakePresenter presenter = new FakePresenter();
+        RateRecipeInteractor interactor = new RateRecipeInteractor(dataAccess, presenter);
 
-        RateRecipeInteractor interactor =
-                new RateRecipeInteractor(dataAccess, presenter);
-
-        // Construct input with stars == null and clearRating == false
+        // stars == null and clearRating == false
         RateRecipeInputData input =
                 new RateRecipeInputData(2L, "recipe-null-stars", null, false);
 
@@ -172,13 +165,33 @@ class RateRecipeInteractorTest {
     void execute_fails_whenStarsBelowZero() {
         FakeRatingDataAccess dataAccess = new FakeRatingDataAccess();
         FakePresenter presenter = new FakePresenter();
+        RateRecipeInteractor interactor = new RateRecipeInteractor(dataAccess, presenter);
 
-        RateRecipeInteractor interactor =
-                new RateRecipeInteractor(dataAccess, presenter);
-
-        // Stars < 0.0 -> invalid
+        // stars < 0.0 -> invalid
         RateRecipeInputData input =
                 RateRecipeInputData.forRating(3L, "recipe-negative", -0.5);
+
+        interactor.execute(input);
+
+        assertEquals(0, presenter.successCount);
+        assertEquals(1, presenter.failureCount);
+        assertEquals("Rating must be between 0.0 and 5.0 in steps of 0.5.",
+                presenter.lastFailure);
+
+        assertEquals(0, dataAccess.findCallCount);
+        assertEquals(0, dataAccess.saveCallCount);
+        assertEquals(0, dataAccess.deleteCallCount);
+    }
+
+    @Test
+    void execute_fails_whenStarsAboveMax() {
+        FakeRatingDataAccess dataAccess = new FakeRatingDataAccess();
+        FakePresenter presenter = new FakePresenter();
+        RateRecipeInteractor interactor = new RateRecipeInteractor(dataAccess, presenter);
+
+        // stars > 5.0 -> invalid, also exercises the same upper-bound branch
+        RateRecipeInputData input =
+                RateRecipeInputData.forRating(30L, "recipe-too-high", 5.5);
 
         interactor.execute(input);
 
@@ -196,9 +209,7 @@ class RateRecipeInteractorTest {
     void execute_fails_whenStarsNotMultipleOfHalf() {
         FakeRatingDataAccess dataAccess = new FakeRatingDataAccess();
         FakePresenter presenter = new FakePresenter();
-
-        RateRecipeInteractor interactor =
-                new RateRecipeInteractor(dataAccess, presenter);
+        RateRecipeInteractor interactor = new RateRecipeInteractor(dataAccess, presenter);
 
         // Stars in range but not multiple of 0.5 -> invalid (exercises scaled logic)
         RateRecipeInputData input =
@@ -221,9 +232,7 @@ class RateRecipeInteractorTest {
         FakeRatingDataAccess dataAccess = new FakeRatingDataAccess();
         // ratingToReturn is null by default -> no existing rating
         FakePresenter presenter = new FakePresenter();
-
-        RateRecipeInteractor interactor =
-                new RateRecipeInteractor(dataAccess, presenter);
+        RateRecipeInteractor interactor = new RateRecipeInteractor(dataAccess, presenter);
 
         long userId = 5L;
         String recipeId = "recipe-new";
@@ -249,7 +258,7 @@ class RateRecipeInteractorTest {
         assertNull(saved.getId());
         assertNotNull(saved.getUpdatedAt());
 
-        // Presenter: success, removed == false, rating is the saved one.
+        // Presenter: success, removed = false, rating is the saved one.
         assertEquals(1, presenter.successCount);
         assertEquals(0, presenter.failureCount);
         assertNotNull(presenter.lastSuccess);
@@ -275,8 +284,7 @@ class RateRecipeInteractorTest {
         );
         dataAccess.ratingToReturn = existing;
 
-        RateRecipeInteractor interactor =
-                new RateRecipeInteractor(dataAccess, presenter);
+        RateRecipeInteractor interactor = new RateRecipeInteractor(dataAccess, presenter);
 
         double newStars = 5.0;
         RateRecipeInputData input =
@@ -284,7 +292,7 @@ class RateRecipeInteractorTest {
 
         interactor.execute(input);
 
-        // Data access: find + save
+        // Data access: find + save, no delete.
         assertEquals(1, dataAccess.findCallCount);
         assertEquals(1, dataAccess.saveCallCount);
         assertEquals(0, dataAccess.deleteCallCount);
@@ -295,7 +303,7 @@ class RateRecipeInteractorTest {
         assertNotNull(existing.getUpdatedAt());
         assertNotEquals(oldInstant, existing.getUpdatedAt());
 
-        // Presenter: success with removed == false and updated rating.
+        // Presenter: success with removed = false and updated rating.
         assertEquals(1, presenter.successCount);
         assertEquals(0, presenter.failureCount);
         assertNotNull(presenter.lastSuccess);
